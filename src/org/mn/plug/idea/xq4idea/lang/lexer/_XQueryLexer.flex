@@ -64,6 +64,9 @@ import com.intellij.psi.tree.IElementType;
 
 %s _NAMESPACEDECL_
 
+%s _ATLIST
+%s _ATLIST_
+
 %s _SEP
 
 %s _QNAME
@@ -145,7 +148,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "option" {pushState(_SEP); pushState(_STRINGLITERAL); yybegin(_QNAME); return KW_OPTION;}
   "ordering" {yybegin(DECLAREORDERING); return KW_ORDERING; }
   "boundary-space" {yybegin(_PRESERVE_OR_STRIP); return KW_BOUNDARY_SPACE; }
-  "namespace" {yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
+  "namespace" {pushState(_SEP); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
   "base-uri" {pushState(_SEP); yybegin(_URILITERAL); return KW_BASE_URI; }
   "copy-namespaces" {yybegin(_DECLARE_COPYNS); return KW_COPY_NAMESPACES; }
   "construction" {yybegin(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
@@ -189,7 +192,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {NCName} {yybegin(_NAMESPACEDECL_); return XQ_LOCAL_NAME; }
 }
 <_NAMESPACEDECL_> {
-  "=" {pushState(_SEP); yybegin(_URILITERAL); return OP_EQUALS; }
+  "=" {yybegin(_URILITERAL); return OP_EQUALS; }
 }
 
 // _DECLARE_COPYNS
@@ -211,14 +214,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 // import schema (namespace =) | (default element namespace) "" (at "" (, "")*)?
 <_IMPORT_SCHEMA> {
-  "namespace" { pushState(_SEP); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
+  "namespace" { pushState(_SEP); pushState(_ATLIST); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
   "default" { yybegin(_IMPORT_SCHEMA_DEFAULT); return KW_DEFAULT; }
 }
 <_IMPORT_SCHEMA_DEFAULT> {
   "element" { yybegin(_IMPORT_SCHEMA_DEFAULT_ELEMENT); return KW_ELEMENT; }
 }
 <_IMPORT_SCHEMA_DEFAULT_ELEMENT> {
-  "namespace" {pushState(_SEP); yybegin(_URILITERAL); return KW_NAMESPACE; }
+  "namespace" {pushState(_SEP); pushState(_ATLIST); yybegin(_URILITERAL); return KW_NAMESPACE; }
 }
 
 
@@ -265,6 +268,18 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "''" { return XQ_STR_ESCAPE_APOS; }
   "'" { popState(); return XQ_STR_END; }
   [^] { return XQ_STR_CHAR; }
+}
+
+// ("at" URILiteral ("," URILiteral)*)?
+<_ATLIST> {
+  "at" {pushState(_ATLIST_); yybegin(_URILITERAL); return KW_AT;}
+  {S} { return WHITE_SPACE; }
+  [^] {popState(); yypushback(1);}
+}
+<_ATLIST_> {
+  "," {pushState(_ATLIST_); yybegin(_URILITERAL); return OP_COMMA;}
+  {S} { return WHITE_SPACE; }
+  [^] {popState(); yypushback(1);}
 }
 
 

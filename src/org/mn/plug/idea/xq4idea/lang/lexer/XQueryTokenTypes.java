@@ -70,4 +70,5 @@ public interface XQueryTokenTypes {
   IElementType KW_MODULE = new XQueryElementType("MODULE");
   IElementType KW_IMPORT = new XQueryElementType("IMPORT");
   IElementType KW_SCHEMA = new XQueryElementType("SCHEMA");
+  IElementType KW_AT = new XQueryElementType("AT");
 }
