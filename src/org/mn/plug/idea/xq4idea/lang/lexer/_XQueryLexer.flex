@@ -30,6 +30,7 @@ import com.intellij.psi.tree.IElementType;
 %s OPERATOR
 %s OPTION
 %s VARNAME
+%s DECLAREORDERING
 
 // strings
 %x STR_START_QUOTE
@@ -49,6 +50,7 @@ import com.intellij.psi.tree.IElementType;
 %s _DECLARE
 %s _DECLARE_OPTION_QN
 %s _DECLARE_OPTION_QN_STR
+%s _DECLARE_ORDERING_END
 %s _DECLARE_VARIABLE
 
 %x _QNAME
@@ -141,6 +143,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_DECLARE> {
   "option" {yybegin(OPTION); return KW_OPTION;}
   "variable" {yybegin(_DECLARE_VARIABLE); return KW_VARIABLE; }
+  "ordering" {yybegin(DECLAREORDERING); return KW_VARIABLE; }
 }
 
 <_DECLARE_VARIABLE> {
@@ -153,7 +156,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {LocalPart} { yybegin(OPERATOR); return XQ_LOCAL_NAME; }
 }
 
-// options
+// OPTION
 <OPTION> {
   {Prefix} / ":" { pushState(_DECLARE_OPTION_QN); yybegin(_QNAME); return XQ_PREFIX_NAME; }
   {LocalPart} { yybegin(_DECLARE_OPTION_QN); return XQ_LOCAL_NAME; }
@@ -165,6 +168,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 <_DECLARE_OPTION_QN_STR> {
+  ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
+}
+
+// ORDERING
+<DECLAREORDERING> {
+  "ordered" {yybegin(_DECLARE_ORDERING_END); return KW_ORDERED; }
+  "unordered" {yybegin(_DECLARE_ORDERING_END); return KW_UNORDERED; }
+}
+
+<_DECLARE_ORDERING_END> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 

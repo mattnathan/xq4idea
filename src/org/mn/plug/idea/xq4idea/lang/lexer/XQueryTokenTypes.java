@@ -44,4 +44,7 @@ public interface XQueryTokenTypes {
   IElementType KW_DECLARE = new XQueryElementType("DECLARE");
   IElementType KW_OPTION = new XQueryElementType("OPTION");
   IElementType KW_VARIABLE = new XQueryElementType("VARIABLE");
+  IElementType KW_ORDERING = new XQueryElementType("ORDERING");
+  IElementType KW_ORDERED = new XQueryElementType("ORDERED");
+  IElementType KW_UNORDERED = new XQueryElementType("UNORDERED");
 }
