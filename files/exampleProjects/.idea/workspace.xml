@@ -62,7 +62,7 @@
       <file leaf-file-name="test.xqy" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="7" selection-start="89" selection-end="89" vertical-scroll-proportion="0.098076925">
+            <state line="5" column="9" selection-start="134" selection-end="134" vertical-scroll-proportion="0.16346154">
               <folding />
             </state>
           </provider>
@@ -71,7 +71,7 @@
       <file leaf-file-name="test.xq" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xq">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="43" vertical-scroll-proportion="0.0">
+            <state line="1" column="0" selection-start="44" selection-end="44" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -117,7 +117,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -152,8 +151,9 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
+      <pane id="Favorites" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -296,12 +296,12 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xq">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="43" vertical-scroll-proportion="0.0" />
+        <state line="1" column="0" selection-start="44" selection-end="44" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="7" selection-start="89" selection-end="89" vertical-scroll-proportion="0.098076925">
+        <state line="5" column="9" selection-start="134" selection-end="134" vertical-scroll-proportion="0.16346154">
           <folding />
         </state>
       </provider>

@@ -11,8 +11,10 @@ public interface XQueryTokenTypeSets extends XQueryTokenTypes {
   TokenSet WHITESPACES = TokenSet.create(WHITE_SPACE);
   TokenSet STRING_LITERALS = TokenSet.create(XQ_STR, XQ_STR_CHAR, XQ_STR_END, XQ_STR_END, XQ_STR_ESCAPE_APOS,
       XQ_STR_ESCAPE_QUOTE);
+  TokenSet NUMBER_LITERALS = TokenSet.create(XQ_INTEGER_LITERAL, XQ_DECIMAL_LITERAL, XQ_DOUBLE_LITERAL);
 
   TokenSet KEYWORDS = TokenSet.create(
-      KW_XQUERY, KW_VERSION, KW_ENCODING
+      KW_XQUERY, KW_VERSION, KW_ENCODING,
+      KW_DECLARE, KW_OPTION
   );
 }

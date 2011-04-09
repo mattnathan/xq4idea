@@ -26,6 +26,7 @@ public class XQuerySyntaxHighlighter extends SyntaxHighlighterBase {
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.COMMENTS, SyntaxHighlighterColors.JAVA_BLOCK_COMMENT);
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.KEYWORDS, SyntaxHighlighterColors.KEYWORD);
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.STRING_LITERALS, SyntaxHighlighterColors.STRING);
+    fillMap(ATTRIBUTES, XQueryTokenTypeSets.NUMBER_LITERALS, SyntaxHighlighterColors.NUMBER);
   }
 
   @NotNull
