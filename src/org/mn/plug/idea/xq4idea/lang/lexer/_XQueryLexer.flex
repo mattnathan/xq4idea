@@ -31,7 +31,6 @@ import com.intellij.psi.tree.IElementType;
 %s OPTION
 %s VARNAME
 %s DECLAREORDERING
-%s XMLSPACE_DECL
 %s NAMESPACEDECL
 
 // strings
@@ -53,12 +52,15 @@ import com.intellij.psi.tree.IElementType;
 %s _DECLARE_OPTION_QN
 %s _DECLARE_OPTION_QN_END
 %s _DECLARE_ORDERING_END
-%s _DECLARE_BOUNDARY_SPACE_END
 %s _DECLARE_VARIABLE
 %s _DECLARE_COPYNS
 %s _DECLARE_COPYNS_
 %s _DECLARE_COPYNS__
 %s _DECLARE_COPYNS__END
+
+%s _PRESERVE_OR_STRIP
+%s _PRESERVE_OR_STRIP_END
+
 %s _NAMESPACEDECL_
 %s _NAMESPACEDECL_URI
 %s _NAMESPACEDECL_URI_END
@@ -154,10 +156,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "option" {yybegin(OPTION); return KW_OPTION;}
   "variable" {yybegin(_DECLARE_VARIABLE); return KW_VARIABLE; }
   "ordering" {yybegin(DECLAREORDERING); return KW_ORDERING; }
-  "boundary-space" {yybegin(XMLSPACE_DECL); return KW_BOUNDARY_SPACE; }
+  "boundary-space" {yybegin(_PRESERVE_OR_STRIP); return KW_BOUNDARY_SPACE; }
   "namespace" {yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
   "base-uri" {yybegin(_NAMESPACEDECL_URI); return KW_NAMESPACE; }
   "copy-namespaces" {yybegin(_DECLARE_COPYNS); return KW_COPY_NAMESPACES; }
+  "construction" {yybegin(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
 }
 
 <_DECLARE_VARIABLE> {
@@ -189,15 +192,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "unordered" {yybegin(_DECLARE_ORDERING_END); return KW_UNORDERED; }
 }
 <_DECLARE_ORDERING_END> {
-  ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
-}
-
-// XMLSPACE_DECL
-<XMLSPACE_DECL> {
-  "preserve" {yybegin(_DECLARE_BOUNDARY_SPACE_END); return KW_PRESERVE; }
-  "strip" {yybegin(_DECLARE_BOUNDARY_SPACE_END); return KW_STRIP; }
-}
-<_DECLARE_BOUNDARY_SPACE_END> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 
@@ -234,6 +228,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 
 // common formats
+
+// ("preserve" | "split") ";"
+<_PRESERVE_OR_STRIP> {
+  "preserve" {yybegin(_PRESERVE_OR_STRIP_END); return KW_PRESERVE; }
+  "strip" {yybegin(_PRESERVE_OR_STRIP_END); return KW_STRIP; }
+}
+<_PRESERVE_OR_STRIP_END> {
+  ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
+}
+
 <_QNAME> {
   ":" {yybegin(_QNAME_); return OP_COLON; }
   [^] { return BAD_CHARACTER; }

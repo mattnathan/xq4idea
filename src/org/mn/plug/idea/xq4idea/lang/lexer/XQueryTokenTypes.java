@@ -58,4 +58,5 @@ public interface XQueryTokenTypes {
   IElementType KW_COPY_NAMESPACES = new XQueryElementType("COPY_NAMESPACES");
   IElementType KW_INHERIT = new XQueryElementType("INHERIT");
   IElementType KW_NO_INHERIT = new XQueryElementType("NO_INHERIT");
+  IElementType KW_CONSTRUCTION = new XQueryElementType("NO_INHERIT");
 }
