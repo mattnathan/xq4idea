@@ -72,12 +72,21 @@ import com.intellij.psi.tree.IElementType;
 %s _AS
 %s _AS_
 %s _AS_OCC
+%s _AS_DN
+%s _AS_PI
+%s _AS_ATTR
+%s _AS_SATTR
+%s _AS_ELEM
+%s _AS_SELEM
 
 %s _EMPTY_BRACES
 %s _EMPTY_BRACES_
+%s _OPEN_BRACE
+%s _CLOSE_BRACE
 
 %s _SEP
 
+%s _NCNAME
 %s _QNAME
 %x _QNAME_
 %x _QNAME_LOCAL
@@ -264,7 +273,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "text" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
   "comment" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
   "document-node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_DOCUMENT_NODE;}
-  "processing-instruction" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_PROCESSING_INSTRUCTION;}
+  "processing-instruction" {pushState(_AS_OCC); pushState(_AS_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
   "attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ATTRIBUTE;}
   "schema-attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_SCHEMA_ATTRIBUTE;}
   "element" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ELEMENT;}
@@ -277,9 +286,20 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "+" {popState(); return OP_PLUS;}
   {_NS} {popState(); yypushback(1);}
 }
+// as processing-instruction( NCName | "")
+<_AS_PI> {
+  "\""|"'" { pushState(_CLOSE_BRACE); yypushback(1); yybegin(_STRINGLITERAL); }
+  {NCName} { pushState(_CLOSE_BRACE); yypushback(yylength()); yybegin(_NCNAME); }
+}
 
 
 // common formats
+<_OPEN_BRACE> {
+  "(" {popState(); return OP_LBRACE; }
+}
+<_CLOSE_BRACE> {
+  ")" {popState(); return OP_RBRACE; }
+}
 <_EMPTY_BRACES> {
   "(" {yybegin(_EMPTY_BRACES_); return OP_LBRACE;}
 }
@@ -297,7 +317,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {Prefix} / ":" { yybegin(_QNAME_); return XQ_PREFIX_NAME; }
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
 }
-
 <_QNAME_> {
   ":" {yybegin(_QNAME_LOCAL); return OP_COLON; }
   [^] { popState(); return BAD_CHARACTER; }
@@ -305,6 +324,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_QNAME_LOCAL> {
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
   [^] { popState(); return BAD_CHARACTER; }
+}
+
+<_NCNAME> {
+  {NCName} {popState(); return XQ_NCNAME; }
 }
 
 <EXPR_COMMENT> {

@@ -28,6 +28,7 @@ public interface XQueryTokenTypes {
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
   IElementType XQ_LOCAL_NAME = new XQueryElementType("XQ_LOCAL_NAME");
+  IElementType XQ_NCNAME = new XQueryElementType("XQ_NCNAME");
 
   // comments
   IElementType XQ_COMMENT_START = new XQueryElementType("(:");
