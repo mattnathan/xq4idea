@@ -59,4 +59,6 @@ public interface XQueryTokenTypes {
   IElementType KW_INHERIT = new XQueryElementType("INHERIT");
   IElementType KW_NO_INHERIT = new XQueryElementType("NO_INHERIT");
   IElementType KW_CONSTRUCTION = new XQueryElementType("NO_INHERIT");
+  IElementType KW_DEFAULT = new XQueryElementType("DEFAULT");
+  IElementType KW_COLLATION = new XQueryElementType("COLLATION");
 }
