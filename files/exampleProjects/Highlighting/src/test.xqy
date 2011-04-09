@@ -52,21 +52,36 @@ declare variable $var as item()* external ;
 declare variable $var as node()? external ;
 declare variable $var as text()+ external ;
 declare variable $var as comment() external ;
+
+(: These are complex attributed tests :)
 declare variable $var as document-node() external ;
+declare variable $var as document-node(element()) external ;
+declare variable $var as document-node(element(hello)) external ;
+declare variable $var as document-node(element(hello:local)) external ;
+declare variable $var as document-node(element(*)) external ;
+declare variable $var as document-node(element(*, something?)) external ;
+declare variable $var as document-node(schema-element(hello)) external ;
+declare variable $var as document-node(schema-element(hello:hello)) external ;
+
 declare variable $var as processing-instruction() external ;
 declare variable $var as processing-instruction("") external ;
 declare variable $var as processing-instruction(myName) external ;
+
 declare variable $var as attribute() external ;
+
 declare variable $var as schema-attribute(hello) external ;
 declare variable $var as schema-attribute(hello:local) external ;
+
 declare variable $var as element() external ;
 declare variable $var as element(hello) external ;
 declare variable $var as element(hello:local) external ;
 declare variable $var as element(*) external ;
 declare variable $var as element(hello, prefix) external ;
 declare variable $var as element(hello, prefix:local?) external ;
+
 declare variable $var as schema-element(hello) external ;
 declare variable $var as schema-element(hello:local) external ;
+
 declare variable $var as my:something external ;
 declare variable $var as prefixless external ;
 

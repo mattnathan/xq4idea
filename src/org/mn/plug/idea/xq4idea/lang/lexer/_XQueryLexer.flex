@@ -274,7 +274,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
   "text" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
   "comment" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
-  "document-node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_DOCUMENT_NODE;}
+  "document-node" {pushState(_AS_OCC); pushState(_AS_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
   "processing-instruction" {pushState(_AS_OCC); pushState(_AS_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
   "attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ATTRIBUTE;}
   "schema-attribute" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
@@ -307,6 +307,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_AS_ELEM__> {
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
   "?" {yybegin(_CLOSE_BRACE); return OP_QUESTION; }
+}
+// as document-node( (ElementTest | ElementSchemaTest)? )
+<_AS_DN> {
+  "element" {pushState(_CLOSE_BRACE); pushState(_AS_ELEM); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
+  "schema-element" {pushState(_CLOSE_BRACE); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
+  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
 
 
