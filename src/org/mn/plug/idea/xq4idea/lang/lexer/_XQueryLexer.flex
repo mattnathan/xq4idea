@@ -71,6 +71,7 @@ import com.intellij.psi.tree.IElementType;
 %s _PARAM
 %s _AS
 %s _AS_
+%s _AS_OCC
 
 %s _EMPTY_BRACES
 %s _EMPTY_BRACES_
@@ -84,6 +85,7 @@ import com.intellij.psi.tree.IElementType;
 // whitespace
 S = [\x20\x09\x0D\x0A]+
 NS = [^\x20\x09\x0D\x0A]+
+_NS = [^\x20\x09\x0D\x0A]
 
 Digits = [0-9]+
 DecimalLiteral = ("." {Digits}) | ({Digits} "." [0-9]*)
@@ -257,11 +259,17 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_AS_> {
   "void" {yybegin(_EMPTY_BRACES); return KW_VOID;}
-  "item" {yybegin(_EMPTY_BRACES); return KW_ITEM;}
-  "node" {yybegin(_EMPTY_BRACES); return KW_NODE;}
-  "text" {yybegin(_EMPTY_BRACES); return KW_TEXT;}
-  "comment" {yybegin(_EMPTY_BRACES); return KW_COMMENT;}
-  {QName} {yypushback(yylength()); yybegin(_QNAME);}
+  "item" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ITEM;}
+  "node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
+  "text" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
+  "comment" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
+  {QName} {yypushback(yylength()); pushState(_AS_OCC); yybegin(_QNAME);}
+}
+<_AS_OCC> {
+  "?" {popState(); return OP_QUESTION;}
+  "*" {popState(); return OP_STAR;}
+  "+" {popState(); return OP_PLUS;}
+  {_NS} {popState(); yypushback(1);}
 }
 
 

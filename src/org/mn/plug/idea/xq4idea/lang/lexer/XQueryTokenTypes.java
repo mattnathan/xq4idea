@@ -21,6 +21,9 @@ public interface XQueryTokenTypes {
   IElementType OP_LBRACE = new XQueryElementType("(");
   IElementType OP_RBRACE = new XQueryElementType(")");
   IElementType OP_ASSIGN = new XQueryElementType(":=");
+  IElementType OP_QUESTION = new XQueryElementType("?");
+  IElementType OP_STAR = new XQueryElementType("*");
+  IElementType OP_PLUS = new XQueryElementType("+");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
