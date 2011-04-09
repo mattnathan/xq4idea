@@ -55,6 +55,10 @@ import com.intellij.psi.tree.IElementType;
 %s _DECLARE_ORDERING_END
 %s _DECLARE_BOUNDARY_SPACE_END
 %s _DECLARE_VARIABLE
+%s _DECLARE_COPYNS
+%s _DECLARE_COPYNS_
+%s _DECLARE_COPYNS__
+%s _DECLARE_COPYNS__END
 %s _NAMESPACEDECL_
 %s _NAMESPACEDECL_URI
 %s _NAMESPACEDECL_URI_END
@@ -153,6 +157,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "boundary-space" {yybegin(XMLSPACE_DECL); return KW_BOUNDARY_SPACE; }
   "namespace" {yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
   "base-uri" {yybegin(_NAMESPACEDECL_URI); return KW_NAMESPACE; }
+  "copy-namespaces" {yybegin(_DECLARE_COPYNS); return KW_COPY_NAMESPACES; }
 }
 
 <_DECLARE_VARIABLE> {
@@ -210,6 +215,23 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_NAMESPACEDECL_URI_END> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
+
+// _DECLARE_COPYNS
+<_DECLARE_COPYNS> {
+  "preserve" {yybegin(_DECLARE_COPYNS_); return KW_PRESERVE; }
+  "no-preserve" {yybegin(_DECLARE_COPYNS_); return KW_NO_PRESERVE;}
+}
+<_DECLARE_COPYNS_> {
+  "," {yybegin(_DECLARE_COPYNS__); return OP_COMMA;}
+}
+<_DECLARE_COPYNS__> {
+  "inherit" {yybegin(_DECLARE_COPYNS__END); return KW_INHERIT; }
+  "no-inherit" {yybegin(_DECLARE_COPYNS__END); return KW_NO_INHERIT; }
+}
+<_DECLARE_COPYNS__END> {
+  ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
+}
+
 
 // common formats
 <_QNAME> {

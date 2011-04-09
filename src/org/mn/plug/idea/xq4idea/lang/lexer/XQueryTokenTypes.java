@@ -17,6 +17,7 @@ public interface XQueryTokenTypes {
   IElementType OP_COLON = new XQueryElementType(":");
   IElementType OP_VARSTART = new XQueryElementType("$");
   IElementType OP_EQUALS = new XQueryElementType("=");
+  IElementType OP_COMMA = new XQueryElementType(",");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
@@ -50,7 +51,11 @@ public interface XQueryTokenTypes {
   IElementType KW_UNORDERED = new XQueryElementType("UNORDERED");
   IElementType KW_BOUNDARY_SPACE = new XQueryElementType("BOUNDARY_SPACE");
   IElementType KW_PRESERVE = new XQueryElementType("PRESERVE");
+  IElementType KW_NO_PRESERVE = new XQueryElementType("NO_PRESERVE");
   IElementType KW_STRIP = new XQueryElementType("STRIP");
   IElementType KW_NAMESPACE = new XQueryElementType("NAMESPACE");
   IElementType KW_BASE_URI = new XQueryElementType("BASE_URI");
+  IElementType KW_COPY_NAMESPACES = new XQueryElementType("COPY_NAMESPACES");
+  IElementType KW_INHERIT = new XQueryElementType("INHERIT");
+  IElementType KW_NO_INHERIT = new XQueryElementType("NO_INHERIT");
 }
