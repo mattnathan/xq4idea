@@ -32,6 +32,7 @@ import com.intellij.psi.tree.IElementType;
 %s VARNAME
 %s DECLAREORDERING
 %s XMLSPACE_DECL
+%s NAMESPACEDECL
 
 // strings
 %x STR_START_QUOTE
@@ -45,15 +46,18 @@ import com.intellij.psi.tree.IElementType;
 
 // partial matches required for comment handling
 %s _XQUERY
-%s _XQUERY_VERSION_STR
+%s _XQUERY_VERSION_END
 %s _XQUERY_ENCODING
-%s _XQUERY_ENCODING_STR
+%s _XQUERY_ENCODING_END
 %s _DECLARE
 %s _DECLARE_OPTION_QN
-%s _DECLARE_OPTION_QN_STR
+%s _DECLARE_OPTION_QN_END
 %s _DECLARE_ORDERING_END
 %s _DECLARE_BOUNDARY_SPACE_END
 %s _DECLARE_VARIABLE
+%s _NAMESPACEDECL_
+%s _NAMESPACEDECL_URI
+%s _NAMESPACEDECL_URI_END
 
 %x _QNAME
 %x _QNAME_
@@ -118,21 +122,21 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 <XQUERYVERSION> {
-  "\"" {pushState(_XQUERY_VERSION_STR); yybegin(STR_START_QUOTE); return XQ_STR_START; }
-  "'" {pushState(_XQUERY_VERSION_STR); yybegin(STR_START_APOS); return XQ_STR_START; }
+  "\"" {pushState(_XQUERY_VERSION_END); yybegin(STR_START_QUOTE); return XQ_STR_START; }
+  "'" {pushState(_XQUERY_VERSION_END); yybegin(STR_START_APOS); return XQ_STR_START; }
 }
 
-<_XQUERY_VERSION_STR> {
+<_XQUERY_VERSION_END> {
   "encoding" {yybegin(_XQUERY_ENCODING); return KW_ENCODING; }
   ";" { yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 
 <_XQUERY_ENCODING> {
-  "\"" {pushState(_XQUERY_ENCODING_STR); yybegin(STR_START_QUOTE); return XQ_STR_START; }
-  "'" {pushState(_XQUERY_ENCODING_STR); yybegin(STR_START_APOS); return XQ_STR_START; }
+  "\"" {pushState(_XQUERY_ENCODING_END); yybegin(STR_START_QUOTE); return XQ_STR_START; }
+  "'" {pushState(_XQUERY_ENCODING_END); yybegin(STR_START_APOS); return XQ_STR_START; }
 }
 
-<_XQUERY_ENCODING_STR> {
+<_XQUERY_ENCODING_END> {
   ";" { yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 
@@ -147,6 +151,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "variable" {yybegin(_DECLARE_VARIABLE); return KW_VARIABLE; }
   "ordering" {yybegin(DECLAREORDERING); return KW_ORDERING; }
   "boundary-space" {yybegin(XMLSPACE_DECL); return KW_BOUNDARY_SPACE; }
+  "namespace" {yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
+  "base-uri" {yybegin(_NAMESPACEDECL_URI); return KW_NAMESPACE; }
 }
 
 <_DECLARE_VARIABLE> {
@@ -164,13 +170,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {Prefix} / ":" { pushState(_DECLARE_OPTION_QN); yybegin(_QNAME); return XQ_PREFIX_NAME; }
   {LocalPart} { yybegin(_DECLARE_OPTION_QN); return XQ_LOCAL_NAME; }
 }
-
 <_DECLARE_OPTION_QN> {
-  "\"" {pushState(_DECLARE_OPTION_QN_STR); yybegin(STR_START_QUOTE); return XQ_STR_START; }
-  "'" {pushState(_DECLARE_OPTION_QN_STR); yybegin(STR_START_APOS); return XQ_STR_START; }
+  "\"" {pushState(_DECLARE_OPTION_QN_END); yybegin(STR_START_QUOTE); return XQ_STR_START; }
+  "'" {pushState(_DECLARE_OPTION_QN_END); yybegin(STR_START_APOS); return XQ_STR_START; }
 }
-
-<_DECLARE_OPTION_QN_STR> {
+<_DECLARE_OPTION_QN_END> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 
@@ -179,7 +183,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "ordered" {yybegin(_DECLARE_ORDERING_END); return KW_ORDERED; }
   "unordered" {yybegin(_DECLARE_ORDERING_END); return KW_UNORDERED; }
 }
-
 <_DECLARE_ORDERING_END> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
@@ -190,6 +193,21 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "strip" {yybegin(_DECLARE_BOUNDARY_SPACE_END); return KW_STRIP; }
 }
 <_DECLARE_BOUNDARY_SPACE_END> {
+  ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
+}
+
+// NAMESPACEDECL
+<NAMESPACEDECL> {
+  {NCName} {yybegin(_NAMESPACEDECL_); return XQ_LOCAL_NAME; }
+}
+<_NAMESPACEDECL_> {
+  "=" {yybegin(_NAMESPACEDECL_URI); return OP_EQUALS; }
+}
+<_NAMESPACEDECL_URI> {
+  "\"" {pushState(_NAMESPACEDECL_URI_END); yybegin(STR_START_QUOTE); return XQ_STR_START; }
+  "'" {pushState(_NAMESPACEDECL_URI_END); yybegin(STR_START_APOS); return XQ_STR_START; }
+}
+<_NAMESPACEDECL_URI_END> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 

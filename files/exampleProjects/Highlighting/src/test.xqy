@@ -11,6 +11,12 @@ declare option option:option "";
 declare ordering unordered;
 declare ordering ordered;
 
+declare boundary-space preserve;
+declare boundary-space strip;
+
+declare namespace my = "http://example.com";
+declare base-uri "http://my.base-uri.com/";
+
 12.2e2234
 
 some other text
