@@ -12,13 +12,12 @@ import javax.swing.*;
  * @author Matt Nathan
  */
 public class XQueryFileType extends LanguageFileType {
-  /**
-   * Creates a language file type for the specified language.
-   *
-   * @param language The language used in the files of the type.
-   */
-  protected XQueryFileType(@NotNull Language language) {
-    super(language);
+  public static final XQueryFileType XQUERY_FILE_TYPE = new XQueryFileType();
+  public static final Language XQUERY_LAGUAGE = XQUERY_FILE_TYPE.getLanguage();
+  private static final String DEFAULT_EXTENSION = "xqy";
+
+  private XQueryFileType() {
+    super(new XQueryLanguage());
   }
 
   @NotNull
@@ -33,7 +32,7 @@ public class XQueryFileType extends LanguageFileType {
 
   @NotNull
   public String getDefaultExtension() {
-    return "xqy";
+    return DEFAULT_EXTENSION;
   }
 
   public Icon getIcon() {
