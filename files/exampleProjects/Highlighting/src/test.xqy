@@ -29,6 +29,9 @@ declare default collation "http://my.collation";
 declare default order empty greatest;
 declare default order empty least;
 
+declare default function namespace "http://function.com/";
+declare default element namespace "http://function.com/";
+
 12.2e2234
 
 some other text

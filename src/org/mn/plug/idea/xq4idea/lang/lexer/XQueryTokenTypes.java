@@ -65,4 +65,6 @@ public interface XQueryTokenTypes {
   IElementType KW_EMPTY = new XQueryElementType("EMPTY");
   IElementType KW_GREATEST = new XQueryElementType("GREATEST");
   IElementType KW_LEAST = new XQueryElementType("LEAST");
+  IElementType KW_FUNCTION = new XQueryElementType("FUNCTION");
+  IElementType KW_ELEMENT = new XQueryElementType("ELEMENT");
 }
