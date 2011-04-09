@@ -77,6 +77,8 @@ import com.intellij.psi.tree.IElementType;
 %s _AS_ATTR
 %s _AS_SATTR
 %s _AS_ELEM
+%s _AS_ELEM_
+%s _AS_ELEM__
 %s _AS_SELEM
 
 %s _EMPTY_BRACES
@@ -276,7 +278,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "processing-instruction" {pushState(_AS_OCC); pushState(_AS_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
   "attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ATTRIBUTE;}
   "schema-attribute" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
-  "element" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ELEMENT;}
+  "element" {pushState(_AS_OCC); pushState(_AS_ELEM); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
   "schema-element" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
   {QName} {yypushback(yylength()); pushState(_AS_OCC); yybegin(_QNAME);}
 }
@@ -291,6 +293,20 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "\""|"'" { pushState(_CLOSE_BRACE); yypushback(1); yybegin(_STRINGLITERAL); }
   {NCName} { pushState(_CLOSE_BRACE); yypushback(yylength()); yybegin(_NCNAME); }
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+}
+// as element( (QName|* (, QName "?"? )? )? )? )
+<_AS_ELEM> {
+  "*" {yybegin(_AS_ELEM_); return OP_STAR; }
+  {QName} {yypushback(yylength()); pushState(_AS_ELEM_); yybegin(_QNAME); }
+  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+}
+<_AS_ELEM_> {
+  "," {pushState(_AS_ELEM__); yybegin(_QNAME); return OP_COMMA;}
+  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+}
+<_AS_ELEM__> {
+  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+  "?" {yybegin(_CLOSE_BRACE); return OP_QUESTION; }
 }
 
 
