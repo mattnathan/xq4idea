@@ -40,6 +40,9 @@ import com.intellij.psi.tree.IElementType;
 // partial matches required for comment handling
 %s _XQUERY
 %s _XQUERY_VERSION_END
+
+%s _MODULE
+
 %s _DECLARE
 %s _DECLARE_END
 %s _DECLARE_COPYNS
@@ -111,6 +114,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "xquery" { yybegin(_XQUERY); return KW_XQUERY; }
   "declare" { yybegin(_DECLARE); return KW_DECLARE; }
+  "module" { yybegin(_MODULE); return KW_MODULE; }
 }
 
 // xquery version "" (encoding "")? ;
@@ -121,6 +125,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_XQUERY_VERSION_END> {
   "encoding" {pushState(_DECLARE_END); yybegin(_STRINGLITERAL); return KW_ENCODING; }
   ";" { yybegin(YYINITIAL); return OP_SEPERATOR; }
+}
+
+// module namespace ...
+<_MODULE> {
+  "namespace" {pushState(_DECLARE_END); yybegin(NAMESPACEDECL); return KW_MODULE; }
 }
 
 // declare ...

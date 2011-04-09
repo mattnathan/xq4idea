@@ -67,4 +67,5 @@ public interface XQueryTokenTypes {
   IElementType KW_LEAST = new XQueryElementType("LEAST");
   IElementType KW_FUNCTION = new XQueryElementType("FUNCTION");
   IElementType KW_ELEMENT = new XQueryElementType("ELEMENT");
+  IElementType KW_MODULE = new XQueryElementType("MODULE");
 }
