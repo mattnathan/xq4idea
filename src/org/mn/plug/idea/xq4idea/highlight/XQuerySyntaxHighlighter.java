@@ -23,6 +23,7 @@ public class XQuerySyntaxHighlighter extends SyntaxHighlighterBase {
 
   static {
     ATTRIBUTES.put(XQueryTokenTypes.BAD_CHARACTER, HighlighterColors.BAD_CHARACTER);
+    ATTRIBUTES.put(XQueryTokenTypes.BAD_WORD, HighlighterColors.BAD_CHARACTER);
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.COMMENTS, SyntaxHighlighterColors.JAVA_BLOCK_COMMENT);
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.KEYWORDS, SyntaxHighlighterColors.KEYWORD);
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.STRING_LITERALS, SyntaxHighlighterColors.STRING);

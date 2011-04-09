@@ -9,10 +9,17 @@ import com.intellij.psi.tree.IElementType;
 public interface XQueryTokenTypes {
   // core types
   IElementType BAD_CHARACTER = TokenType.BAD_CHARACTER;
+  IElementType BAD_WORD = TokenType.ERROR_ELEMENT;
   IElementType WHITE_SPACE = TokenType.WHITE_SPACE;
 
   // operators
   IElementType OP_SEPERATOR = new XQueryElementType(";");
+  IElementType OP_COLON = new XQueryElementType(":");
+  IElementType OP_VARSTART = new XQueryElementType("$");
+
+  // names
+  IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
+  IElementType XQ_LOCAL_NAME = new XQueryElementType("XQ_LOCAL_NAME");
 
   // comments
   IElementType XQ_COMMENT_START = new XQueryElementType("(:");
@@ -36,4 +43,5 @@ public interface XQueryTokenTypes {
   IElementType KW_ENCODING = new XQueryElementType("ENCODING");
   IElementType KW_DECLARE = new XQueryElementType("DECLARE");
   IElementType KW_OPTION = new XQueryElementType("OPTION");
+  IElementType KW_VARIABLE = new XQueryElementType("VARIABLE");
 }
