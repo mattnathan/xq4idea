@@ -12,6 +12,8 @@ import schema namespace lib = "my.module"
 import schema default element namespace "my.module";
 import schema default element namespace "my.module" at "/home/lib.xqy";
 
+import module namespace my = "ns.declr" at "/some/path", "other path";
+
 declare option my:declare "some value";
 declare option option "";
 declare option local:option "";

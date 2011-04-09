@@ -211,6 +211,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // import ...
 <_IMPORT> {
   "schema" {yybegin(_IMPORT_SCHEMA); return KW_SCHEMA; }
+  "module" {yybegin(_IMPORT_MODULE); return KW_MODULE; }
 }
 // import schema (namespace =) | (default element namespace) "" (at "" (, "")*)?
 <_IMPORT_SCHEMA> {
@@ -222,6 +223,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_IMPORT_SCHEMA_DEFAULT_ELEMENT> {
   "namespace" {pushState(_SEP); pushState(_ATLIST); yybegin(_URILITERAL); return KW_NAMESPACE; }
+}
+<_IMPORT_MODULE> {
+  "namespace" { pushState(_SEP); pushState(_ATLIST); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
 }
 
 
