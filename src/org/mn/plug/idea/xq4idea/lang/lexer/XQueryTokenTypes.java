@@ -84,4 +84,9 @@ public interface XQueryTokenTypes {
   IElementType KW_NODE = new XQueryElementType("NODE");
   IElementType KW_TEXT = new XQueryElementType("TEXT");
   IElementType KW_COMMENT = new XQueryElementType("COMMENT");
+  IElementType KW_DOCUMENT_NODE = new XQueryElementType("COMMENT");
+  IElementType KW_PROCESSING_INSTRUCTION = new XQueryElementType("COMMENT");
+  IElementType KW_ATTRIBUTE = new XQueryElementType("COMMENT");
+  IElementType KW_SCHEMA_ATTRIBUTE = new XQueryElementType("COMMENT");
+  IElementType KW_SCHEMA_ELEMENT = new XQueryElementType("COMMENT");
 }

@@ -263,6 +263,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
   "text" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
   "comment" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
+  "document-node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_DOCUMENT_NODE;}
+  "processing-instruction" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_PROCESSING_INSTRUCTION;}
+  "attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ATTRIBUTE;}
+  "schema-attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_SCHEMA_ATTRIBUTE;}
+  "element" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ELEMENT;}
+  "schema-element" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_SCHEMA_ELEMENT;}
   {QName} {yypushback(yylength()); pushState(_AS_OCC); yybegin(_QNAME);}
 }
 <_AS_OCC> {

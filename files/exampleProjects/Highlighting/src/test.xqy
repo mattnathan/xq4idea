@@ -52,6 +52,12 @@ declare variable $var as item()* external ;
 declare variable $var as node()? external ;
 declare variable $var as text()+ external ;
 declare variable $var as comment() external ;
+declare variable $var as document-node() external ;
+declare variable $var as processing-instruction() external ;
+declare variable $var as attribute() external ;
+declare variable $var as schema-attribute() external ;
+declare variable $var as element() external ;
+declare variable $var as schema-element() external ;
 declare variable $var as my:something external ;
 declare variable $var as prefixless external ;
 
