@@ -26,6 +26,8 @@ public interface XQueryTokenTypeSets extends XQueryTokenTypes {
       KW_FUNCTION, KW_ELEMENT,
       KW_MODULE,
       KW_IMPORT, KW_SCHEMA,
-      KW_AT
+      KW_AT,
+      KW_AS, KW_VOID, KW_EXTERNAL,
+      KW_ITEM, KW_NODE, KW_TEXT, KW_COMMENT
   );
 }

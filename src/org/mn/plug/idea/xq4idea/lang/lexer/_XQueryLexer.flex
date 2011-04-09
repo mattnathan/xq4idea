@@ -51,6 +51,7 @@ import com.intellij.psi.tree.IElementType;
 %s _DECLARE_DEFAULT_ORDER
 %s _DECLARE_DEFAULT_ORDER_EMPTY
 %s _DECLARE_DEFAULT_NAMESPACE
+%s _DECLARE_VARIABLE
 
 %s _IMPORT
 %s _IMPORT_SCHEMA
@@ -67,6 +68,13 @@ import com.intellij.psi.tree.IElementType;
 %s _ATLIST
 %s _ATLIST_
 
+%s _PARAM
+%s _AS
+%s _AS_
+
+%s _EMPTY_BRACES
+%s _EMPTY_BRACES_
+
 %s _SEP
 
 %s _QNAME
@@ -75,6 +83,7 @@ import com.intellij.psi.tree.IElementType;
 
 // whitespace
 S = [\x20\x09\x0D\x0A]+
+NS = [^\x20\x09\x0D\x0A]+
 
 Digits = [0-9]+
 DecimalLiteral = ("." {Digits}) | ({Digits} "." [0-9]*)
@@ -153,6 +162,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "copy-namespaces" {yybegin(_DECLARE_COPYNS); return KW_COPY_NAMESPACES; }
   "construction" {yybegin(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
   "default" {yybegin(_DECLARE_DEFAULT); return KW_DEFAULT; }
+  "variable" {pushState(_SEP); pushState(_DECLARE_VARIABLE); yybegin(_PARAM); return KW_VARIABLE; }
 }
 
 <_SEP> {
@@ -208,6 +218,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "no-inherit" {yybegin(_SEP); return KW_NO_INHERIT; }
 }
 
+// declare variable...
+<_DECLARE_VARIABLE> {
+  ":=" {popState(); return OP_ASSIGN;}
+  "external" {popState(); return KW_EXTERNAL;}
+}
+
 // import ...
 <_IMPORT> {
   "schema" {yybegin(_IMPORT_SCHEMA); return KW_SCHEMA; }
@@ -229,7 +245,33 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 
+// variable declaration part
+// "$" VarName TypeDeclaration?
+//
+<_PARAM> {
+  "$" {pushState(_AS); yybegin(_QNAME); return OP_VARSTART;}
+}
+<_AS> {
+  "as" {yybegin(_AS_); return KW_AS; }
+  {NS} {yypushback(yylength()); popState();}
+}
+<_AS_> {
+  "void" {yybegin(_EMPTY_BRACES); return KW_VOID;}
+  "item" {yybegin(_EMPTY_BRACES); return KW_ITEM;}
+  "node" {yybegin(_EMPTY_BRACES); return KW_NODE;}
+  "text" {yybegin(_EMPTY_BRACES); return KW_TEXT;}
+  "comment" {yybegin(_EMPTY_BRACES); return KW_COMMENT;}
+  {QName} {yypushback(yylength()); yybegin(_QNAME);}
+}
+
+
 // common formats
+<_EMPTY_BRACES> {
+  "(" {yybegin(_EMPTY_BRACES_); return OP_LBRACE;}
+}
+<_EMPTY_BRACES_> {
+  ")" {popState(); return OP_RBRACE; }
+}
 
 // ("preserve" | "split") ";"
 <_PRESERVE_OR_STRIP> {
@@ -277,18 +319,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // ("at" URILiteral ("," URILiteral)*)?
 <_ATLIST> {
   "at" {pushState(_ATLIST_); yybegin(_URILITERAL); return KW_AT;}
-  {S} { return WHITE_SPACE; }
-  [^] {popState(); yypushback(1);}
+  {NS} {yypushback(yylength()); popState();}
 }
 <_ATLIST_> {
   "," {pushState(_ATLIST_); yybegin(_URILITERAL); return OP_COMMA;}
-  {S} { return WHITE_SPACE; }
-  [^] {popState(); yypushback(1);}
+  {NS} {yypushback(yylength()); popState();}
 }
 
 
 
 "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
 {S} { return WHITE_SPACE; }
-[:letter:]+ { return BAD_WORD; }
+[:letter:] { return BAD_WORD; }
 [^] { yybegin(YYINITIAL); return BAD_CHARACTER; }

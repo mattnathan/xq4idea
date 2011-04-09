@@ -18,6 +18,9 @@ public interface XQueryTokenTypes {
   IElementType OP_VARSTART = new XQueryElementType("$");
   IElementType OP_EQUALS = new XQueryElementType("=");
   IElementType OP_COMMA = new XQueryElementType(",");
+  IElementType OP_LBRACE = new XQueryElementType("(");
+  IElementType OP_RBRACE = new XQueryElementType(")");
+  IElementType OP_ASSIGN = new XQueryElementType(":=");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
@@ -71,4 +74,11 @@ public interface XQueryTokenTypes {
   IElementType KW_IMPORT = new XQueryElementType("IMPORT");
   IElementType KW_SCHEMA = new XQueryElementType("SCHEMA");
   IElementType KW_AT = new XQueryElementType("AT");
+  IElementType KW_AS = new XQueryElementType("AS");
+  IElementType KW_VOID = new XQueryElementType("VOID");
+  IElementType KW_EXTERNAL = new XQueryElementType("EXTERNAL");
+  IElementType KW_ITEM = new XQueryElementType("ITEM");
+  IElementType KW_NODE = new XQueryElementType("NODE");
+  IElementType KW_TEXT = new XQueryElementType("TEXT");
+  IElementType KW_COMMENT = new XQueryElementType("COMMENT");
 }

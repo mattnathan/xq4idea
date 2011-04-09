@@ -43,6 +43,17 @@ declare default order empty least;
 declare default function namespace "http://function.com/";
 declare default element namespace "http://function.com/";
 
+declare variable $var external;
+declare variable $var := ;
+declare variable $var as void() := ;
+declare variable $var as void() external ;
+declare variable $var as item() external ;
+declare variable $var as node() external ;
+declare variable $var as text() external ;
+declare variable $var as comment() external ;
+declare variable $var as my:something external ;
+declare variable $var as prefixless external ;
+
 12.2e2234
 
 some other text
