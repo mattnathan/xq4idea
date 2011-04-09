@@ -44,7 +44,6 @@ import com.intellij.psi.tree.IElementType;
 %s _MODULE
 
 %s _DECLARE
-%s _DECLARE_END
 %s _DECLARE_COPYNS
 %s _DECLARE_COPYNS_
 %s _DECLARE_COPYNS__
@@ -58,6 +57,8 @@ import com.intellij.psi.tree.IElementType;
 %s _STRINGLITERAL
 
 %s _NAMESPACEDECL_
+
+%s _SEP
 
 %s _QNAME
 %x _QNAME_
@@ -123,34 +124,34 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 <_XQUERY_VERSION> {
-  "encoding" {pushState(_DECLARE_END); yybegin(_STRINGLITERAL); return KW_ENCODING; }
+  "encoding" {pushState(_SEP); yybegin(_STRINGLITERAL); return KW_ENCODING; }
   ";" { yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 
 // module namespace ...
 <_MODULE> {
-  "namespace" {pushState(_DECLARE_END); yybegin(NAMESPACEDECL); return KW_MODULE; }
+  "namespace" {pushState(_SEP); yybegin(NAMESPACEDECL); return KW_MODULE; }
 }
 
 // declare ...
 <_DECLARE> {
-  "option" {pushState(_DECLARE_END); pushState(_STRINGLITERAL); yybegin(_QNAME); return KW_OPTION;}
+  "option" {pushState(_SEP); pushState(_STRINGLITERAL); yybegin(_QNAME); return KW_OPTION;}
   "ordering" {yybegin(DECLAREORDERING); return KW_ORDERING; }
   "boundary-space" {yybegin(_PRESERVE_OR_STRIP); return KW_BOUNDARY_SPACE; }
   "namespace" {yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
-  "base-uri" {pushState(_DECLARE_END); yybegin(_URILITERAL); return KW_BASE_URI; }
+  "base-uri" {pushState(_SEP); yybegin(_URILITERAL); return KW_BASE_URI; }
   "copy-namespaces" {yybegin(_DECLARE_COPYNS); return KW_COPY_NAMESPACES; }
   "construction" {yybegin(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
   "default" {yybegin(_DECLARE_DEFAULT); return KW_DEFAULT; }
 }
 
-<_DECLARE_END> {
+<_SEP> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 
 // DECLARE DEFAULT ...
 <_DECLARE_DEFAULT> {
-  "collation" {pushState(_DECLARE_END); yybegin(_URILITERAL); return KW_COLLATION; }
+  "collation" {pushState(_SEP); yybegin(_URILITERAL); return KW_COLLATION; }
   "order" {yybegin(_DECLARE_DEFAULT_ORDER); return KW_ORDER; }
   "function" {yybegin(_DECLARE_DEFAULT_NAMESPACE); return KW_FUNCTION; }
   "element" {yybegin(_DECLARE_DEFAULT_NAMESPACE); return KW_ELEMENT; }
@@ -161,19 +162,19 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "empty" {yybegin(_DECLARE_DEFAULT_ORDER_EMPTY); return KW_EMPTY; }
 }
 <_DECLARE_DEFAULT_ORDER_EMPTY> {
-  "greatest" {yybegin(_DECLARE_END); return KW_GREATEST;}
-  "least" {yybegin(_DECLARE_END); return KW_LEAST;}
+  "greatest" {yybegin(_SEP); return KW_GREATEST;}
+  "least" {yybegin(_SEP); return KW_LEAST;}
 }
 
 // declare default (function | element) namespace ""
 <_DECLARE_DEFAULT_NAMESPACE> {
-  "namespace" {pushState(_DECLARE_END); yybegin(_URILITERAL); return KW_NAMESPACE; }
+  "namespace" {pushState(_SEP); yybegin(_URILITERAL); return KW_NAMESPACE; }
 }
 
 // ORDERING
 <DECLAREORDERING> {
-  "ordered" {yybegin(_DECLARE_END); return KW_ORDERED; }
-  "unordered" {yybegin(_DECLARE_END); return KW_UNORDERED; }
+  "ordered" {yybegin(_SEP); return KW_ORDERED; }
+  "unordered" {yybegin(_SEP); return KW_UNORDERED; }
 }
 
 // NAMESPACEDECL
@@ -181,7 +182,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {NCName} {yybegin(_NAMESPACEDECL_); return XQ_LOCAL_NAME; }
 }
 <_NAMESPACEDECL_> {
-  "=" {pushState(_DECLARE_END); yybegin(_URILITERAL); return OP_EQUALS; }
+  "=" {pushState(_SEP); yybegin(_URILITERAL); return OP_EQUALS; }
 }
 
 // _DECLARE_COPYNS
@@ -193,8 +194,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "," {yybegin(_DECLARE_COPYNS__); return OP_COMMA;}
 }
 <_DECLARE_COPYNS__> {
-  "inherit" {yybegin(_DECLARE_END); return KW_INHERIT; }
-  "no-inherit" {yybegin(_DECLARE_END); return KW_NO_INHERIT; }
+  "inherit" {yybegin(_SEP); return KW_INHERIT; }
+  "no-inherit" {yybegin(_SEP); return KW_NO_INHERIT; }
 }
 
 
@@ -202,8 +203,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // ("preserve" | "split") ";"
 <_PRESERVE_OR_STRIP> {
-  "preserve" {yybegin(_DECLARE_END); return KW_PRESERVE; }
-  "strip" {yybegin(_DECLARE_END); return KW_STRIP; }
+  "preserve" {yybegin(_SEP); return KW_PRESERVE; }
+  "strip" {yybegin(_SEP); return KW_STRIP; }
 }
 
 <_QNAME> {
