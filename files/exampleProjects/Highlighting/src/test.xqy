@@ -5,6 +5,9 @@ xquery version "1.0-ml" encoding "UTF-8";
 
 module namespace lib = "my.module";
 
+import schema namespace lib = "my.module";
+import schema default element namespace "my.module";
+
 declare option my:declare "some value";
 declare option option "";
 declare option local:option "";

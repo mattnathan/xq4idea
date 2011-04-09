@@ -68,4 +68,6 @@ public interface XQueryTokenTypes {
   IElementType KW_FUNCTION = new XQueryElementType("FUNCTION");
   IElementType KW_ELEMENT = new XQueryElementType("ELEMENT");
   IElementType KW_MODULE = new XQueryElementType("MODULE");
+  IElementType KW_IMPORT = new XQueryElementType("IMPORT");
+  IElementType KW_SCHEMA = new XQueryElementType("SCHEMA");
 }

@@ -52,6 +52,12 @@ import com.intellij.psi.tree.IElementType;
 %s _DECLARE_DEFAULT_ORDER_EMPTY
 %s _DECLARE_DEFAULT_NAMESPACE
 
+%s _IMPORT
+%s _IMPORT_SCHEMA
+%s _IMPORT_SCHEMA_DEFAULT
+%s _IMPORT_SCHEMA_DEFAULT_ELEMENT
+%s _IMPORT_MODULE
+
 %s _PRESERVE_OR_STRIP
 %s _URILITERAL
 %s _STRINGLITERAL
@@ -116,6 +122,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "xquery" { yybegin(_XQUERY); return KW_XQUERY; }
   "declare" { yybegin(_DECLARE); return KW_DECLARE; }
   "module" { yybegin(_MODULE); return KW_MODULE; }
+  "import" {yybegin(_IMPORT); return KW_IMPORT; }
 }
 
 // xquery version "" (encoding "")? ;
@@ -196,6 +203,22 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_DECLARE_COPYNS__> {
   "inherit" {yybegin(_SEP); return KW_INHERIT; }
   "no-inherit" {yybegin(_SEP); return KW_NO_INHERIT; }
+}
+
+// import ...
+<_IMPORT> {
+  "schema" {yybegin(_IMPORT_SCHEMA); return KW_SCHEMA; }
+}
+// import schema (namespace =) | (default element namespace) "" (at "" (, "")*)?
+<_IMPORT_SCHEMA> {
+  "namespace" { pushState(_SEP); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
+  "default" { yybegin(_IMPORT_SCHEMA_DEFAULT); return KW_DEFAULT; }
+}
+<_IMPORT_SCHEMA_DEFAULT> {
+  "element" { yybegin(_IMPORT_SCHEMA_DEFAULT_ELEMENT); return KW_ELEMENT; }
+}
+<_IMPORT_SCHEMA_DEFAULT_ELEMENT> {
+  "namespace" {pushState(_SEP); yybegin(_URILITERAL); return KW_NAMESPACE; }
 }
 
 

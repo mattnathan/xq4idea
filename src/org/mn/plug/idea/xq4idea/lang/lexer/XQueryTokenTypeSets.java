@@ -24,6 +24,7 @@ public interface XQueryTokenTypeSets extends XQueryTokenTypes {
       KW_DEFAULT, KW_COLLATION,
       KW_ORDER, KW_EMPTY, KW_GREATEST, KW_LEAST,
       KW_FUNCTION, KW_ELEMENT,
-      KW_MODULE
+      KW_MODULE,
+      KW_IMPORT, KW_SCHEMA
   );
 }
