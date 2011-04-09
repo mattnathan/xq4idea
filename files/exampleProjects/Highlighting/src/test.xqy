@@ -53,6 +53,7 @@ declare variable $var as node()? external ;
 declare variable $var as text()+ external ;
 declare variable $var as comment() external ;
 declare variable $var as document-node() external ;
+declare variable $var as processing-instruction() external ;
 declare variable $var as processing-instruction("") external ;
 declare variable $var as processing-instruction(myName) external ;
 declare variable $var as attribute() external ;

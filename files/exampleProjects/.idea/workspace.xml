@@ -62,7 +62,7 @@
       <file leaf-file-name="test.xqy" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="56" column="48" selection-start="1875" selection-end="1875" vertical-scroll-proportion="0.47692308">
+            <state line="55" column="48" selection-start="1812" selection-end="1812" vertical-scroll-proportion="0.41153845">
               <folding />
             </state>
           </provider>
@@ -198,7 +198,7 @@
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
   <component name="ToolWindowManager">
-    <frame x="1971" y="209" width="1062" height="674" extended-state="0" />
+    <frame x="1971" y="202" width="1062" height="674" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -268,7 +268,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="56" column="48" selection-start="1875" selection-end="1875" vertical-scroll-proportion="0.47692308">
+        <state line="55" column="48" selection-start="1812" selection-end="1812" vertical-scroll-proportion="0.41153845">
           <folding />
         </state>
       </provider>

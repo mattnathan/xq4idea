@@ -290,6 +290,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_AS_PI> {
   "\""|"'" { pushState(_CLOSE_BRACE); yypushback(1); yybegin(_STRINGLITERAL); }
   {NCName} { pushState(_CLOSE_BRACE); yypushback(yylength()); yybegin(_NCNAME); }
+  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
 
 
