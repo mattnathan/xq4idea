@@ -39,7 +39,7 @@ import com.intellij.psi.tree.IElementType;
 
 // partial matches required for comment handling
 %s _XQUERY
-%s _XQUERY_VERSION_END
+%s _XQUERY_VERSION
 
 %s _MODULE
 
@@ -119,10 +119,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // xquery version "" (encoding "")? ;
 <_XQUERY> {
-  "version" { pushState(_XQUERY_VERSION_END); yybegin(_STRINGLITERAL); return KW_VERSION; }
+  "version" { pushState(_XQUERY_VERSION); yybegin(_STRINGLITERAL); return KW_VERSION; }
 }
 
-<_XQUERY_VERSION_END> {
+<_XQUERY_VERSION> {
   "encoding" {pushState(_DECLARE_END); yybegin(_STRINGLITERAL); return KW_ENCODING; }
   ";" { yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
