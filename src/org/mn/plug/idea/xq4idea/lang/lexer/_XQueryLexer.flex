@@ -4,6 +4,10 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
 // this lexer follows the principles set out in http://www.w3.org/TR/xquery-xpath-parsing/
+/**
+ * Generated lexer
+ */
+@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "FieldCanBeLocal", "AccessStaticViaInstance", "JavaDoc", "ConstantConditions"})
 %%
 
 %class _XQueryLexer
