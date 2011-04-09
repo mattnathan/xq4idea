@@ -275,7 +275,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "document-node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_DOCUMENT_NODE;}
   "processing-instruction" {pushState(_AS_OCC); pushState(_AS_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
   "attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ATTRIBUTE;}
-  "schema-attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_SCHEMA_ATTRIBUTE;}
+  "schema-attribute" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
   "element" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ELEMENT;}
   "schema-element" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
   {QName} {yypushback(yylength()); pushState(_AS_OCC); yybegin(_QNAME);}
