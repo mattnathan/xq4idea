@@ -25,6 +25,10 @@ declare copy-namespaces no-preserve , no-inherit;
 declare construction preserve;
 declare construction strip;
 
+declare default collation "http://my.collation";
+declare default order empty greatest;
+declare default order empty least;
+
 12.2e2234
 
 some other text

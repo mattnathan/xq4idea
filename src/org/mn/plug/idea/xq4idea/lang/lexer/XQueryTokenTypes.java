@@ -61,4 +61,8 @@ public interface XQueryTokenTypes {
   IElementType KW_CONSTRUCTION = new XQueryElementType("NO_INHERIT");
   IElementType KW_DEFAULT = new XQueryElementType("DEFAULT");
   IElementType KW_COLLATION = new XQueryElementType("COLLATION");
+  IElementType KW_ORDER = new XQueryElementType("ORDER");
+  IElementType KW_EMPTY = new XQueryElementType("EMPTY");
+  IElementType KW_GREATEST = new XQueryElementType("GREATEST");
+  IElementType KW_LEAST = new XQueryElementType("LEAST");
 }

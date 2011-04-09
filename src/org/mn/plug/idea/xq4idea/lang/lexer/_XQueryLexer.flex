@@ -42,6 +42,8 @@ import com.intellij.psi.tree.IElementType;
 %s _DECLARE_COPYNS_
 %s _DECLARE_COPYNS__
 %s _DECLARE_DEFAULT
+%s _DECLARE_DEFAULT_ORDER
+%s _DECLARE_DEFAULT_ORDER_EMPTY
 
 %s _PRESERVE_OR_STRIP
 %s _URILITERAL
@@ -135,6 +137,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // DECLARE DEFAULT ...
 <_DECLARE_DEFAULT> {
   "collation" {pushState(_DECLARE_END); yybegin(_URILITERAL); return KW_COLLATION; }
+  "order" {yybegin(_DECLARE_DEFAULT_ORDER); return KW_ORDER; }
+}
+
+// declare default empty (greatest | least)
+<_DECLARE_DEFAULT_ORDER> {
+  "empty" {yybegin(_DECLARE_DEFAULT_ORDER_EMPTY); return KW_EMPTY; }
+}
+<_DECLARE_DEFAULT_ORDER_EMPTY> {
+  "greatest" {yybegin(_DECLARE_END); return KW_GREATEST;}
+  "least" {yybegin(_DECLARE_END); return KW_LEAST;}
 }
 
 // ORDERING
