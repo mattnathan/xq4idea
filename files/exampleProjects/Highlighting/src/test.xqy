@@ -68,6 +68,11 @@ declare variable $var as processing-instruction("") external ;
 declare variable $var as processing-instruction(myName) external ;
 
 declare variable $var as attribute() external ;
+declare variable $var as attribute(hello) external ;
+declare variable $var as attribute(hello:local) external ;
+declare variable $var as attribute(*) external ;
+declare variable $var as attribute(hello, prefix) external ;
+declare variable $var as attribute(hello, prefix:local?) external ;
 
 declare variable $var as schema-attribute(hello) external ;
 declare variable $var as schema-attribute(hello:local) external ;

@@ -76,9 +76,9 @@ import com.intellij.psi.tree.IElementType;
 %s _AS_PI
 %s _AS_ATTR
 %s _AS_SATTR
-%s _AS_ELEM
-%s _AS_ELEM_
-%s _AS_ELEM__
+%s _AS_AorE
+%s _AS_AorE_
+%s _AS_AorE__
 %s _AS_SELEM
 
 %s _EMPTY_BRACES
@@ -276,9 +276,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "comment" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
   "document-node" {pushState(_AS_OCC); pushState(_AS_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
   "processing-instruction" {pushState(_AS_OCC); pushState(_AS_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
-  "attribute" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ATTRIBUTE;}
+  "attribute" {pushState(_AS_OCC); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
   "schema-attribute" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
-  "element" {pushState(_AS_OCC); pushState(_AS_ELEM); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
+  "element" {pushState(_AS_OCC); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
   "schema-element" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
   {QName} {yypushback(yylength()); pushState(_AS_OCC); yybegin(_QNAME);}
 }
@@ -295,22 +295,22 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
 // as element( (QName|* (, QName "?"? )? )? )? )
-<_AS_ELEM> {
-  "*" {yybegin(_AS_ELEM_); return OP_STAR; }
-  {QName} {yypushback(yylength()); pushState(_AS_ELEM_); yybegin(_QNAME); }
+<_AS_AorE> {
+  "*" {yybegin(_AS_AorE_); return OP_STAR; }
+  {QName} {yypushback(yylength()); pushState(_AS_AorE_); yybegin(_QNAME); }
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
-<_AS_ELEM_> {
-  "," {pushState(_AS_ELEM__); yybegin(_QNAME); return OP_COMMA;}
+<_AS_AorE_> {
+  "," {pushState(_AS_AorE__); yybegin(_QNAME); return OP_COMMA;}
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
-<_AS_ELEM__> {
+<_AS_AorE__> {
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
   "?" {yybegin(_CLOSE_BRACE); return OP_QUESTION; }
 }
 // as document-node( (ElementTest | ElementSchemaTest)? )
 <_AS_DN> {
-  "element" {pushState(_CLOSE_BRACE); pushState(_AS_ELEM); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
+  "element" {pushState(_CLOSE_BRACE); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
   "schema-element" {pushState(_CLOSE_BRACE); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
