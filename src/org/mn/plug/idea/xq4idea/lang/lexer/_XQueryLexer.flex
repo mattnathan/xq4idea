@@ -31,6 +31,7 @@ import com.intellij.psi.tree.IElementType;
 %s OPTION
 %s VARNAME
 %s DECLAREORDERING
+%s XMLSPACE_DECL
 
 // strings
 %x STR_START_QUOTE
@@ -51,6 +52,7 @@ import com.intellij.psi.tree.IElementType;
 %s _DECLARE_OPTION_QN
 %s _DECLARE_OPTION_QN_STR
 %s _DECLARE_ORDERING_END
+%s _DECLARE_BOUNDARY_SPACE_END
 %s _DECLARE_VARIABLE
 
 %x _QNAME
@@ -143,7 +145,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_DECLARE> {
   "option" {yybegin(OPTION); return KW_OPTION;}
   "variable" {yybegin(_DECLARE_VARIABLE); return KW_VARIABLE; }
-  "ordering" {yybegin(DECLAREORDERING); return KW_VARIABLE; }
+  "ordering" {yybegin(DECLAREORDERING); return KW_ORDERING; }
+  "boundary-space" {yybegin(XMLSPACE_DECL); return KW_BOUNDARY_SPACE; }
 }
 
 <_DECLARE_VARIABLE> {
@@ -178,6 +181,15 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 <_DECLARE_ORDERING_END> {
+  ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
+}
+
+// XMLSPACE_DECL
+<XMLSPACE_DECL> {
+  "preserve" {yybegin(_DECLARE_BOUNDARY_SPACE_END); return KW_PRESERVE; }
+  "strip" {yybegin(_DECLARE_BOUNDARY_SPACE_END); return KW_STRIP; }
+}
+<_DECLARE_BOUNDARY_SPACE_END> {
   ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
 }
 

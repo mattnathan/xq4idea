@@ -47,4 +47,7 @@ public interface XQueryTokenTypes {
   IElementType KW_ORDERING = new XQueryElementType("ORDERING");
   IElementType KW_ORDERED = new XQueryElementType("ORDERED");
   IElementType KW_UNORDERED = new XQueryElementType("UNORDERED");
+  IElementType KW_BOUNDARY_SPACE = new XQueryElementType("BOUNDARY_SPACE");
+  IElementType KW_PRESERVE = new XQueryElementType("PRESERVE");
+  IElementType KW_STRIP = new XQueryElementType("STRIP");
 }

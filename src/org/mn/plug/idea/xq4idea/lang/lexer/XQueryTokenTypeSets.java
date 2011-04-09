@@ -16,6 +16,7 @@ public interface XQueryTokenTypeSets extends XQueryTokenTypes {
   TokenSet KEYWORDS = TokenSet.create(
       KW_XQUERY, KW_VERSION, KW_ENCODING,
       KW_DECLARE, KW_OPTION, KW_VARIABLE,
-      KW_ORDERING, KW_ORDERED, KW_UNORDERED
+      KW_ORDERING, KW_ORDERED, KW_UNORDERED,
+      KW_BOUNDARY_SPACE, KW_PRESERVE, KW_STRIP
   );
 }
