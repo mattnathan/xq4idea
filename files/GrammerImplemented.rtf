@@ -1,0 +1,210 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang2057{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
+{\colortbl ;\red204\green204\blue204;\red0\green0\blue255;}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sl240\slmult1\lang9\f0\fs22\par
+[1]   \tab Module\tab    ::=   \tab VersionDecl? (MainModule | LibraryModule)\par
+\cf1 [2]   \tab VersionDecl\tab    ::=   \tab <"xquery" "version"> StringLiteral ("encoding" StringLiteral)? Separator\cf0\par
+[3]   \tab MainModule\tab    ::=   \tab Prolog QueryBody\par
+[4]   \tab LibraryModule\tab    ::=   \tab ModuleDecl Prolog\par
+\cf1 [5]   \tab ModuleDecl\tab    ::=   \tab <"module" "namespace"> NCName "=" URILiteral Separator\cf0\par
+[6]   \tab Prolog\tab    ::=   \tab ((Setter | Import | NamespaceDecl | DefaultNamespaceDecl) Separator)* ((VarDecl | FunctionDecl | OptionDecl) Separator)*\par
+[7]   \tab Setter\tab    ::=   \tab BoundarySpaceDecl | DefaultCollationDecl | BaseURIDecl | ConstructionDecl | OrderingModeDecl | EmptyOrderDecl | CopyNamespacesDecl\par
+[8]   \tab Import\tab    ::=   \tab SchemaImport | ModuleImport\par
+\cf1 [9]   \tab Separator\tab    ::=   \tab ";"\cf0\par
+\cf1 [10]   \tab NamespaceDecl\tab    ::=   \tab <"declare" "namespace"> NCName "=" URILiteral\par
+[11]   \tab BoundarySpaceDecl\tab    ::=   \tab <"declare" "boundary-space"> ("preserve" | "strip")\par
+[12]   \tab DefaultNamespaceDecl\tab    ::=   \tab (<"declare" "default" "element"> | <"declare" "default" "function">) "namespace" URILiteral\par
+[13]   \tab OptionDecl\tab    ::=   \tab <"declare" "option"> QName StringLiteral\par
+[14]   \tab OrderingModeDecl\tab    ::=   \tab <"declare" "ordering"> ("ordered" | "unordered")\par
+[15]   \tab EmptyOrderDecl\tab    ::=   \tab <"declare" "default" "order"> (<"empty" "greatest"> | <"empty" "least">)\par
+[16]   \tab CopyNamespacesDecl\tab    ::=   \tab <"declare" "copy-namespaces"> PreserveMode "," InheritMode\par
+[17]   \tab PreserveMode\tab    ::=   \tab "preserve" | "no-preserve"\par
+[18]   \tab InheritMode\tab    ::=   \tab "inherit" | "no-inherit"\cf0\par
+\cf1 [19]   \tab DefaultCollationDecl\tab    ::=   \tab <"declare" "default" "collation"> URILiteral\par
+[20]   \tab BaseURIDecl\tab    ::=   \tab <"declare" "base-uri"> URILiteral\par
+[21]   \tab SchemaImport\tab    ::=   \tab <"import" "schema"> SchemaPrefix? URILiteral (<"at" URILiteral> ("," URILiteral)*)?\par
+[22]   \tab SchemaPrefix\tab    ::=   \tab ("namespace" NCName "=") | (<"default" "element"> "namespace")\par
+[23]   \tab ModuleImport\tab    ::=   \tab <"import" "module"> ("namespace" NCName "=")? URILiteral (<"at" URILiteral> ("," URILiteral)*)?\par
+[24]   \tab VarDecl\tab    ::=   \tab <"declare" "variable" "$"> VarName TypeDeclaration? ((":="\cf0  ExprSingle\cf1 ) | "external")\par
+[25]   \tab ConstructionDecl\tab    ::=   \tab <"declare" "construction"> ("preserve" | "strip")\par
+\cf0 [26]   \tab FunctionDecl\tab    ::=   \tab <"declare" "function"> <QName "("> ParamList? (")" | (<")" "as"> SequenceType)) (EnclosedExpr | "external")\par
+[27]   \tab ParamList\tab    ::=   \tab Param ("," Param)*\par
+\cf1 [28]   \tab Param\tab    ::=   \tab "$" VarName \cf0 TypeDeclaration?\par
+[29]   \tab EnclosedExpr\tab    ::=   \tab "\{" Expr "\}"\par
+[30]   \tab QueryBody\tab    ::=   \tab Expr\par
+[31]   \tab Expr\tab    ::=   \tab ExprSingle ("," ExprSingle)*\par
+[32]   \tab ExprSingle\tab    ::=   \tab FLWORExpr\par
+| QuantifiedExpr\par
+| TypeswitchExpr\par
+| IfExpr\par
+| OrExpr\par
+[33]   \tab FLWORExpr\tab    ::=   \tab (ForClause | LetClause)+ WhereClause? OrderByClause? "return" ExprSingle\par
+[34]   \tab ForClause\tab    ::=   \tab <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*\par
+[35]   \tab PositionalVar\tab    ::=   \tab "at" "$" VarName\par
+[36]   \tab LetClause\tab    ::=   \tab <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*\par
+[37]   \tab WhereClause\tab    ::=   \tab "where" ExprSingle\par
+[38]   \tab OrderByClause\tab    ::=   \tab (<"order" "by"> | <"stable" "order" "by">) OrderSpecList\par
+[39]   \tab OrderSpecList\tab    ::=   \tab OrderSpec ("," OrderSpec)*\par
+[40]   \tab OrderSpec\tab    ::=   \tab ExprSingle OrderModifier\par
+[41]   \tab OrderModifier\tab    ::=   \tab ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?\par
+[42]   \tab QuantifiedExpr\tab    ::=   \tab (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle\par
+[43]   \tab TypeswitchExpr\tab    ::=   \tab <"typeswitch" "("> Expr ")" CaseClause+ "default" ("$" VarName)? "return" ExprSingle\par
+[44]   \tab CaseClause\tab    ::=   \tab "case" ("$" VarName "as")? SequenceType "return" ExprSingle\par
+[45]   \tab IfExpr\tab    ::=   \tab <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle\par
+[46]   \tab OrExpr\tab    ::=   \tab AndExpr ( "or" AndExpr )*\par
+[47]   \tab AndExpr\tab    ::=   \tab ComparisonExpr ( "and" ComparisonExpr )*\par
+[48]   \tab ComparisonExpr\tab    ::=   \tab RangeExpr ( (ValueComp\par
+| GeneralComp\par
+| NodeComp) RangeExpr )?\par
+[49]   \tab RangeExpr\tab    ::=   \tab AdditiveExpr ( "to" AdditiveExpr )?\par
+[50]   \tab AdditiveExpr\tab    ::=   \tab MultiplicativeExpr ( ("+" | "-") MultiplicativeExpr )*\par
+[51]   \tab MultiplicativeExpr\tab    ::=   \tab UnionExpr ( ("*" | "div" | "idiv" | "mod") UnionExpr )*\par
+[52]   \tab UnionExpr\tab    ::=   \tab IntersectExceptExpr ( ("union" | "|") IntersectExceptExpr )*\par
+[53]   \tab IntersectExceptExpr\tab    ::=   \tab InstanceofExpr ( ("intersect" | "except") InstanceofExpr )*\par
+[54]   \tab InstanceofExpr\tab    ::=   \tab TreatExpr ( <"instance" "of"> SequenceType )?\par
+[55]   \tab TreatExpr\tab    ::=   \tab CastableExpr ( <"treat" "as"> SequenceType )?\par
+[56]   \tab CastableExpr\tab    ::=   \tab CastExpr ( <"castable" "as"> SingleType )?\par
+[57]   \tab CastExpr\tab    ::=   \tab UnaryExpr ( <"cast" "as"> SingleType )?\par
+[58]   \tab UnaryExpr\tab    ::=   \tab ("-" | "+")* ValueExpr\par
+[59]   \tab ValueExpr\tab    ::=   \tab ValidateExpr | PathExpr | ExtensionExpr\par
+[60]   \tab GeneralComp\tab    ::=   \tab "=" | "!=" | "<" | "<=" | ">" | ">="\tab /* gn: ltXQ */\par
+[61]   \tab ValueComp\tab    ::=   \tab "eq" | "ne" | "lt" | "le" | "gt" | "ge"\par
+[62]   \tab NodeComp\tab    ::=   \tab "is" | "<<" | ">>"\par
+[63]   \tab ValidateExpr\tab    ::=   \tab (<"validate" "\{"> | (<"validate" ValidationMode> "\{")) Expr "\}"\par
+[64]   \tab ExtensionExpr\tab    ::=   \tab Pragma+ "\{" Expr? "\}"\par
+[65]   \tab Pragma\tab    ::=   \tab "(#" S? QName PragmaContents "#)"\tab /* ws: explicitXQ */\par
+[66]   \tab PragmaContents\tab    ::=   \tab (Char* - (Char* '#)' Char*))\par
+[67]   \tab PathExpr\tab    ::=   \tab ("/" RelativePathExpr?)\par
+| ("//" RelativePathExpr)\par
+| RelativePathExpr\tab /* gn: leading-lone-slashXQ */\par
+[68]   \tab RelativePathExpr\tab    ::=   \tab StepExpr (("/" | "//") StepExpr)*\par
+[69]   \tab StepExpr\tab    ::=   \tab AxisStep | FilterExpr\par
+[70]   \tab AxisStep\tab    ::=   \tab (ForwardStep | ReverseStep) PredicateList\par
+[71]   \tab ForwardStep\tab    ::=   \tab (ForwardAxis NodeTest) | AbbrevForwardStep\par
+[72]   \tab ForwardAxis\tab    ::=   \tab <"child" "::">\par
+| <"descendant" "::">\par
+| <"attribute" "::">\par
+| <"self" "::">\par
+| <"descendant-or-self" "::">\par
+| <"following-sibling" "::">\par
+| <"following" "::">\par
+[73]   \tab AbbrevForwardStep\tab    ::=   \tab "@"? NodeTest\par
+[74]   \tab ReverseStep\tab    ::=   \tab (ReverseAxis NodeTest) | AbbrevReverseStep\par
+[75]   \tab ReverseAxis\tab    ::=   \tab <"parent" "::">\par
+| <"ancestor" "::">\par
+| <"preceding-sibling" "::">\par
+| <"preceding" "::">\par
+| <"ancestor-or-self" "::">\par
+[76]   \tab AbbrevReverseStep\tab    ::=   \tab ".."\par
+[77]   \tab NodeTest\tab    ::=   \tab KindTest | NameTest\par
+[78]   \tab NameTest\tab    ::=   \tab QName | Wildcard\par
+[79]   \tab Wildcard\tab    ::=   \tab "*"\par
+| <NCName ":" "*">\par
+| <"*" ":" NCName>\tab /* ws: explicitXQ */\par
+[80]   \tab FilterExpr\tab    ::=   \tab PrimaryExpr PredicateList\par
+[81]   \tab PredicateList\tab    ::=   \tab Predicate*\par
+[82]   \tab Predicate\tab    ::=   \tab "[" Expr "]"\par
+[83]   \tab PrimaryExpr\tab    ::=   \tab Literal | VarRef | ParenthesizedExpr | ContextItemExpr | FunctionCall | Constructor | OrderedExpr | UnorderedExpr\par
+[84]   \tab Literal\tab    ::=   \tab NumericLiteral | StringLiteral\par
+[85]   \tab NumericLiteral\tab    ::=   \tab IntegerLiteral | DecimalLiteral | DoubleLiteral\par
+[86]   \tab VarRef\tab    ::=   \tab "$" VarName\par
+[87]   \tab ParenthesizedExpr\tab    ::=   \tab "(" Expr? ")"\par
+[88]   \tab ContextItemExpr\tab    ::=   \tab "."\par
+[89]   \tab OrderedExpr\tab    ::=   \tab <"ordered" "\{"> Expr "\}"\par
+[90]   \tab UnorderedExpr\tab    ::=   \tab <"unordered" "\{"> Expr "\}"\par
+[91]   \tab FunctionCall\tab    ::=   \tab <QName "("> (ExprSingle ("," ExprSingle)*)? ")"\tab /* gn: parensXQ */\par
+/* gn: reserved-function-namesXQ */\par
+[92]   \tab Constructor\tab    ::=   \tab DirectConstructor\par
+| ComputedConstructor\par
+[93]   \tab DirectConstructor\tab    ::=   \tab DirElemConstructor\par
+| DirCommentConstructor\par
+| DirPIConstructor\par
+[94]   \tab DirElemConstructor\tab    ::=   \tab "<" QName DirAttributeList ("/>" | (">" DirElemContent* "</" QName S? ">"))\tab /* ws: explicitXQ */\par
+/* gn: ltXQ */\par
+[95]   \tab DirAttributeList\tab    ::=   \tab (S (QName S? "=" S? DirAttributeValue)?)*\tab /* ws: explicitXQ */\par
+[96]   \tab DirAttributeValue\tab    ::=   \tab ('"' (EscapeQuot | QuotAttrValueContent)* '"')\par
+| ("'" (EscapeApos | AposAttrValueContent)* "'")\tab /* ws: explicitXQ */\par
+[97]   \tab QuotAttrValueContent\tab    ::=   \tab QuotAttrContentChar\par
+| CommonContent\par
+[98]   \tab AposAttrValueContent\tab    ::=   \tab AposAttrContentChar\par
+| CommonContent\par
+[99]   \tab DirElemContent\tab    ::=   \tab DirectConstructor\par
+| ElementContentChar\par
+| CDataSection\par
+| CommonContent\par
+[100]   \tab CommonContent\tab    ::=   \tab PredefinedEntityRef | CharRef | "\{\{" | "\}\}" | EnclosedExpr\par
+[101]   \tab DirCommentConstructor\tab    ::=   \tab "<!--" DirCommentContents "-->"\tab /* ws: explicitXQ */\par
+[102]   \tab DirCommentContents\tab    ::=   \tab ((Char - '-') | <'-' (Char - '-')>)*\tab /* ws: explicitXQ */\par
+[103]   \tab DirPIConstructor\tab    ::=   \tab "<?" PITarget (S DirPIContents)? "?>"\tab /* ws: explicitXQ */\par
+[104]   \tab DirPIContents\tab    ::=   \tab (Char* - (Char* '?>' Char*))\tab /* ws: explicitXQ */\par
+[105]   \tab CDataSection\tab    ::=   \tab "<![CDATA[" CDataSectionContents "]]>"\tab /* ws: explicitXQ */\par
+[106]   \tab CDataSectionContents\tab    ::=   \tab (Char* - (Char* ']]>' Char*))\tab /* ws: explicitXQ */\par
+[107]   \tab ComputedConstructor\tab    ::=   \tab CompDocConstructor\par
+| CompElemConstructor\par
+| CompAttrConstructor\par
+| CompTextConstructor\par
+| CompCommentConstructor\par
+| CompPIConstructor\par
+[108]   \tab CompDocConstructor\tab    ::=   \tab <"document" "\{"> Expr "\}"\par
+[109]   \tab CompElemConstructor\tab    ::=   \tab (<"element" QName "\{"> | (<"element" "\{"> Expr "\}" "\{")) ContentExpr? "\}"\par
+[110]   \tab ContentExpr\tab    ::=   \tab Expr\par
+[111]   \tab CompAttrConstructor\tab    ::=   \tab (<"attribute" QName "\{"> | (<"attribute" "\{"> Expr "\}" "\{")) Expr? "\}"\par
+[112]   \tab CompTextConstructor\tab    ::=   \tab <"text" "\{"> Expr "\}"\par
+[113]   \tab CompCommentConstructor\tab    ::=   \tab <"comment" "\{"> Expr "\}"\par
+[114]   \tab CompPIConstructor\tab    ::=   \tab (<"processing-instruction" NCName "\{"> | (<"processing-instruction" "\{"> Expr "\}" "\{")) Expr? "\}"\par
+[115]   \tab SingleType\tab    ::=   \tab AtomicType "?"?\par
+\cf1 [116]   \tab TypeDeclaration\tab    ::=   \tab "as" SequenceType\cf0\par
+\cf1 [117]   \tab SequenceType\tab    ::=   \tab (ItemType OccurrenceIndicator?)\par
+| <"void" "(" ")">\cf0\par
+\cf1 [118]   \tab OccurrenceIndicator\tab    ::=   \tab "?" | "*" | "+"\tab /* gn: occurrence-indicatorsXQ */\cf0\par
+\cf1 [119]   \tab ItemType\tab    ::=   \tab AtomicType | KindTest | <"item" "(" ")">\cf0\par
+\cf1 [120]   \tab AtomicType\tab    ::=   \tab QName\cf0\par
+\cf1 [121]   \tab KindTest\tab    ::=   \tab DocumentTest\par
+| ElementTest\par
+| AttributeTest\par
+| SchemaElementTest\par
+| SchemaAttributeTest\par
+| PITest\par
+| CommentTest\par
+| TextTest\par
+| AnyKindTest\cf0\par
+\cf1 [122]   \tab AnyKindTest\tab    ::=   \tab <"node" "("> ")"\cf0\par
+\cf1 [123]   \tab DocumentTest\tab    ::=   \tab <"document-node" "("> (ElementTest | SchemaElementTest)? ")"\cf0\par
+\cf1 [124]   \tab TextTest\tab    ::=   \tab <"text" "("> ")"\cf0\par
+\cf1 [125]   \tab CommentTest\tab    ::=   \tab <"comment" "("> ")"\cf0\par
+\cf1 [126]   \tab PITest\tab    ::=   \tab <"processing-instruction" "("> (NCName | StringLiteral)? ")"\cf0\par
+\cf1 [127]   \tab AttributeTest\tab    ::=   \tab <"attribute" "("> (AttribNameOrWildcard ("," TypeName)?)? ")"\par
+[128]   \tab AttribNameOrWildcard\tab    ::=   \tab AttributeName | "*"\cf0\par
+\cf1 [129]   \tab SchemaAttributeTest\tab    ::=   \tab <"schema-attribute" "("> AttributeDeclaration ")"\cf0\par
+\cf1 [130]   \tab AttributeDeclaration\tab    ::=   \tab AttributeName\par
+[131]   \tab ElementTest\tab    ::=   \tab <"element" "("> (ElementNameOrWildcard ("," TypeName "?"?)?)? ")"\par
+[132]   \tab ElementNameOrWildcard\tab    ::=   \tab ElementName | "*"\cf0\par
+\cf1 [133]   \tab SchemaElementTest\tab    ::=   \tab <"schema-element" "("> ElementDeclaration ")"\par
+[134]   \tab ElementDeclaration\tab    ::=   \tab ElementName\par
+[135]   \tab AttributeName\tab    ::=   \tab QName\par
+[136]   \tab ElementName\tab    ::=   \tab QName\par
+[137]   \tab TypeName\tab    ::=   \tab QName\cf0\par
+\cf1 [138]   \tab IntegerLiteral\tab    ::=   \tab Digits\par
+[139]   \tab DecimalLiteral\tab    ::=   \tab ("." Digits) | (Digits "." [0-9]*)\tab /* ws: explicitXQ */\par
+[140]   \tab DoubleLiteral\tab    ::=   \tab (("." Digits) | (Digits ("." [0-9]*)?)) [eE] [+-]? Digits\tab /* ws: explicitXQ */\cf0\par
+\cf1 [141]   \tab URILiteral\tab    ::=   \tab StringLiteral\cf0\par
+[142]   \tab StringLiteral\tab    ::=   \tab ('"' (PredefinedEntityRef | CharRef | ('"' '"') | [^"&])* '"') | ("'" (PredefinedEntityRef | CharRef | ("'" "'") | [^'&])* "'")\tab /* ws: explicitXQ */\par
+[143]   \tab PITarget\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-PITarget]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-PITarget]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
+\cf1 [144]   \tab VarName\tab    ::=   \tab QName\cf0\par
+\pard\sl276\slmult1 [145]   \tab ValidationMode\tab    ::=   \tab "lax" | "strict"\par
+\pard\sl240\slmult1\cf1 [146]   \tab Digits\tab    ::=   \tab [0-9]+\cf0\par
+[147]   \tab PredefinedEntityRef\tab    ::=   \tab "&" ("lt" | "gt" | "amp" | "quot" | "apos") ";"\tab /* ws: explicitXQ */\par
+[148]   \tab CharRef\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-CharRef]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-CharRef]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
+\cf1 [149]   \tab EscapeQuot\tab    ::=   \tab '""'\par
+[150]   \tab EscapeApos\tab    ::=   \tab "''"\cf0\par
+[151]   \tab ElementContentChar\tab    ::=   \tab Char - [\{\}<&]\par
+[152]   \tab QuotAttrContentChar\tab    ::=   \tab Char - ["\{\}<&]\par
+[153]   \tab AposAttrContentChar\tab    ::=   \tab Char - ['\{\}<&]\par
+\cf1 [154]   \tab Comment\tab    ::=   \tab "(:" (CommentContents | Comment)* ":)"\tab /* ws: explicitXQ */\par
+/* gn: commentsXQ */\par
+[155]   \tab CommentContents\tab    ::=   \tab (Char+ - (Char* ':)' Char*))\cf0\par
+\cf1 [156]   \tab QName\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-QName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-QName]Names}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
+[157]   \tab NCName\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
+[158]   \tab S\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-S]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-S]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
+\pard\ri-1352\sl240\slmult1 [159]   \tab Char\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-Char]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-Char]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\cf0\par
+}
+ 

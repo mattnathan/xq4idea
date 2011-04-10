@@ -81,6 +81,37 @@ import com.intellij.psi.tree.IElementType;
 %s _AS_AorE__
 %s _AS_SELEM
 
+// FLWOR states
+%s _EXPR_SINGLE
+
+// allows for or let repeating, as soon as return, where or order are seen we trasition to body
+%s _FLWOR_HEAD
+%s _FLWOR_BODY1
+%s _FLWOR_BODY2
+%s _FLWOR_BODY3
+
+%s _FOR_CLAUSE
+%s _FOR_CLAUSE_
+%s _FOR_CLAUSE_VAR
+%s _FOR_CLAUSE_VAR_POS
+%s _FOR_CLAUSE_VAR_POS_
+%s _FOR_CLAUSE_VAR_IN
+
+%s _LET_CLAUSE
+%s _LET_CLAUSE_
+%s _LET_CLAUSE_VAR
+
+%s _WHERE_CLAUSE
+
+%s _ORDER_CLAUSE
+%s _ORDER_CLAUSE_BY
+%s _ORDER_CLAUSE_LIST
+%s _ORDER_CLAUSE_MODIFIER
+%s _ORDER_CLAUSE_MODIFIER_EMPTY
+%s _ORDER_CLAUSE_MODIFIER_EMPTY_
+%s _ORDER_CLAUSE_MODIFIER_COLLATION
+%s _STABLE_ORDER_CLAUSE
+
 %s _EMPTY_BRACES
 %s _EMPTY_BRACES_
 %s _OPEN_BRACE
@@ -233,7 +264,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // declare variable...
 <_DECLARE_VARIABLE> {
-  ":=" {popState(); return OP_ASSIGN;}
+  ":=" { yybegin(_EXPR_SINGLE); return OP_ASSIGN;}
   "external" {popState(); return KW_EXTERNAL;}
 }
 
@@ -315,6 +346,101 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
 
+// ExprSingle
+<_EXPR_SINGLE> {
+  "for" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_FOR_CLAUSE); }
+  "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
+}
+
+<_FLWOR_HEAD> {
+  "for" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_FOR_CLAUSE); }
+  "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
+}
+<_FLWOR_BODY1, _FLWOR_BODY2, _FLWOR_BODY3, _FLWOR_HEAD> {
+  "where" {pushState(_FLWOR_BODY2); yypushback(yylength()); yybegin(_WHERE_CLAUSE); }
+}
+<_FLWOR_BODY2, _FLWOR_BODY3, _FLWOR_HEAD> {
+  "order" {pushState(_FLWOR_BODY3); yypushback(yylength()); yybegin(_ORDER_CLAUSE); }
+  "stable" {pushState(_FLWOR_BODY3); yypushback(yylength()); yybegin(_ORDER_CLAUSE); }
+}
+<_FLWOR_BODY3, _FLWOR_HEAD> {
+  "return" {yybegin(_EXPR_SINGLE); return KW_RETURN;}
+}
+
+// ForClause := <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle
+//              ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*
+<_FOR_CLAUSE> {
+  "for" { yybegin(_FOR_CLAUSE_VAR); return KW_FOR; }
+}
+<_FOR_CLAUSE_> {
+  "," {yybegin(_FOR_CLAUSE); return OP_COMMA; }
+  {_NS} {yypushback(1); popState(); }
+}
+<_FOR_CLAUSE_VAR> {
+  "$" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); yypushback(1); yybegin(_PARAM); }
+}
+<_FOR_CLAUSE_VAR_POS> {
+  "at" { yybegin(_FOR_CLAUSE_VAR_POS_); return KW_AT; }
+  {_NS} { yypushback(1); popState(); }
+}
+<_FOR_CLAUSE_VAR_POS_> {
+  "$" {yybegin(_QNAME); return OP_VARSTART; }
+}
+<_FOR_CLAUSE_VAR_IN> {
+  "in" { yybegin(_EXPR_SINGLE); return KW_IN;}
+}
+
+// LetClause := <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*
+<_LET_CLAUSE> {
+  "let" {pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return KW_LET;}
+}
+<_LET_CLAUSE_> {
+  "," { pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return OP_COMMA;}
+  {_NS} {yypushback(1); popState(); }
+}
+<_LET_CLAUSE_VAR> {
+  ":=" { yybegin(_EXPR_SINGLE); return OP_ASSIGN;}
+}
+
+// WhereClause := "where" ExprSingle
+<_WHERE_CLAUSE> {
+  "where" {yybegin(_EXPR_SINGLE); return KW_WHERE; }
+}
+
+// OrderByClause := (<"order" "by"> | <"stable" "order" "by">) OrderSpecList
+// OrderSpecList := OrderSpec ("," OrderSpec)*
+// OrderSpec     := ExprSingle OrderModifier
+// OrderModifier := ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?
+<_STABLE_ORDER_CLAUSE> {
+  "stable" {yybegin(_ORDER_CLAUSE); return KW_STABLE; }
+}
+<_ORDER_CLAUSE> {
+  "order" {yybegin(_ORDER_CLAUSE_BY); return KW_ORDER; }
+}
+<_ORDER_CLAUSE_BY> {
+  "by" { pushState(_ORDER_CLAUSE_LIST); pushState(_ORDER_CLAUSE_MODIFIER); yybegin(_EXPR_SINGLE); return KW_BY; }
+}
+<_ORDER_CLAUSE_LIST> {
+  "," { pushState(_ORDER_CLAUSE_LIST); pushState(_ORDER_CLAUSE_MODIFIER); yybegin(_EXPR_SINGLE); return OP_COMMA; }
+  {_NS} {yypushback(1); popState(); }
+}
+<_ORDER_CLAUSE_MODIFIER> {
+  "ascending" { return KW_ASCENDING; }
+  "descending" { return KW_DESCENDING; }
+  {_NS} {yypushback(1); yybegin(_ORDER_CLAUSE_MODIFIER_EMPTY); }
+}
+<_ORDER_CLAUSE_MODIFIER_EMPTY> {
+  "empty" {yybegin(_ORDER_CLAUSE_MODIFIER_EMPTY_); return KW_EMPTY; }
+  {_NS} {yypushback(1); yybegin(_ORDER_CLAUSE_MODIFIER_COLLATION); }
+}
+<_ORDER_CLAUSE_MODIFIER_EMPTY_> {
+  "greatest" {yybegin(_ORDER_CLAUSE_MODIFIER_COLLATION); return KW_GREATEST; }
+  "least" {yybegin(_ORDER_CLAUSE_MODIFIER_COLLATION); return KW_LEAST; }
+}
+<_ORDER_CLAUSE_MODIFIER_COLLATION> {
+  "collation" {yybegin(_URILITERAL); return KW_COLLATION; }
+  {_NS} {yypushback(1); popState(); }
+}
 
 // common formats
 <_OPEN_BRACE> {

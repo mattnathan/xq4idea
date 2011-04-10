@@ -85,9 +85,18 @@ public interface XQueryTokenTypes {
   IElementType KW_NODE = new XQueryElementType("NODE");
   IElementType KW_TEXT = new XQueryElementType("TEXT");
   IElementType KW_COMMENT = new XQueryElementType("COMMENT");
-  IElementType KW_DOCUMENT_NODE = new XQueryElementType("COMMENT");
-  IElementType KW_PROCESSING_INSTRUCTION = new XQueryElementType("COMMENT");
-  IElementType KW_ATTRIBUTE = new XQueryElementType("COMMENT");
-  IElementType KW_SCHEMA_ATTRIBUTE = new XQueryElementType("COMMENT");
-  IElementType KW_SCHEMA_ELEMENT = new XQueryElementType("COMMENT");
+  IElementType KW_DOCUMENT_NODE = new XQueryElementType("DOCUMENT_NODE");
+  IElementType KW_PROCESSING_INSTRUCTION = new XQueryElementType("PROCESSING_INSTRUCTION");
+  IElementType KW_ATTRIBUTE = new XQueryElementType("ATTRIBUTE");
+  IElementType KW_SCHEMA_ATTRIBUTE = new XQueryElementType("SCHEMA_ATTRIBUTE");
+  IElementType KW_SCHEMA_ELEMENT = new XQueryElementType("SCHEMA_ELEMENT");
+  IElementType KW_FOR = new XQueryElementType("FOR");
+  IElementType KW_LET = new XQueryElementType("LET");
+  IElementType KW_IN = new XQueryElementType("IN");
+  IElementType KW_WHERE = new XQueryElementType("WHERE");
+  IElementType KW_RETURN = new XQueryElementType("RETURN");
+  IElementType KW_STABLE = new XQueryElementType("STABLE");
+  IElementType KW_BY = new XQueryElementType("BY");
+  IElementType KW_ASCENDING = new XQueryElementType("ASCENDING");
+  IElementType KW_DESCENDING = new XQueryElementType("DESCENDING");
 }

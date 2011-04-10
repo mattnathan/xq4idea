@@ -44,7 +44,11 @@ declare default function namespace "http://function.com/";
 declare default element namespace "http://function.com/";
 
 declare variable $var external;
-declare variable $var := ;
+declare variable $var :=
+    let $var as void() :=
+    for $var as void() at $var in ;
+declare variable $var :=
+    for $var in ;
 declare variable $var as void() := ;
 declare variable $var as void() external ;
 declare variable $var as item() external ;
