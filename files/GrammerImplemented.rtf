@@ -103,17 +103,17 @@
 [80]   \tab FilterExpr\tab    ::=   \tab PrimaryExpr PredicateList\par
 [81]   \tab PredicateList\tab    ::=   \tab Predicate*\par
 [82]   \tab Predicate\tab    ::=   \tab "[" Expr "]"\par
-[83]   \tab PrimaryExpr\tab    ::=   \tab\cf1 Literal | VarRef | \cf0 ParenthesizedExpr | ContextItemExpr | FunctionCall | Constructor | OrderedExpr | UnorderedExpr\par
-\cf1 [84]   \tab Literal\tab    ::=   \tab NumericLiteral | StringLiteral\cf0\par
+[83]   \tab PrimaryExpr\tab    ::=   \tab\cf1 Literal | VarRef | ParenthesizedExpr | ContextItemExpr | FunctionCall\cf0  | Constructor |\cf1  OrderedExpr | UnorderedExpr\par
+[84]   \tab Literal\tab    ::=   \tab NumericLiteral | StringLiteral\cf0\par
 \cf1 [85]   \tab NumericLiteral\tab    ::=   \tab IntegerLiteral | DecimalLiteral | DoubleLiteral\cf0\par
 \cf1 [86]   \tab VarRef\tab    ::=   \tab "$" VarName\cf0\par
-[87]   \tab ParenthesizedExpr\tab    ::=   \tab "(" Expr? ")"\par
+\cf1 [87]   \tab ParenthesizedExpr\tab    ::=   \tab "(" Expr? ")"\par
 [88]   \tab ContextItemExpr\tab    ::=   \tab "."\par
 [89]   \tab OrderedExpr\tab    ::=   \tab <"ordered" "\{"> Expr "\}"\par
 [90]   \tab UnorderedExpr\tab    ::=   \tab <"unordered" "\{"> Expr "\}"\par
 [91]   \tab FunctionCall\tab    ::=   \tab <QName "("> (ExprSingle ("," ExprSingle)*)? ")"\tab /* gn: parensXQ */\par
 /* gn: reserved-function-namesXQ */\par
-[92]   \tab Constructor\tab    ::=   \tab DirectConstructor\par
+\cf0 [92]   \tab Constructor\tab    ::=   \tab DirectConstructor\par
 | ComputedConstructor\par
 [93]   \tab DirectConstructor\tab    ::=   \tab DirElemConstructor\par
 | DirCommentConstructor\par
@@ -190,8 +190,8 @@
 [142]   \tab StringLiteral\tab    ::=   \tab ('"' (PredefinedEntityRef | CharRef | ('"' '"') | [^"&])* '"') | ("'" (PredefinedEntityRef | CharRef | ("'" "'") | [^'&])* "'")\tab /* ws: explicitXQ */\par
 [143]   \tab PITarget\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-PITarget]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-PITarget]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
 \cf1 [144]   \tab VarName\tab    ::=   \tab QName\cf0\par
-\pard\sl276\slmult1 [145]   \tab ValidationMode\tab    ::=   \tab "lax" | "strict"\par
-\pard\sl240\slmult1\cf1 [146]   \tab Digits\tab    ::=   \tab [0-9]+\cf0\par
+\pard\sl276\slmult1\cf1 [145]   \tab ValidationMode\tab    ::=   \tab "lax" | "strict"\par
+\pard\sl240\slmult1 [146]   \tab Digits\tab    ::=   \tab [0-9]+\cf0\par
 [147]   \tab PredefinedEntityRef\tab    ::=   \tab "&" ("lt" | "gt" | "amp" | "quot" | "apos") ";"\tab /* ws: explicitXQ */\par
 [148]   \tab CharRef\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-CharRef]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-CharRef]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
 \cf1 [149]   \tab EscapeQuot\tab    ::=   \tab '""'\par

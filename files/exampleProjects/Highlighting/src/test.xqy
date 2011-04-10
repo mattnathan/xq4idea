@@ -119,14 +119,19 @@ declare variable $var :=
         case my:something return ""
         default return "";
 
-declare variable $var := -+2;
+declare variable $var := -+2[""][2];
 declare variable $var := validate {2};
 declare variable $var := validate lax {2};
 declare variable $var := validate strict {2};
 declare variable $var := .;
 declare variable $var := ("hello");
 
+declare variable $var := $local:dun;
 declare variable $var := local:func(3, 2);
+declare variable $var := local:func(3, 2);
+declare variable $var := local:func(3, 2);
+declare variable $var := local:func(3, 2);
+
 
 12.2e2234
 

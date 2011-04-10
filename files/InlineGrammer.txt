@@ -1,0 +1,192 @@
+
+[1]     Module	                      ::=  VersionDecl? (PrologExpr | LibraryModule)
+[2]     VersionDecl	                  ::=  <"xquery" "version"> StringLiteral ("encoding" StringLiteral)? Separator
+[4]     LibraryModule	                ::=  ModuleDecl Prolog
+[5]     ModuleDecl	                  ::=  <"module" "namespace"> NCName "=" URILiteral Separator
+[6]     Prolog	                      ::=  ((Setter | SchemaImport |  ModuleImport | NamespaceDecl | DefaultNamespaceDecl) Separator)* ((VarDecl | FunctionDecl | OptionDecl) Separator)*
+[7]     Setter	                      ::=  BoundarySpaceDecl 
+                                        |  DefaultCollationDecl 
+                                        |  BaseURIDecl 
+                                        |  ConstructionDecl 
+                                        |  OrderingModeDecl 
+                                        |  EmptyOrderDecl 
+                                        |  CopyNamespacesDecl
+[9]     Separator	                    ::=  ";"
+[10]    NamespaceDecl	                ::=  <"declare" "namespace"> NCName "=" URILiteral
+[11]    BoundarySpaceDecl	            ::=  <"declare" "boundary-space"> ("preserve" | "strip")
+[12]    DefaultNamespaceDecl	        ::=  (<"declare" "default" "element"> | <"declare" "default" "function">) "namespace" URILiteral
+[13]    OptionDecl	                  ::=  <"declare" "option"> QName StringLiteral
+[14]    OrderingModeDecl	            ::=  <"declare" "ordering"> ("ordered" | "unordered")
+[15]    EmptyOrderDecl	              ::=  <"declare" "default" "order"> (<"empty" "greatest"> | <"empty" "least">)
+[16]    CopyNamespacesDecl	          ::=  <"declare " "copy-namespaces"> ("preserve" | "no-preserve") "," ("inherit" | "no-inherit")
+[19]    DefaultCollationDecl	        ::=  <"declare" "de fault" "collation"> URILiteral
+[20]    BaseURIDecl	                  ::=  <"declare" "bas e-uri"> URILiteral
+[21]    SchemaImport	                ::=  <"import" "schema"> SchemaPrefix? URILiteral (<"at" URILiteral> ("," URILiteral)*)?
+[22]    SchemaPrefix	                ::=  ("namespace" NCName "=") 
+                                        | (<"default" "element"> "namespace")
+[23]    ModuleImport	                ::=  <"import" "module" > ("namespace" NCName "=")? URILiteral (<"at" URILiteral> ("," URILiteral)*)?
+[24]    VarDecl	                      ::=  <"declare" "variable" "$"> QName TypeDeclaration? ((":=" ExprSingle) | "external")
+[25]    ConstructionDecl	            ::=  <"declare" "construction"> ("preserve" | "strip")
+[26]    FunctionDecl	                ::=  <"declare" "function"> <QName "("> ParamList? (")" | (<")" "as"> SequenceType)) (EnclosedExpr | "external")
+[27]    ParamList	                    ::=  Param ("," Param)*
+[28]    Param	                        ::=  "$" QName TypeDeclaration?
+[29]    EnclosedExpr	                ::=  "{" Expr "}"
+[31]    Expr	                        ::=  ExprSingle ("," ExprSingle)*
+[32]    ExprSingle	                  ::=  FLWORExpr
+                                        |  QuantifiedExpr
+                                        |  TypeswitchExpr
+                                        |  IfExpr
+                                        |  OrExpr
+[33]    FLWORExpr	                    ::=  (   (<"for" "$"> QName TypeDeclaration? PositionalVar? "in" ExprSingle
+                                                 ("," Param PositionalVar? "in" ExprSingle)*)
+                                             | (<"let" "$"> QName TypeDeclaration? ":=" ExprSingle
+                                                 ("," Param ":=" ExprSingle)*)+ )
+                                           ( "where" ExprSingle )?
+                                           ( (<"order" "by">
+                                             | <"stable" "order" "by">) OrderSpecList )?
+                                           "return"  ExprSingle
+[35]    PositionalVar	                ::=  "at" "$" QName
+[39]    OrderSpecList	                ::=  OrderSpec ("," OrderSpec)*
+[40]    OrderSpec	                    ::=  ExprSingle OrderModifier
+[41]    OrderModifier	                ::=  ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?
+[42]    QuantifiedExpr	              ::=  (<"some" "$"> | <"every" "$">) QName TypeDeclaration? "in" ExprSingle ("," "$" QName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle
+[43]    TypeswitchExpr	              ::=  <"typeswitch" "("> Expr ")" CaseClause+ "default" ("$" QName)? "return" ExprSingle
+[44]    CaseClause	                  ::=  "case" ("$" QName "as")? SequenceType "return" ExprSingle
+[45]    IfExpr	                      ::=  <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle
+[46]    OrExpr	                      ::=  AndExpr ( "or" AndExpr )*
+[47]    AndExpr	                      ::=  ComparisonExpr ( "and" ComparisonExpr )*
+[48]    ComparisonExpr	              ::=  RangeExpr ( ComparisonComp RangeExpr )?
+[49]    RangeExpr	                    ::=  AdditiveExpr ( "to" AdditiveExpr )?
+[50]    AdditiveExpr	                ::=  MultiplicativeExpr ( ("+" | "-") MultiplicativeExpr )*
+[51]    MultiplicativeExpr	          ::=  UnionExpr ( ("*" | "div" | "idiv" | "mod") UnionExpr )*
+[52]    UnionExpr	                    ::=  IntersectExceptExpr ( ("union" | "|") IntersectExceptExpr )*
+[53]    IntersectExceptExpr	          ::=  InstanceofExpr ( ("intersect" | "except") InstanceofExpr )*
+[54]    InstanceofExpr	              ::=  ("-" | "+")* (
+                                                 <"validate" "{"> Expr "}"
+                                              |  <"validate" ("lax" | "strict")> "{" Expr "}"
+                                              |  ("/" RelativePathExpr?)
+                                              |  ("//" RelativePathExpr)
+                                              |  RelativePathExpr
+                                              |  Pragma+ "{" Expr? "}"
+                                           )
+                                           ( <"cast" "as"> SingleType )?
+                                           ( <"castable" "as"> SingleType )?
+                                           ( <"treat" "as"> SequenceType )?
+                                           ( <"instance" "of"> SequenceType )?
+[59]    ValueExpr	                    ::=
+[x60]   ComparisonComp                ::=  "=" | "!=" | "<" | "<=" | ">" | ">=" | "eq" | "ne" | "lt" | "le" | "gt" | "ge" | "is" | "<<" | ">>"
+[65]    Pragma	                      ::=  "(#" S? QName PragmaContents "#)"                                            /* ws: explicitXQ */
+[66]    PragmaContents	              ::=  (Char* - (Char* '#)' Char*))
+[68]    RelativePathExpr	            ::=  StepExpr (("/" | "//") StepExpr)*
+[69]    StepExpr	                    ::=  StepExprImpl PredicateList
+[x69]   StepExprImpl                  ::=  AxisStep NodeTest
+                                        |  IntegerLiteral
+                                        |  DecimalLiteral
+                                        |  DoubleLiteral
+                                        |   StringLiteral
+                                        |  "$" QName
+                                        |  "(" Expr? ")"
+                                        |  "."
+                                        |  <QName "("> (ExprSingle ("," ExprSingle)*)? ")"                              /* gn: parensXQ */
+                                        |  "<" QName DirAttributeList ("/>" | (">" DirElemContent* "</" QName S? ">"))
+                                        |  "<!--" DirCommentContents "-->"
+                                        |  "<?" PITarget (S DirPIContents)? "?>"                                        /* ws: explicitXQ */
+                                        |  <"document" "{"> Expr "}"
+                                        |  (<"element" Q Name "{"> | (<"element" "{"> Expr "}" "{")) Expr? "}"
+                                        |  (<"attribute" QName "{"> | (<"attribute" "{"> Expr "}" "{")) Expr? "}"
+                                        |  <"text" "{"> Expr "}"
+                                        |  <"comment" "{"> Expr "}"
+                                        |  (<"processing-instruction" NCName "{"> | (<"processing-instruction" "{"> Expr "} " "{")) Expr? "}"
+                                        |  <"ordered" "{"> Expr "}"
+                                        |  <"unordered" "{"> Expr "}"
+                                        |  "@"? NoteTest
+                                        |  ".."
+[70]    AxisStep                      ::=  <"child" "::">
+                                        |  <"descendant" "::">
+                                        |  <"attribute" "::">
+                                        |  <"self" "::">
+                                        |  <"descendant-or-self" "::">
+                                        |  <"following-sibling" "::">
+                                        |  <"following" "::">
+                                        |  <"parent" "::">
+                                        |  <"ancestor" "::">
+                                        |  <"preceding-sibling" "::">
+                                        |  <"preceding" "::">
+                                        |  <"ancestor-or-self" "::">
+[77]    NodeTest	                    ::=  <"document-node" "("> (ElementTest | SchemaElementTest)? ")"
+                                        |  ElementTest
+                                        |  <"attribute" "("> ((QName | "*") ("," QName)?)? ")"
+                                        |  SchemaElementTest
+                                        |  <"schema-attribute" "("> QName ")"
+                                        |  <"processing-instruction" "("> (NCName | StringLiteral)? ")"
+                                        |  <"comment" "("> ")"
+                                        |  <"text" "("> ")"
+                                        |  <"node" "("> ")"
+                                        |  QName
+                                        |  "*"
+                                        |  <NCName ":" "*">
+                                        |  <"*" ":" NCName>                                                             /* ws: explicitXQ */
+[81]    PredicateList	                ::=  ( "[" Expr "]" )*
+[95]    DirAttributeList	            ::=  (S (QName S? "=" S? DirAttributeValue)?)*                                    /* ws: explicitXQ */
+[96]    DirAttributeValue	            ::=  ('"' (EscapeQuot | QuotAttrValueContent)* '"')
+                                        |  ("'" (EscapeApos | AposAttrValueContent)* "'")                               /* ws: explicitXQ */
+[97]    QuotAttrValueContent	        ::=  QuotAttrCo ntentChar
+                                        |  CommonContent
+[98]    AposAttrValueContent	        ::=  AposAttrContentChar
+                                        |  CommonContent
+[99]    DirElemContent	              ::=  "<" QName DirAttributeList ("/>" | (">" DirElemContent* "</" QName S? ">"))
+                                        |  "<!--" DirCommentContents "-->"                                              /* ws: explicitXQ */
+                                        |  "<?" PITarget (S DirPIContents)? "?>"                                        /* ws: explicitXQ */
+                                        |  Elem entContentChar
+                                        |  CDataSection
+                                        |  CommonContent
+[100]   CommonContent	                ::=  PredefinedEntityRef | CharRef | "{{" | "}}" | EnclosedExpr
+[102]   DirCommentContents	          ::=  ((Char - '-') | <'-' (Char - '-')>)*                                         /* ws: explicitXQ */
+[104]   DirPIContents	                ::=  (Char* - (Char* '?>' Char*))                                                 /* ws: explicitXQ */
+[105]   CDataSection	                ::=  "<![CDATA[" CDataSectionContents "]]>"                                       /* ws: explicitXQ */
+[106]   CDataSectionContents	        ::=  (Char* - (Char* ']]>' Char*))                                                /* ws: explicitXQ */
+[107]   ComputedConstructor	          ::=  <"document" "{"> Expr "}"
+                                        |  (<"element" Q Name "{"> | (<"element" "{"> Expr "}" "{")) Expr? "}"
+                                        |  (<"attribute" QName "{"> | (<"attribute" "{"> Expr "}" "{")) Expr? "}"
+                                        |  <"text" "{"> Expr "}"
+                                        |  <"comment" "{"> Expr "}"
+                                        |  (<"processing-instruction" NCName "{"> | (<"processing-instruction" "{"> Expr "} " "{")) Expr? "}"
+[115]   SingleType	                  ::=  QName "?"?
+[116]   TypeDeclaration	              ::=  "as" SequenceType
+[117]   SequenceType	                ::=  (ItemType ("?" | "*" | "+")?)
+                                        |  <"void" "(" ")">
+[119]   ItemType	                    ::=  QName
+                                        |  <"document-node" "("> (ElementTest | SchemaElementTest)? ")"
+                                        |  ElementTest
+                                        |  <"attribute" "("> ((QName | "*") ("," QName)?)? ")"
+                                        |  SchemaElementTest
+                                        |  <"schema-attribute" "("> QName ")"
+                                        |  <"processing-instruction" "("> (NCName | StringLiteral)? ")"
+                                        |  <"comment" "("> ")"
+                                        |  <"text" "("> ")"
+                                        |  <"node" "("> ")"
+                                        |  <"item" "(" ")">
+[131]   ElementTest	                  ::=  <"element" "("> ((QName | "*") ("," QName "?"?)?)? ")"
+[133]   SchemaElementTest	            ::=  <"schema-element" "("> QName ")"
+
+[138]   IntegerLiteral	              ::=  Digits
+[139]   DecimalLiteral	              ::=  ("." Digits) | (Digits "." [0-9]*)                                           /* ws: explicitXQ */
+[140]   DoubleLiteral	                ::=  (("." Digits) | (Digits ("." [0-9]*)?)) [eE] [+-]? Digits                    /* ws: explicitXQ */
+[141]   URILiteral	                  ::=  StringLiteral
+[142]   StringLiteral	                ::=  ('"' (PredefinedEntityRef | CharRef | ('"' '"') | [^"&])* '"') | ("'" (PredefinedEntityRef | CharRef | ("'" "'") | [^'&])* "'")	/* ws: explicitXQ */
+[143]   PITarget	                    ::=  [http://www.w3.org/TR/REC-xml#NT-PITarget]XML                                /* gn: xml-versionXQ */
+[146]   Digits	                      ::=  [0-9]+
+[147]   PredefinedEntityRef	          ::=  "&" ("lt" | "gt" | "amp" | "quot" | "apos") ";"	/* ws: explicitXQ */
+[148]   CharRef	                      ::=  [http://www.w3.org/TR/REC-xml#NT-CharRef]XML	/* gn: xml-versionXQ */
+[149]   EscapeQuot	                  ::=  '""'
+[150]   EscapeApos	                  ::=  "''"
+[151]   ElementContentChar	          ::=  Char - [{}<&]
+[152]   QuotAttrContentChar	          ::=  Char - ["{}<&]
+[153]   AposAttrContentChar	          ::=  Char - ['{}<&]
+[154]   Comment	                      ::=  "(:" (CommentContents | Comment)* ":)"	/* ws: explicitXQ */
+/* gn: commentsXQ */
+[155]   CommentContents	              ::=  (Char+ - (Char* ':)' Char*))
+[156]   QName	                        ::=  [http://www.w3.org/TR/REC-xml-names/#NT-QName]Names	/* gn: xml-versionXQ */
+[157]   NCName	                      ::=  [http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names	/* gn: xml-versionXQ */
+[158]   S	                            ::=  [http://www.w3.org/TR/REC-xml#NT-S]XML	/* gn: xml-versionXQ */
+[159]   Char	                        ::=  [http://www.w3.org/TR/REC-xml#NT-Char]XML	/* gn: xml-versionXQ */

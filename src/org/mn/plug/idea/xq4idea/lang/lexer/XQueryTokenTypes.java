@@ -22,12 +22,18 @@ public interface XQueryTokenTypes {
   IElementType OP_RBRACE = new XQueryElementType(")");
   IElementType OP_LCURLY = new XQueryElementType("{");
   IElementType OP_RCURLY = new XQueryElementType("}");
+  IElementType OP_LSQUARE = new XQueryElementType("[");
+  IElementType OP_RSQUARE = new XQueryElementType("]");
   IElementType OP_ASSIGN = new XQueryElementType(":=");
   IElementType OP_QUESTION = new XQueryElementType("?");
   IElementType OP_STAR = new XQueryElementType("*");
   IElementType OP_PLUS = new XQueryElementType("+");
   IElementType OP_MINUS = new XQueryElementType("-");
   IElementType OP_DOT = new XQueryElementType(".");
+  IElementType OP_SLASH = new XQueryElementType("/");
+  IElementType OP_SLASHSLASH = new XQueryElementType("//");
+  IElementType OP_COLONCOLON = new XQueryElementType("::");
+  IElementType OP_AT = new XQueryElementType("@");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
@@ -114,4 +120,16 @@ public interface XQueryTokenTypes {
   IElementType KW_VALIDATE = new XQueryElementType("VALIDATE");
   IElementType KW_LAX = new XQueryElementType("LAX");
   IElementType KW_STRICT = new XQueryElementType("STRICT");
+  IElementType KW_CHILD = new XQueryElementType("CHILD");
+  IElementType KW_DESCENDANT = new XQueryElementType("DESCENDANT");
+  IElementType KW_SELF = new XQueryElementType("SELF");
+  IElementType KW_DESCENDANT_OR_SELF = new XQueryElementType("DESCENDANT_OR_SELF");
+  IElementType KW_FOLLOWING_SIBLING = new XQueryElementType("FOLLOWING_SIBLING");
+  IElementType KW_FOLLOWING = new XQueryElementType("FOLLOWING");
+  IElementType KW_PARENT = new XQueryElementType("PARENT");
+  IElementType KW_ANCESTOR = new XQueryElementType("ANCESTOR");
+  IElementType KW_ANCESTOR_OR_SELF = new XQueryElementType("ANCESTOR_OR_SELF");
+  IElementType KW_PRECEDING = new XQueryElementType("PRECEDING");
+  IElementType KW_PRECEDING_SIBLING = new XQueryElementType("PRECEDING_SIBLING");
+  IElementType KW_ = new XQueryElementType("");
 }
