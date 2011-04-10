@@ -46,10 +46,13 @@ declare default element namespace "http://function.com/";
 declare variable $var external;
 declare variable $var :=
     let $var as void() :=
-    for $var as void() at $var in ;
+        for $var as void() at $var in ""
+        return ""
+    return "";
 declare variable $var :=
-    for $var in ;
-declare variable $var as void() := ;
+    for $var in ""
+    return $var;
+declare variable $var as void() := 222.22e2122;
 declare variable $var as void() external ;
 declare variable $var as item() external ;
 declare variable $var as item()* external ;

@@ -352,6 +352,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
   "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
   "'" {yypushback(1); yybegin(_STRINGLITERAL); }
+  {DoubleLiteral} { popState(); return XQ_DOUBLE_LITERAL; }
+  {DecimalLiteral} { popState(); return XQ_DECIMAL_LITERAL; }
+  {IntegerLiteral} { popState(); return XQ_INTEGER_LITERAL; }
+  "$" {yybegin(_NCNAME); return OP_VARSTART; }
 }
 
 <_FLWOR_HEAD> {
