@@ -92,7 +92,7 @@
                                         |  "<!--" DirCommentContents "-->"
                                         |  "<?" PITarget (S DirPIContents)? "?>"                                        /* ws: explicitXQ */
                                         |  <"document" "{"> Expr "}"
-                                        |  (<"element" Q Name "{"> | (<"element" "{"> Expr "}" "{")) Expr? "}"
+                                        |  (<"element" QName "{"> | (<"element" "{"> Expr "}" "{")) Expr? "}"
                                         |  (<"attribute" QName "{"> | (<"attribute" "{"> Expr "}" "{")) Expr? "}"
                                         |  <"text" "{"> Expr "}"
                                         |  <"comment" "{"> Expr "}"

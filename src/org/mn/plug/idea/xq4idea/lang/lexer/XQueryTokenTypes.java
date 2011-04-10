@@ -30,6 +30,7 @@ public interface XQueryTokenTypes {
   IElementType OP_PLUS = new XQueryElementType("+");
   IElementType OP_MINUS = new XQueryElementType("-");
   IElementType OP_DOT = new XQueryElementType(".");
+  IElementType OP_DOTDOT = new XQueryElementType("..");
   IElementType OP_SLASH = new XQueryElementType("/");
   IElementType OP_SLASHSLASH = new XQueryElementType("//");
   IElementType OP_COLONCOLON = new XQueryElementType("::");

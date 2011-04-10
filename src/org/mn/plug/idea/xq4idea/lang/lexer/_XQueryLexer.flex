@@ -614,6 +614,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "$" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(_VARNAME); }
   // flattened ParenthesizedExpr
   "(" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
+  ".." { yybegin(_PREDICATE_LIST); return OP_DOTDOT;}
   // flattened ContextItemExpr
   "." { yybegin(_PREDICATE_LIST);  return OP_DOT; }
   // flattened Ordered and Unordered Expressions
@@ -635,7 +636,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "preceeding-sibling" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_ATTRIBUTE;}
   "preceeding" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_SELF;}
   "ancestor-or-self" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_DESCENDANT_OR_SELF;}
-  ".." { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_FOLLOWING_SIBLING;}
   // the @ is optional so we need to test here for the rest
   "@" { pushState(_PREDICATE_LIST); yybegin(_NODE_TEST); return OP_AT;}
   {_NS} {yypushback(yylength()); pushState(_PREDICATE_LIST); yybegin(_NODE_TEST);}
