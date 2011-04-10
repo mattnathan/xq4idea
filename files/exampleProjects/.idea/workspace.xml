@@ -62,7 +62,7 @@
       <file leaf-file-name="test.xqy" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="49" selection-start="2025" selection-end="2025" vertical-scroll-proportion="0.26153848">
+            <state line="102" column="47" selection-start="3804" selection-end="3804" vertical-scroll-proportion="0.70576924">
               <folding />
             </state>
           </provider>
@@ -108,6 +108,9 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Favorites" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -118,9 +121,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Favorites" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -268,7 +268,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="49" selection-start="2025" selection-end="2025" vertical-scroll-proportion="0.26153848">
+        <state line="102" column="47" selection-start="3804" selection-end="3804" vertical-scroll-proportion="0.70576924">
           <folding />
         </state>
       </provider>

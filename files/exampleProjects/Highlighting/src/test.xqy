@@ -99,6 +99,8 @@ declare variable $var as prefixless external ;
 
 declare variable $var :=
     if (12) then "true" else "false";
+declare variable $var :=
+    if (12, "", $var) then "true" else "false";
 
 12.2e2234
 
