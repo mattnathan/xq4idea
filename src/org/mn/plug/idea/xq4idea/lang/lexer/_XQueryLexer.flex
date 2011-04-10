@@ -350,6 +350,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_EXPR_SINGLE> {
   "for" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_FOR_CLAUSE); }
   "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
+  "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
+  "'" {yypushback(1); yybegin(_STRINGLITERAL); }
 }
 
 <_FLWOR_HEAD> {

@@ -24,20 +24,20 @@
 [21]   \tab SchemaImport\tab    ::=   \tab <"import" "schema"> SchemaPrefix? URILiteral (<"at" URILiteral> ("," URILiteral)*)?\par
 [22]   \tab SchemaPrefix\tab    ::=   \tab ("namespace" NCName "=") | (<"default" "element"> "namespace")\par
 [23]   \tab ModuleImport\tab    ::=   \tab <"import" "module"> ("namespace" NCName "=")? URILiteral (<"at" URILiteral> ("," URILiteral)*)?\par
-[24]   \tab VarDecl\tab    ::=   \tab <"declare" "variable" "$"> VarName TypeDeclaration? ((":="\cf0  ExprSingle\cf1 ) | "external")\par
+[24]   \tab VarDecl\tab    ::=   \tab <"declare" "variable" "$"> VarName TypeDeclaration? ((":=" ExprSingle) | "external")\par
 [25]   \tab ConstructionDecl\tab    ::=   \tab <"declare" "construction"> ("preserve" | "strip")\par
 \cf0 [26]   \tab FunctionDecl\tab    ::=   \tab <"declare" "function"> <QName "("> ParamList? (")" | (<")" "as"> SequenceType)) (EnclosedExpr | "external")\par
 [27]   \tab ParamList\tab    ::=   \tab Param ("," Param)*\par
-\cf1 [28]   \tab Param\tab    ::=   \tab "$" VarName \cf0 TypeDeclaration?\par
-[29]   \tab EnclosedExpr\tab    ::=   \tab "\{" Expr "\}"\par
+\cf1 [28]   \tab Param\tab    ::=   \tab "$" VarName TypeDeclaration?\par
+\cf0 [29]   \tab EnclosedExpr\tab    ::=   \tab "\{" Expr "\}"\par
 [30]   \tab QueryBody\tab    ::=   \tab Expr\par
 [31]   \tab Expr\tab    ::=   \tab ExprSingle ("," ExprSingle)*\par
-[32]   \tab ExprSingle\tab    ::=   \tab FLWORExpr\par
+[32]   \tab ExprSingle\tab    ::=   \tab\cf1 FLWORExpr\cf0\par
 | QuantifiedExpr\par
 | TypeswitchExpr\par
 | IfExpr\par
 | OrExpr\par
-[33]   \tab FLWORExpr\tab    ::=   \tab (ForClause | LetClause)+ WhereClause? OrderByClause? "return" ExprSingle\par
+\cf1 [33]   \tab FLWORExpr\tab    ::=   \tab (ForClause | LetClause)+ WhereClause? OrderByClause? "return" ExprSingle\par
 [34]   \tab ForClause\tab    ::=   \tab <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*\par
 [35]   \tab PositionalVar\tab    ::=   \tab "at" "$" VarName\par
 [36]   \tab LetClause\tab    ::=   \tab <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*\par
@@ -46,7 +46,7 @@
 [39]   \tab OrderSpecList\tab    ::=   \tab OrderSpec ("," OrderSpec)*\par
 [40]   \tab OrderSpec\tab    ::=   \tab ExprSingle OrderModifier\par
 [41]   \tab OrderModifier\tab    ::=   \tab ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?\par
-[42]   \tab QuantifiedExpr\tab    ::=   \tab (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle\par
+\cf0 [42]   \tab QuantifiedExpr\tab    ::=   \tab (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle\par
 [43]   \tab TypeswitchExpr\tab    ::=   \tab <"typeswitch" "("> Expr ")" CaseClause+ "default" ("$" VarName)? "return" ExprSingle\par
 [44]   \tab CaseClause\tab    ::=   \tab "case" ("$" VarName "as")? SequenceType "return" ExprSingle\par
 [45]   \tab IfExpr\tab    ::=   \tab <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle\par
@@ -202,9 +202,9 @@
 \cf1 [154]   \tab Comment\tab    ::=   \tab "(:" (CommentContents | Comment)* ":)"\tab /* ws: explicitXQ */\par
 /* gn: commentsXQ */\par
 [155]   \tab CommentContents\tab    ::=   \tab (Char+ - (Char* ':)' Char*))\cf0\par
-\cf1 [156]   \tab QName\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-QName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-QName]Names}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
-[157]   \tab NCName\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
-[158]   \tab S\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-S]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-S]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
-\pard\ri-1352\sl240\slmult1 [159]   \tab Char\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-Char]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-Char]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\cf0\par
+\cf1 [156]   \tab QName\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-QName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-QName]Names}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\par
+[157]   \tab NCName\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\par
+[158]   \tab S\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-S]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-S]XML}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\par
+\pard\ri-1352\sl240\slmult1 [159]   \tab Char\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-Char]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-Char]XML}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\cf0\par
 }
  
