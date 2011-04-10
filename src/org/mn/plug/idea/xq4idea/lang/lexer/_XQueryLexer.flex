@@ -618,8 +618,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   // flattened Ordered and Unordered Expressions
   "ordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
   "unordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
-  // flattened FunctionCall
-  {QName} { pushState(_PREDICATE_LIST);  yypushback(yylength()); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
   // todo: flattened Constructor
   // flattened AxisStep
   "child" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_CHILD;}
@@ -638,6 +636,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   // the @ is optional so we need to test here for the rest
   "@" { pushState(_PREDICATE_LIST); yybegin(_NODE_TEST); return OP_AT;}
   {_NS} {yypushback(yylength()); pushState(_PREDICATE_LIST); yybegin(_NODE_TEST);}
+  // flattened FunctionCall
+  {QName} { pushState(_PREDICATE_LIST);  yypushback(yylength()); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
 }
 <_PREDICATE_LIST> {
   "[" {pushState(_PREDICATE_LIST); pushState(_CLOSE_SQUARE); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LSQUARE; }

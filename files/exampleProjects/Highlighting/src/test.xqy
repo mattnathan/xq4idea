@@ -127,8 +127,8 @@ declare variable $var := .;
 declare variable $var := ("hello");
 
 declare variable $var := $local:dun;
-declare variable $var := local:func(3, 2);
-declare variable $var := local:func(3, 2);
+declare variable $var := child::void();
+declare variable $var := self::comment()[0];
 declare variable $var := local:func(3, 2);
 declare variable $var := local:func(3, 2);
 
