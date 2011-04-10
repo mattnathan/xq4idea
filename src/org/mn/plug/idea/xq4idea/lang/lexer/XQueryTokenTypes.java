@@ -27,6 +27,7 @@ public interface XQueryTokenTypes {
   IElementType OP_STAR = new XQueryElementType("*");
   IElementType OP_PLUS = new XQueryElementType("+");
   IElementType OP_MINUS = new XQueryElementType("-");
+  IElementType OP_DOT = new XQueryElementType(".");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");

@@ -84,6 +84,9 @@ import com.intellij.psi.tree.IElementType;
 // Expression states
 %s _EXPR_SINGLE
 %s _EXPR_LIST
+%s _EXPR_LIST_IN_CURLY
+%s _OPT_EXPR_LIST_IN_BRACE
+%s _EXPR_LIST_OR_RBRACE
 
 // If expression
 %s _IF_EXPR
@@ -128,6 +131,9 @@ import com.intellij.psi.tree.IElementType;
 %s _VALIDATE_EXPR_X
 %s _VALIDATE_EXPR_
 %s _VALIDATE_EXPR__
+%s _PATH_EXPR
+%s _PRIMARY_EXPR
+%s _PARENTHESIZED_EXPR
 
 // FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we trasition to body
@@ -162,6 +168,8 @@ import com.intellij.psi.tree.IElementType;
 %s _EMPTY_BRACES_
 %s _OPEN_BRACE
 %s _CLOSE_BRACE
+%s _OPEN_CURLY
+%s _CLOSE_CURLY
 
 %s _SEP
 %s _VARNAME
@@ -404,12 +412,24 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
   "+"|"-" {yypushback(yylength()); yybegin(_UNARY_EXPR);}
   "validate" {yypushback(yylength()); yybegin(_VALIDATE_EXPR);}
+  // flattened Literals
   "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
   "'" {yypushback(1); yybegin(_STRINGLITERAL); }
   {DoubleLiteral} { popState(); return XQ_DOUBLE_LITERAL; }
   {DecimalLiteral} { popState(); return XQ_DECIMAL_LITERAL; }
   {IntegerLiteral} { popState(); return XQ_INTEGER_LITERAL; }
+  // flattened VarRef
   "$" {yypushback(1); yybegin(_VARNAME); }
+  // flattened ParenthesizedExpr
+  "(" {yybegin(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
+  // flattened ContextItemExpr
+  "." {popState(); return OP_DOT; }
+  // flattened Ordered and Unordered Expressions
+  "ordered" {yybegin(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
+  "unordered" {yybegin(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
+  // flattened FunctionCall
+  {QName} { yypushback(yylength()); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
+  // todo: flattened Constructor
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -583,10 +603,27 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "strict" {yybegin(_VALIDATE_EXPR_); return KW_STRICT;}
 }
 <_VALIDATE_EXPR_, _VALIDATE_EXPR_X> {
-  "{" {pushState(_VALIDATE_EXPR__); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LCURLY; }
+  "{" {pushState(_CLOSE_CURLY); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LCURLY; }
 }
-<_VALIDATE_EXPR__> {
-  "}" {popState(); return OP_RCURLY;}
+<_PRIMARY_EXPR> {
+  // flattened Literals
+  "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
+  "'" {yypushback(1); yybegin(_STRINGLITERAL); }
+  {DoubleLiteral} { popState(); return XQ_DOUBLE_LITERAL; }
+  {DecimalLiteral} { popState(); return XQ_DECIMAL_LITERAL; }
+  {IntegerLiteral} { popState(); return XQ_INTEGER_LITERAL; }
+  // flattened VarRef
+  "$" {yypushback(1); yybegin(_VARNAME); }
+  // flattened ParenthesizedExpr
+  "(" {yybegin(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
+  // flattened ContextItemExpr
+  "." {popState(); return OP_DOT; }
+  // flattened Ordered and Unordered Expressions
+  "ordered" {yybegin(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
+  "unordered" {yybegin(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
+  // flattened FunctionCall
+  {QName} { yypushback(yylength()); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
+  // todo: flattened Constructor
 }
 
 // common formats
@@ -596,11 +633,27 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_CLOSE_BRACE> {
   ")" {popState(); return OP_RBRACE; }
 }
+<_OPEN_CURLY> {
+  "{" {popState(); return OP_LCURLY;}
+}
+<_CLOSE_CURLY> {
+  "}" {popState(); return OP_RCURLY; }
+}
 <_EMPTY_BRACES> {
   "(" {yybegin(_EMPTY_BRACES_); return OP_LBRACE;}
 }
 <_EMPTY_BRACES_> {
   ")" {popState(); return OP_RBRACE; }
+}
+<_EXPR_LIST_IN_CURLY> {
+  "{" {pushState(_CLOSE_CURLY); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LCURLY; }
+}
+<_OPT_EXPR_LIST_IN_BRACE> {
+  "(" {yybegin(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
+}
+<_EXPR_LIST_OR_RBRACE> {
+  ")" {popState(); return OP_RBRACE;}
+  [^\)\x20\x09\x0D\x0A]+ {yypushback(yylength()); pushState(_CLOSE_BRACE); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); }
 }
 
 // ("preserve" | "split") ";"
