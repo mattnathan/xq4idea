@@ -92,6 +92,12 @@ import com.intellij.psi.tree.IElementType;
 %s _IF_EXPR_THEN
 %s _IF_EXPR_ELSE
 
+// Quantified Expression
+%s _QUANT_EXPR
+%s _QUANT_EXPR_LIST
+%s _QUANT_EXPR_IN
+%s _QUANT_EXPR_SATISFIES
+
 // FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we trasition to body
 %s _FLWOR_HEAD
@@ -361,6 +367,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "for" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_FOR_CLAUSE); }
   "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
   "if" {yypushback(yylength()); yybegin(_IF_EXPR); }
+  "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
+  "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
   "'" {yypushback(1); yybegin(_STRINGLITERAL); }
   {DoubleLiteral} { popState(); return XQ_DOUBLE_LITERAL; }
@@ -388,6 +396,23 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_IF_EXPR_ELSE> {
   "else" {yybegin(_EXPR_SINGLE); return KW_ELSE; }
+}
+
+// QuantifiedExpr := (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle
+//                    ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle
+<_QUANT_EXPR> {
+  "some" {pushState(_QUANT_EXPR_IN); yybegin(_PARAM); return KW_SOME;}
+  "every" {pushState(_QUANT_EXPR_IN); yybegin(_PARAM); return KW_EVERY;}
+}
+<_QUANT_EXPR_LIST> {
+  "," {pushState(_QUANT_EXPR_LIST); pushState(_QUANT_EXPR_IN); yybegin(_PARAM); return OP_COMMA; }
+  {_NS} {yypushback(1); popState(); }
+}
+<_QUANT_EXPR_IN> {
+  "in" {pushState(_QUANT_EXPR_SATISFIES); yybegin(_EXPR_SINGLE); return KW_IN;}
+}
+<_QUANT_EXPR_SATISFIES> {
+  "satisfies" {yybegin(_EXPR_SINGLE); return KW_SATISFIES; }
 }
 
 <_FLWOR_HEAD> {

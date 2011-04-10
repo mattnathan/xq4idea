@@ -102,4 +102,7 @@ public interface XQueryTokenTypes {
   IElementType KW_IF = new XQueryElementType("IF");
   IElementType KW_THEN = new XQueryElementType("THEN");
   IElementType KW_ELSE = new XQueryElementType("ELSE");
+  IElementType KW_SOME = new XQueryElementType("SOME");
+  IElementType KW_EVERY = new XQueryElementType("EVERY");
+  IElementType KW_SATISFIES = new XQueryElementType("SATISFIES");
 }

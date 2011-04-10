@@ -102,6 +102,15 @@ declare variable $var :=
 declare variable $var :=
     if (12, "", $var) then "true" else "false";
 
+declare variable $var :=
+    some $var as void()
+        in $var
+        satisfies $var ;
+declare variable $var :=
+    every $var as void()
+        in $var
+        satisfies $var ;
+
 12.2e2234
 
 some other text
