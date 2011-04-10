@@ -71,7 +71,7 @@ import com.intellij.psi.tree.IElementType;
 %s _PARAM
 %s _AS
 %s _AS_
-%s _AS_OCC
+%x _AS_OCC
 %s _AS_DN
 %s _AS_PI
 %s _AS_ATTR
@@ -81,9 +81,18 @@ import com.intellij.psi.tree.IElementType;
 %s _AS_AorE__
 %s _AS_SELEM
 
-// FLWOR states
+// Expression states
 %s _EXPR_SINGLE
+%s _EXPR_LIST
 
+// If expression
+%s _IF_EXPR
+%s _IF_EXPR_
+%s _IF_EXPR__
+%s _IF_EXPR_THEN
+%s _IF_EXPR_ELSE
+
+// FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we trasition to body
 %s _FLWOR_HEAD
 %s _FLWOR_BODY1
@@ -317,7 +326,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "?" {popState(); return OP_QUESTION;}
   "*" {popState(); return OP_STAR;}
   "+" {popState(); return OP_PLUS;}
-  {_NS} {popState(); yypushback(1);}
+  [^\?\*\+] {popState(); yypushback(1);}
 }
 // as processing-instruction( NCName | "")
 <_AS_PI> {
@@ -346,16 +355,39 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
 
+// Expr := ExprSingle ( "," ExprSingle )?
 // ExprSingle
 <_EXPR_SINGLE> {
   "for" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_FOR_CLAUSE); }
   "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
+  "if" {yypushback(yylength()); yybegin(_IF_EXPR); }
   "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
   "'" {yypushback(1); yybegin(_STRINGLITERAL); }
   {DoubleLiteral} { popState(); return XQ_DOUBLE_LITERAL; }
   {DecimalLiteral} { popState(); return XQ_DECIMAL_LITERAL; }
   {IntegerLiteral} { popState(); return XQ_INTEGER_LITERAL; }
   "$" {yybegin(_NCNAME); return OP_VARSTART; }
+}
+<_EXPR_LIST> {
+  "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
+  {_NS} {yypushback(1); popState(); }
+}
+
+// IfExpr := <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle
+<_IF_EXPR> {
+  "if" {yybegin(_IF_EXPR_); return KW_IF;}
+}
+<_IF_EXPR_> {
+  "(" {pushState(_IF_EXPR__); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LBRACE; }
+}
+<_IF_EXPR__> {
+  ")" {yybegin(_IF_EXPR_THEN); return OP_RBRACE;}
+}
+<_IF_EXPR_THEN> {
+  "then" {pushState(_IF_EXPR_ELSE); yybegin(_EXPR_SINGLE); return KW_THEN; }
+}
+<_IF_EXPR_ELSE> {
+  "else" {yybegin(_EXPR_SINGLE); return KW_ELSE; }
 }
 
 <_FLWOR_HEAD> {
@@ -522,5 +554,5 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
 {S} { return WHITE_SPACE; }
-[:letter:] { return BAD_WORD; }
+[:letter:]+ { return BAD_WORD; }
 [^] { yybegin(YYINITIAL); return BAD_CHARACTER; }

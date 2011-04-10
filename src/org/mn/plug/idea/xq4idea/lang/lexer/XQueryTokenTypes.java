@@ -99,4 +99,7 @@ public interface XQueryTokenTypes {
   IElementType KW_BY = new XQueryElementType("BY");
   IElementType KW_ASCENDING = new XQueryElementType("ASCENDING");
   IElementType KW_DESCENDING = new XQueryElementType("DESCENDING");
+  IElementType KW_IF = new XQueryElementType("IF");
+  IElementType KW_THEN = new XQueryElementType("THEN");
+  IElementType KW_ELSE = new XQueryElementType("ELSE");
 }

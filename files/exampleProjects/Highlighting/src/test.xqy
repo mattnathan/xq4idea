@@ -97,6 +97,9 @@ declare variable $var as schema-element(hello:local) external ;
 declare variable $var as my:something external ;
 declare variable $var as prefixless external ;
 
+declare variable $var :=
+    if (12) then "true" else "false";
+
 12.2e2234
 
 some other text
