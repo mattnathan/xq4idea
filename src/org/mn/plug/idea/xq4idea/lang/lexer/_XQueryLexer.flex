@@ -30,6 +30,7 @@ import com.intellij.psi.tree.IElementType;
 
 // these are top level states
 %x EXPR_COMMENT
+%x XML_COMMENT
 %s DECLAREORDERING
 %s NAMESPACEDECL
 
@@ -619,6 +620,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "ordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
   "unordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
   // todo: flattened Constructor
+  // flattened DirCommentConstructor
+  "<!--" { pushState(_PREDICATE_LIST); yybegin(XML_COMMENT); return XML_COMMENT_START; }
   // flattened AxisStep
   "child" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_CHILD;}
   "descendant" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_DESCENDANT;}
@@ -744,6 +747,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   ":)" { popState(); return XQ_COMMENT_END; }
   "(:" { pushState(); return XQ_COMMENT_START; }
   [^] { return XQ_COMMENT_CHAR; }
+}
+<XML_COMMENT> {
+  "-->" {popState(); return XML_COMMENT_END;}
+  [^\-]|(-[^\-]) {return XML_COMMENT_CHAR; }
+  [^] { return BAD_CHARACTER; }
 }
 
 

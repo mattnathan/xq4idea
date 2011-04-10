@@ -7,7 +7,8 @@ import com.intellij.psi.tree.TokenSet;
  */
 public interface XQueryTokenTypeSets extends XQueryTokenTypes {
   TokenSet XQ_COMMENTS = TokenSet.create(XQ_COMMENT_START, XQ_COMMENT_CHAR, XQ_COMMENT_END);
-  TokenSet COMMENTS = TokenSet.orSet(XQ_COMMENTS);
+  TokenSet XML_COMMENTS = TokenSet.create(XML_COMMENT_START, XML_COMMENT_CHAR, XML_COMMENT_END);
+  TokenSet COMMENTS = TokenSet.orSet(XQ_COMMENTS, XML_COMMENTS);
   TokenSet WHITESPACES = TokenSet.create(WHITE_SPACE);
   TokenSet STRING_LITERALS = TokenSet.create(XQ_STR, XQ_STR_CHAR, XQ_STR_START, XQ_STR_END, XQ_STR_ESCAPE_APOS,
       XQ_STR_ESCAPE_QUOTE);

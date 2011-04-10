@@ -44,6 +44,9 @@ public interface XQueryTokenTypes {
   IElementType XQ_COMMENT_START = new XQueryElementType("(:");
   IElementType XQ_COMMENT_CHAR = new XQueryElementType("XQ_COMMENT_CHAR");
   IElementType XQ_COMMENT_END = new XQueryElementType(":)");
+  IElementType XML_COMMENT_START = new XQueryElementType("<!--");
+  IElementType XML_COMMENT_CHAR = new XQueryElementType("XML_COMMENT_CHAR");
+  IElementType XML_COMMENT_END = new XQueryElementType("-->");
 
   // literals
   IElementType XQ_STR = new XQueryElementType("XQ_STR");
