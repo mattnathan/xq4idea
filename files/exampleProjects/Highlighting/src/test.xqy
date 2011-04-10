@@ -119,6 +119,11 @@ declare variable $var :=
         case my:something return ""
         default return "";
 
+declare variable $var := -+2;
+declare variable $var := validate {2};
+declare variable $var := validate lax {2};
+declare variable $var := validate strict {2};
+
 12.2e2234
 
 some other text

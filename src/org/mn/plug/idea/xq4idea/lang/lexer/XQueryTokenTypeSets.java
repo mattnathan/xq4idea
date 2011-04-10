@@ -33,6 +33,7 @@ public interface XQueryTokenTypeSets extends XQueryTokenTypes {
       KW_FOR, KW_LET, KW_IN, KW_WHERE, KW_RETURN, KW_STABLE, KW_ORDER, KW_BY, KW_ASCENDING, KW_DESCENDING,
       KW_IF, KW_THEN, KW_ELSE,
       KW_SOME, KW_EVERY, KW_SATISFIES,
-      KW_TYPESWITCH, KW_CASE
+      KW_TYPESWITCH, KW_CASE,
+      KW_VALIDATE, KW_LAX, KW_STRICT
   );
 }

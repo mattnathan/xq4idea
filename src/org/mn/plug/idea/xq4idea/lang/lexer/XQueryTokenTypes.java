@@ -20,10 +20,13 @@ public interface XQueryTokenTypes {
   IElementType OP_COMMA = new XQueryElementType(",");
   IElementType OP_LBRACE = new XQueryElementType("(");
   IElementType OP_RBRACE = new XQueryElementType(")");
+  IElementType OP_LCURLY = new XQueryElementType("{");
+  IElementType OP_RCURLY = new XQueryElementType("}");
   IElementType OP_ASSIGN = new XQueryElementType(":=");
   IElementType OP_QUESTION = new XQueryElementType("?");
   IElementType OP_STAR = new XQueryElementType("*");
   IElementType OP_PLUS = new XQueryElementType("+");
+  IElementType OP_MINUS = new XQueryElementType("-");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
@@ -107,4 +110,7 @@ public interface XQueryTokenTypes {
   IElementType KW_SATISFIES = new XQueryElementType("SATISFIES");
   IElementType KW_TYPESWITCH = new XQueryElementType("TYPESWITCH");
   IElementType KW_CASE = new XQueryElementType("CASE");
+  IElementType KW_VALIDATE = new XQueryElementType("VALIDATE");
+  IElementType KW_LAX = new XQueryElementType("LAX");
+  IElementType KW_STRICT = new XQueryElementType("STRICT");
 }

@@ -110,6 +110,25 @@ import com.intellij.psi.tree.IElementType;
 %s _TYPESWITCH_EXPR_CASE_AS
 %s _TYPESWITCH_EXPR_RETURN
 
+// other expressions
+%s _OR_EXPR
+%s _AND_EXPR
+%s _RANGE_EXPR
+%s _ADD_EXPR
+%s _MULT_EXPR
+%s _UNION_EXPR
+%s _INTERSECT_EXPR
+%s _INSTANCE_OF_EXPR
+%s _TREAT_EXPR
+%s _CASTABLE_EXPR
+%s _CAST_EXPR
+%s _UNARY_EXPR
+%s _VALUE_EXPR
+%s _VALIDATE_EXPR
+%s _VALIDATE_EXPR_X
+%s _VALIDATE_EXPR_
+%s _VALIDATE_EXPR__
+
 // FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we trasition to body
 %s _FLWOR_HEAD
@@ -383,6 +402,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
+  "+"|"-" {yypushback(yylength()); yybegin(_UNARY_EXPR);}
+  "validate" {yypushback(yylength()); yybegin(_VALIDATE_EXPR);}
   "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
   "'" {yypushback(1); yybegin(_STRINGLITERAL); }
   {DoubleLiteral} { popState(); return XQ_DOUBLE_LITERAL; }
@@ -454,7 +475,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_TYPESWITCH_EXPR_DEFAULT_> {
   "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(_VARNAME); }
-  {NS} {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR_RETURN); }
+  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR_RETURN); }
 }
 <_TYPESWITCH_EXPR_RETURN> {
   "return" {yybegin(_EXPR_SINGLE); return KW_RETURN; }
@@ -543,6 +564,29 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_ORDER_CLAUSE_MODIFIER_COLLATION> {
   "collation" {yybegin(_URILITERAL); return KW_COLLATION; }
   {_NS} {yypushback(1); popState(); }
+}
+
+// other expressions
+<_UNARY_EXPR> {
+  "+" {return OP_PLUS; }
+  "-" {return OP_MINUS; }
+  [^\-+\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_VALUE_EXPR); }
+}
+<_VALUE_EXPR> {
+  "validate" {yypushback(yylength()); yybegin(_VALIDATE_EXPR);}
+}
+<_VALIDATE_EXPR> {
+  "validate" {yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
+}
+<_VALIDATE_EXPR_X> {
+  "lax" {yybegin(_VALIDATE_EXPR_); return KW_LAX;}
+  "strict" {yybegin(_VALIDATE_EXPR_); return KW_STRICT;}
+}
+<_VALIDATE_EXPR_, _VALIDATE_EXPR_X> {
+  "{" {pushState(_VALIDATE_EXPR__); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LCURLY; }
+}
+<_VALIDATE_EXPR__> {
+  "}" {popState(); return OP_RCURLY;}
 }
 
 // common formats
