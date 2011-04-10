@@ -48,6 +48,7 @@ declare variable $var :=
     let $var as void() :=
         for $var as void() at $var in ""
         return ""
+    let $var2 := 7
     return "";
 declare variable $var :=
     for $var in ""
@@ -110,6 +111,13 @@ declare variable $var :=
     every $var as void()
         in $var
         satisfies $var ;
+
+declare variable $var :=
+    typeswitch($var)
+        case $var as void() return ""
+        case void() return ""
+        case my:something return ""
+        default return "";
 
 12.2e2234
 

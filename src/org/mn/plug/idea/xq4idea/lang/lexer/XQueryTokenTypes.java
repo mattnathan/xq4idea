@@ -105,4 +105,6 @@ public interface XQueryTokenTypes {
   IElementType KW_SOME = new XQueryElementType("SOME");
   IElementType KW_EVERY = new XQueryElementType("EVERY");
   IElementType KW_SATISFIES = new XQueryElementType("SATISFIES");
+  IElementType KW_TYPESWITCH = new XQueryElementType("TYPESWITCH");
+  IElementType KW_CASE = new XQueryElementType("CASE");
 }

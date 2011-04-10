@@ -98,6 +98,18 @@ import com.intellij.psi.tree.IElementType;
 %s _QUANT_EXPR_IN
 %s _QUANT_EXPR_SATISFIES
 
+// TypeSwitch expression
+%s _TYPESWITCH_EXPR
+%s _TYPESWITCH_EXPR_
+%s _TYPESWITCH_EXPR__
+%s _TYPESWITCH_EXPR_DEFAULT
+%s _TYPESWITCH_EXPR_DEFAULT_
+%s _TYPESWITCH_EXPR_CASE
+%s _TYPESWITCH_EXPR_CASE2
+%s _TYPESWITCH_EXPR_CASE_
+%s _TYPESWITCH_EXPR_CASE_AS
+%s _TYPESWITCH_EXPR_RETURN
+
 // FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we trasition to body
 %s _FLWOR_HEAD
@@ -133,6 +145,7 @@ import com.intellij.psi.tree.IElementType;
 %s _CLOSE_BRACE
 
 %s _SEP
+%s _VARNAME
 
 %s _NCNAME
 %s _QNAME
@@ -308,7 +321,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // "$" VarName TypeDeclaration?
 //
 <_PARAM> {
-  "$" {pushState(_AS); yybegin(_QNAME); return OP_VARSTART;}
+  "$" {yypushback(1); pushState(_AS); yybegin(_VARNAME);}
 }
 <_AS> {
   "as" {yybegin(_AS_); return KW_AS; }
@@ -369,12 +382,13 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "if" {yypushback(yylength()); yybegin(_IF_EXPR); }
   "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
+  "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
   "\"" {yypushback(1); yybegin(_STRINGLITERAL); }
   "'" {yypushback(1); yybegin(_STRINGLITERAL); }
   {DoubleLiteral} { popState(); return XQ_DOUBLE_LITERAL; }
   {DecimalLiteral} { popState(); return XQ_DECIMAL_LITERAL; }
   {IntegerLiteral} { popState(); return XQ_INTEGER_LITERAL; }
-  "$" {yybegin(_NCNAME); return OP_VARSTART; }
+  "$" {yypushback(1); yybegin(_VARNAME); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -415,6 +429,38 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "satisfies" {yybegin(_EXPR_SINGLE); return KW_SATISFIES; }
 }
 
+// Typeswitch expressions
+<_TYPESWITCH_EXPR> {
+  "typeswitch" {yybegin(_TYPESWITCH_EXPR_); return KW_TYPESWITCH; }
+}
+<_TYPESWITCH_EXPR_> {
+  "(" {pushState(_TYPESWITCH_EXPR__); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LBRACE; }
+}
+<_TYPESWITCH_EXPR__> {
+  ")" {yybegin(_TYPESWITCH_EXPR_CASE); return OP_RBRACE; }
+}
+<_TYPESWITCH_EXPR_CASE,_TYPESWITCH_EXPR_CASE2> {
+  "case" {pushState(_TYPESWITCH_EXPR_CASE2); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(_TYPESWITCH_EXPR_CASE_); return KW_CASE;}
+}
+<_TYPESWITCH_EXPR_CASE_> {
+  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_CASE_AS); yybegin(_VARNAME);}
+  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_AS_); }
+}
+<_TYPESWITCH_EXPR_CASE_AS> {
+  "as" {yybegin(_AS_); return KW_AS; }
+}
+<_TYPESWITCH_EXPR_DEFAULT, _TYPESWITCH_EXPR_CASE2> {
+  "default" {yybegin(_TYPESWITCH_EXPR_DEFAULT_); return KW_DEFAULT; }
+}
+<_TYPESWITCH_EXPR_DEFAULT_> {
+  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(_VARNAME); }
+  {NS} {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR_RETURN); }
+}
+<_TYPESWITCH_EXPR_RETURN> {
+  "return" {yybegin(_EXPR_SINGLE); return KW_RETURN; }
+}
+
+// FLWOR Expressions
 <_FLWOR_HEAD> {
   "for" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_FOR_CLAUSE); }
   "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
@@ -433,21 +479,15 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // ForClause := <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle
 //              ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*
 <_FOR_CLAUSE> {
-  "for" { yybegin(_FOR_CLAUSE_VAR); return KW_FOR; }
+  "for" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); yybegin(_PARAM); return KW_FOR; }
 }
 <_FOR_CLAUSE_> {
   "," {yybegin(_FOR_CLAUSE); return OP_COMMA; }
-  {_NS} {yypushback(1); popState(); }
-}
-<_FOR_CLAUSE_VAR> {
-  "$" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); yypushback(1); yybegin(_PARAM); }
+  {NS} {yypushback(yylength()); popState(); }
 }
 <_FOR_CLAUSE_VAR_POS> {
-  "at" { yybegin(_FOR_CLAUSE_VAR_POS_); return KW_AT; }
-  {_NS} { yypushback(1); popState(); }
-}
-<_FOR_CLAUSE_VAR_POS_> {
-  "$" {yybegin(_QNAME); return OP_VARSTART; }
+  "at" { yybegin(_VARNAME); return KW_AT; }
+  {NS} { yypushback(yylength()); popState(); }
 }
 <_FOR_CLAUSE_VAR_IN> {
   "in" { yybegin(_EXPR_SINGLE); return KW_IN;}
@@ -459,7 +499,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_LET_CLAUSE_> {
   "," { pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return OP_COMMA;}
-  {_NS} {yypushback(1); popState(); }
+  {NS} {yypushback(yylength()); popState(); }
 }
 <_LET_CLAUSE_VAR> {
   ":=" { yybegin(_EXPR_SINGLE); return OP_ASSIGN;}
@@ -575,6 +615,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {NS} {yypushback(yylength()); popState();}
 }
 
+// "$" QNAME
+<_VARNAME> {
+  "$" {yybegin(_QNAME); return OP_VARSTART; }
+}
 
 
 "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }

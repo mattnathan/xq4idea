@@ -31,12 +31,12 @@
 \cf1 [28]   \tab Param\tab    ::=   \tab "$" VarName TypeDeclaration?\par
 \cf0 [29]   \tab EnclosedExpr\tab    ::=   \tab "\{" Expr "\}"\par
 [30]   \tab QueryBody\tab    ::=   \tab Expr\par
-[31]   \tab Expr\tab    ::=   \tab ExprSingle ("," ExprSingle)*\par
-[32]   \tab ExprSingle\tab    ::=   \tab\cf1 FLWORExpr\cf0\par
-| QuantifiedExpr\par
+\cf1 [31]   \tab Expr\tab    ::=   \tab ExprSingle ("," ExprSingle)*\par
+\cf0 [32]   \tab ExprSingle\tab    ::=   \tab\cf1 FLWORExpr\cf0\par
+\cf1 | QuantifiedExpr\par
 | TypeswitchExpr\par
 | IfExpr\par
-| OrExpr\par
+\cf0 | OrExpr\par
 \cf1 [33]   \tab FLWORExpr\tab    ::=   \tab (ForClause | LetClause)+ WhereClause? OrderByClause? "return" ExprSingle\par
 [34]   \tab ForClause\tab    ::=   \tab <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*\par
 [35]   \tab PositionalVar\tab    ::=   \tab "at" "$" VarName\par
@@ -46,11 +46,11 @@
 [39]   \tab OrderSpecList\tab    ::=   \tab OrderSpec ("," OrderSpec)*\par
 [40]   \tab OrderSpec\tab    ::=   \tab ExprSingle OrderModifier\par
 [41]   \tab OrderModifier\tab    ::=   \tab ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?\par
-\cf0 [42]   \tab QuantifiedExpr\tab    ::=   \tab (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle\par
+[42]   \tab QuantifiedExpr\tab    ::=   \tab (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle\par
 [43]   \tab TypeswitchExpr\tab    ::=   \tab <"typeswitch" "("> Expr ")" CaseClause+ "default" ("$" VarName)? "return" ExprSingle\par
 [44]   \tab CaseClause\tab    ::=   \tab "case" ("$" VarName "as")? SequenceType "return" ExprSingle\par
 [45]   \tab IfExpr\tab    ::=   \tab <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle\par
-[46]   \tab OrExpr\tab    ::=   \tab AndExpr ( "or" AndExpr )*\par
+\cf0 [46]   \tab OrExpr\tab    ::=   \tab AndExpr ( "or" AndExpr )*\par
 [47]   \tab AndExpr\tab    ::=   \tab ComparisonExpr ( "and" ComparisonExpr )*\par
 [48]   \tab ComparisonExpr\tab    ::=   \tab RangeExpr ( (ValueComp\par
 | GeneralComp\par
@@ -103,10 +103,10 @@
 [80]   \tab FilterExpr\tab    ::=   \tab PrimaryExpr PredicateList\par
 [81]   \tab PredicateList\tab    ::=   \tab Predicate*\par
 [82]   \tab Predicate\tab    ::=   \tab "[" Expr "]"\par
-[83]   \tab PrimaryExpr\tab    ::=   \tab Literal | VarRef | ParenthesizedExpr | ContextItemExpr | FunctionCall | Constructor | OrderedExpr | UnorderedExpr\par
-[84]   \tab Literal\tab    ::=   \tab NumericLiteral | StringLiteral\par
-[85]   \tab NumericLiteral\tab    ::=   \tab IntegerLiteral | DecimalLiteral | DoubleLiteral\par
-[86]   \tab VarRef\tab    ::=   \tab "$" VarName\par
+[83]   \tab PrimaryExpr\tab    ::=   \tab\cf1 Literal | VarRef | \cf0 ParenthesizedExpr | ContextItemExpr | FunctionCall | Constructor | OrderedExpr | UnorderedExpr\par
+\cf1 [84]   \tab Literal\tab    ::=   \tab NumericLiteral | StringLiteral\cf0\par
+\cf1 [85]   \tab NumericLiteral\tab    ::=   \tab IntegerLiteral | DecimalLiteral | DoubleLiteral\cf0\par
+\cf1 [86]   \tab VarRef\tab    ::=   \tab "$" VarName\cf0\par
 [87]   \tab ParenthesizedExpr\tab    ::=   \tab "(" Expr? ")"\par
 [88]   \tab ContextItemExpr\tab    ::=   \tab "."\par
 [89]   \tab OrderedExpr\tab    ::=   \tab <"ordered" "\{"> Expr "\}"\par
