@@ -137,8 +137,8 @@
 [99]    DirElemContent	              ::=  "<" QName DirAttributeList ("/>" | (">" DirElemContent* "</" QName S? ">"))
                                         |  "<!--" DirCommentContents "-->"                                              /* ws: explicitXQ */
                                         |  "<?" PITarget (S DirPIContents)? "?>"                                        /* ws: explicitXQ */
-                                        |  Elem entContentChar
-                                        |  CDataSection
+                                        |  ElementContentChar
+                                        |  "<![CDATA[" CDataSectionContents "]]>"
                                         |  CommonContent
 [100]   CommonContent	                ::=  PredefinedEntityRef | CharRef | "{{" | "}}" | EnclosedExpr
 [102]   DirCommentContents	          ::=  ((Char - '-') | <'-' (Char - '-')>)*                                         /* ws: explicitXQ */

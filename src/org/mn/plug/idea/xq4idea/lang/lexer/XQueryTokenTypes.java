@@ -49,6 +49,12 @@ public interface XQueryTokenTypes {
   IElementType XML_COMMENT_CHAR = new XQueryElementType("XML_COMMENT_CHAR");
   IElementType XML_COMMENT_END = new XQueryElementType("-->");
 
+  // xml stuff
+  IElementType XML_PI_START = new XQueryElementType("<?");
+  IElementType XML_PI_END = new XQueryElementType("?>");
+  IElementType XML_PI_NAME = new XQueryElementType("XML_PI_NAME");
+  IElementType XML_PI_CHAR = new XQueryElementType("XML_PI_CHAR");
+
   // literals
   IElementType XQ_STR = new XQueryElementType("XQ_STR");
   IElementType XQ_STR_START = new XQueryElementType("XQ_STR_START");

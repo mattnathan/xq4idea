@@ -172,6 +172,13 @@ import com.intellij.psi.tree.IElementType;
 %s _ORDER_CLAUSE_MODIFIER_COLLATION
 %s _STABLE_ORDER_CLAUSE
 
+// xml states
+%x _XML_PI_NAME
+%x _XML_PI_CONTENT
+%s _XML_PI_END
+%x _XML_ATTRLIST_START
+%x _XML_ATTR_NAME
+
 %s _EMPTY_BRACES
 %s _EMPTY_BRACES_
 %s _OPEN_BRACE
@@ -186,6 +193,7 @@ import com.intellij.psi.tree.IElementType;
 %s _STAR
 %s _COLON
 %s _COLONCOLON
+%s _EQUALS
 
 %s _NCNAME
 %s _QNAME
@@ -226,6 +234,9 @@ CharRef = (&#[0-9]+;|&#x[0-9a-fA-F]+;)
 
 NameChar = ({Letter} | {Digit} | "." | "-" | "_" | ":" | {CombiningChar} | {Extender})
 Name = ({Letter} | "_" | ":" ) ({NameChar})*
+XmlDigit = [0-9]
+XmlLetter = [:letter:]
+XmlName = ({XmlLetter}|"_")({XmlLetter}|{XmlDigit}|"_"|"."|"-")*(":"({XmlLetter}|"_")?({XmlLetter}|{XmlDigit}|"_"|"."|"-")*)?
 
 // Namespaces
 
@@ -623,6 +634,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   // todo: flattened Constructor
   // flattened DirCommentConstructor
   "<!--" { pushState(_PREDICATE_LIST); yybegin(XML_COMMENT); return XML_COMMENT_START; }
+  "<?" { pushState(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
   // flattened AxisStep
   "child" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_CHILD;}
   "descendant" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_DESCENDANT;}
@@ -663,6 +675,25 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {WildcardQName} {yypushback(yylength()); yybegin(_WILDCARD_QNAME); }
 }
 
+<_XML_PI_NAME> {
+  "xml" {yybegin(_XML_ATTRLIST_START); return XML_PI_NAME;}
+  {XmlName} {yybegin(_XML_PI_CONTENT); return XML_PI_NAME;}
+  [^] {return BAD_CHARACTER;}
+}
+<_XML_PI_CONTENT, _XML_PI_NAME> "?>" { yypushback(yylength()); popState(); }
+<_XML_PI_CONTENT> {
+  {S} { return WHITE_SPACE; }
+  [^] { return XML_PI_CHAR; }
+}
+<_XML_ATTRLIST_START> {
+  {S} { pushState(_XML_ATTRLIST_START); yybegin(_XML_ATTR_NAME); return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
+<_XML_ATTR_NAME> {
+  {QName} {yypushback(yylength()); pushState(_STRINGLITERAL); pushState(_EQUALS); yybegin(_QNAME); }
+  [^] {yypushback(yylength()); popState(); }
+}
+
 // common formats
 <_STAR> {
   "*" {popState(); return OP_STAR; }
@@ -672,6 +703,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_COLONCOLON> {
   "::" {popState(); return OP_COLONCOLON; }
+}
+<_EQUALS> {
+  "=" {popState(); return OP_EQUALS; }
 }
 
 <_OPEN_BRACE> {
@@ -688,6 +722,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_CLOSE_SQUARE> {
   "]" {popState(); return OP_RSQUARE; }
+}
+<_XML_PI_END> {
+  "?>" {popState(); return XML_PI_END; }
 }
 <_EMPTY_BRACES> {
   "(" {yybegin(_EMPTY_BRACES_); return OP_LBRACE;}

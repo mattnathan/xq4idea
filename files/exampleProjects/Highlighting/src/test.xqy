@@ -133,7 +133,8 @@ declare variable $var := self::comment()[0];
 
 
 declare variable $xmlComment := <!-- my xml comment-d -->;
-declare variable $var := local:func(3, 2);
+declare variable $xmlProcessingInstruction := <?name jjjj"" (::) ?>;
+declare variable $xmlProcessingInstruction := <?xml version="1.0" encoding="UTF-8" ?>;
 
 
 12.2e2234
