@@ -133,9 +133,11 @@ declare variable $var := self::comment()[0];
 
 
 declare variable $xmlComment := <!-- my xml comment-d -->;
-declare variable $xmlProcessingInstruction := <?name jjjj"" (::) ?>;
+declare variable $xmlProcessingInstruction := <?name this shows no processing is done here (::) for{2} ?>;
 declare variable $xmlProcessingInstruction :=
-    <?xml version="my&#333;hello &#x12abDE; &lt;" encoding="UTF-{$var}" ?>;
+    <?xml version="my&#333;hello &#x12abDE; &lt;" encoding="UTF-{
+            if ($var) then $var else $var
+         } continue the string" ?>;
 
 
 12.2e2234
