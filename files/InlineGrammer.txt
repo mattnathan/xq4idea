@@ -19,8 +19,8 @@
 [14]    OrderingModeDecl	            ::=  <"declare" "ordering"> ("ordered" | "unordered")
 [15]    EmptyOrderDecl	              ::=  <"declare" "default" "order"> (<"empty" "greatest"> | <"empty" "least">)
 [16]    CopyNamespacesDecl	          ::=  <"declare " "copy-namespaces"> ("preserve" | "no-preserve") "," ("inherit" | "no-inherit")
-[19]    DefaultCollationDecl	        ::=  <"declare" "de fault" "collation"> URILiteral
-[20]    BaseURIDecl	                  ::=  <"declare" "bas e-uri"> URILiteral
+[19]    DefaultCollationDecl	        ::=  <"declare" "default" "collation"> URILiteral
+[20]    BaseURIDecl	                  ::=  <"declare" "base-uri"> URILiteral
 [21]    SchemaImport	                ::=  <"import" "schema"> SchemaPrefix? URILiteral (<"at" URILiteral> ("," URILiteral)*)?
 [22]    SchemaPrefix	                ::=  ("namespace" NCName "=") 
                                         | (<"default" "element"> "namespace")
@@ -173,20 +173,21 @@
 [139]   DecimalLiteral	              ::=  ("." Digits) | (Digits "." [0-9]*)                                           /* ws: explicitXQ */
 [140]   DoubleLiteral	                ::=  (("." Digits) | (Digits ("." [0-9]*)?)) [eE] [+-]? Digits                    /* ws: explicitXQ */
 [141]   URILiteral	                  ::=  StringLiteral
-[142]   StringLiteral	                ::=  ('"' (PredefinedEntityRef | CharRef | ('"' '"') | [^"&])* '"') | ("'" (PredefinedEntityRef | CharRef | ("'" "'") | [^'&])* "'")	/* ws: explicitXQ */
+[142]   StringLiteral	                ::=  ('"' (PredefinedEntityRef | CharRef | ('"' '"') | [^"&])* '"')
+                                        | ("'" (PredefinedEntityRef | CharRef | ("'" "'") | [^'&])* "'")                /* ws: explicitXQ */
 [143]   PITarget	                    ::=  [http://www.w3.org/TR/REC-xml#NT-PITarget]XML                                /* gn: xml-versionXQ */
 [146]   Digits	                      ::=  [0-9]+
-[147]   PredefinedEntityRef	          ::=  "&" ("lt" | "gt" | "amp" | "quot" | "apos") ";"	/* ws: explicitXQ */
-[148]   CharRef	                      ::=  [http://www.w3.org/TR/REC-xml#NT-CharRef]XML	/* gn: xml-versionXQ */
+[147]   PredefinedEntityRef	          ::=  "&" ("lt" | "gt" | "amp" | "quot" | "apos") ";"                              /* ws: explicitXQ */
+[148]   CharRef	                      ::=  [http://www.w3.org/TR/REC-xml#NT-CharRef]XML                                 /* gn: xml-versionXQ */
 [149]   EscapeQuot	                  ::=  '""'
 [150]   EscapeApos	                  ::=  "''"
 [151]   ElementContentChar	          ::=  Char - [{}<&]
 [152]   QuotAttrContentChar	          ::=  Char - ["{}<&]
 [153]   AposAttrContentChar	          ::=  Char - ['{}<&]
-[154]   Comment	                      ::=  "(:" (CommentContents | Comment)* ":)"	/* ws: explicitXQ */
+[154]   Comment	                      ::=  "(:" (CommentContents | Comment)* ":)"                                       /* ws: explicitXQ */
 /* gn: commentsXQ */
 [155]   CommentContents	              ::=  (Char+ - (Char* ':)' Char*))
-[156]   QName	                        ::=  [http://www.w3.org/TR/REC-xml-names/#NT-QName]Names	/* gn: xml-versionXQ */
-[157]   NCName	                      ::=  [http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names	/* gn: xml-versionXQ */
-[158]   S	                            ::=  [http://www.w3.org/TR/REC-xml#NT-S]XML	/* gn: xml-versionXQ */
-[159]   Char	                        ::=  [http://www.w3.org/TR/REC-xml#NT-Char]XML	/* gn: xml-versionXQ */
+[156]   QName	                        ::=  [http://www.w3.org/TR/REC-xml-names/#NT-QName]Names                          /* gn: xml-versionXQ */
+[157]   NCName	                      ::=  [http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names                         /* gn: xml-versionXQ */
+[158]   S	                            ::=  [http://www.w3.org/TR/REC-xml#NT-S]XML                                       /* gn: xml-versionXQ */
+[159]   Char	                        ::=  [http://www.w3.org/TR/REC-xml#NT-Char]XML                                    /* gn: xml-versionXQ */
