@@ -149,6 +149,17 @@ declare variable $xml :=
 declare variable $name := "Bobby Brown";
 declare variable $helloWorld := <my:node val="Hello, {$name}!">How are you</node>;
 
+(: ComputedConstructors :)
+declare variable $document := document {"hello comment"};
+declare variable $element := element {<node />} {"Hello world"};
+declare variable $element := element my:node {"Hello world"};
+declare variable $attribute := attribute my:attr {"hello comment"};
+declare variable $attribute := attribute {2} {"hello comment"};
+declare variable $text := text{"hello comment"};
+declare variable $comment := comment{"hello comment"};
+declare variable $pi := processing-instruction hello{"hello comment"};
+declare variable $pi := processing-instruction {"hello"} {"hello comment"};
+
 12.2e2234,
 "hello",
 <html>(::)</html>

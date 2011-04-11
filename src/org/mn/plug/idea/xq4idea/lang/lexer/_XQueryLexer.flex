@@ -94,6 +94,10 @@ import com.intellij.psi.tree.IElementType;
 %s _EXPR_LIST_IN_CURLY
 %s _OPT_EXPR_LIST_IN_BRACE
 %s _EXPR_LIST_OR_RBRACE
+%s _OPT_EXPR_LIST_IN_CURLY
+%s _EXPR_LIST_OR_RCURLY
+%s _EL_IN_CURLY_OR_QNAME
+%s _EL_IN_CURLY_OR_NCNAME
 
 // If expression
 %s _IF_EXPR
@@ -647,10 +651,20 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   // flattened Ordered and Unordered Expressions
   "ordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
   "unordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
-  // flattened Constructor
+
+  // flattened DirectConstructor
   "<!--" { pushState(_PREDICATE_LIST); yybegin(XML_COMMENT); return XML_COMMENT_START; }
   "<?" { pushState(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
   "<" { pushState(_XML_END_TAG); pushState(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
+
+  // flattened ComputedConstructor
+  "document" {pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_DOCUMENT;}
+  "element" {pushState(_PREDICATE_LIST); pushState(_OPT_EXPR_LIST_IN_CURLY); yybegin(_EL_IN_CURLY_OR_QNAME); return KW_ELEMENT;}
+  "attribute" {pushState(_PREDICATE_LIST); pushState(_OPT_EXPR_LIST_IN_CURLY); yybegin(_EL_IN_CURLY_OR_QNAME); return KW_ATTRIBUTE;}
+  "text" {pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_TEXT;}
+  "comment" {pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_COMMENT;}
+  "processing-instruction" {pushState(_PREDICATE_LIST); pushState(_OPT_EXPR_LIST_IN_CURLY); yybegin(_EL_IN_CURLY_OR_NCNAME); return KW_PROCESSING_INSTRUCTION;}
+
   // flattened AxisStep
   "child" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_CHILD;}
   "descendant" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_DESCENDANT;}
@@ -664,6 +678,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "preceeding-sibling" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_ATTRIBUTE;}
   "preceeding" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_SELF;}
   "ancestor-or-self" { pushState(_PREDICATE_LIST); pushState(_NODE_TEST); yybegin(_COLONCOLON); return KW_DESCENDANT_OR_SELF;}
+
   // the @ is optional so we need to test here for the rest
   "@" { pushState(_PREDICATE_LIST); yybegin(_NODE_TEST); return OP_AT;}
   {_NS} {yypushback(yylength()); pushState(_PREDICATE_LIST); yybegin(_NODE_TEST);}
@@ -673,6 +688,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_PREDICATE_LIST> {
   "[" {pushState(_PREDICATE_LIST); pushState(_CLOSE_SQUARE); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LSQUARE; }
   [^\[\x20\x09\x0D\x0A]+ {yypushback(yylength()); popState(); }
+}
+
+<_EL_IN_CURLY_OR_QNAME> {
+  "{" {yypushback(yylength()); yybegin(_EXPR_LIST_IN_CURLY); }
+  {QName} {yypushback(yylength()); yybegin(_QNAME); }
+}
+
+<_EL_IN_CURLY_OR_NCNAME> {
+  "{" {yypushback(yylength()); yybegin(_EXPR_LIST_IN_CURLY); }
+  {NCName} {yypushback(yylength()); yybegin(_NCNAME); }
 }
 
 <_NODE_TEST> {
@@ -797,6 +822,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_EXPR_LIST_OR_RBRACE> {
   ")" {popState(); return OP_RBRACE;}
   [^\)\x20\x09\x0D\x0A]+ {yypushback(yylength()); pushState(_CLOSE_BRACE); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); }
+}
+<_OPT_EXPR_LIST_IN_CURLY> {
+  "{" {yybegin(_EXPR_LIST_OR_RCURLY); return OP_LCURLY;}
+}
+<_EXPR_LIST_OR_RCURLY> {
+  "}" {popState(); return OP_RCURLY; }
+  {S} {return WHITE_SPACE;}
+  [^\}] {yypushback(yylength()); pushState(_CLOSE_CURLY); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); }
 }
 
 // ("preserve" | "split") ";"

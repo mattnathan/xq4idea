@@ -160,5 +160,5 @@ public interface XQueryTokenTypes {
   IElementType KW_ANCESTOR_OR_SELF = new XQueryElementType("ANCESTOR_OR_SELF");
   IElementType KW_PRECEDING = new XQueryElementType("PRECEDING");
   IElementType KW_PRECEDING_SIBLING = new XQueryElementType("PRECEDING_SIBLING");
-  IElementType KW_ = new XQueryElementType("");
+  IElementType KW_DOCUMENT = new XQueryElementType("");
 }

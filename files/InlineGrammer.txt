@@ -95,7 +95,7 @@
                                         |  (<"attribute" QName "{"> | (<"attribute" "{"> Expr "}" "{")) Expr? "}"
                                         |  <"text" "{"> Expr "}"
                                         |  <"comment" "{"> Expr "}"
-                                        |  (<"processing-instruction" NCName "{"> | (<"processing-instruction" "{"> Expr "} " "{")) Expr? "}"
+                                        |  (<"processing-instruction" NCName "{"> | (<"processing-instruction" "{"> Expr "}" "{")) Expr? "}"
                                         |  <"ordered" "{"> Expr "}"
                                         |  <"unordered" "{"> Expr "}"
                                         |  "@"? NoteTest
