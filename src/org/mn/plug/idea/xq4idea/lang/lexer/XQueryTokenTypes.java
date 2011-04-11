@@ -52,6 +52,10 @@ public interface XQueryTokenTypes {
   IElementType XML_COMMENT_END = new XQueryElementType("-->");
 
   // xml stuff
+  IElementType XML_TAG_START = new XQueryElementType("XML_TAG_START <");
+  IElementType XML_EMPTYTAG_END = new XQueryElementType("XML_EMPTYTAG_END />");
+  IElementType XML_TAG_END = new XQueryElementType("XML_TAG_END >");
+  IElementType XML_CLOSETAG_START = new XQueryElementType("XML_CLOSETAG_START </");
   IElementType XML_PI_START = new XQueryElementType("<?");
   IElementType XML_PI_END = new XQueryElementType("?>");
   IElementType XML_PI_NAME = new XQueryElementType("XML_PI_NAME");

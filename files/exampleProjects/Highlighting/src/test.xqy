@@ -138,6 +138,10 @@ declare variable $xmlProcessingInstruction :=
     <?xml version="my&#333;hello &#x12abDE; &lt;" encoding="UTF-{
             if ($var) then $var else $var
          } continue the string" ?>;
+declare variable $xml :=
+    <my:node attr = "value" code = "{$var}">
+            "content"
+    </my:node>;
 
 
 12.2e2234
