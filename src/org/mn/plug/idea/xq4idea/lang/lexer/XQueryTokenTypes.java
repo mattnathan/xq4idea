@@ -85,6 +85,10 @@ public interface XQueryTokenTypes {
   IElementType XQ_DOUBLE_LITERAL = new XQueryElementType("XQ_DOUBLE_LITERAL");
   IElementType XQ_DECIMAL_LITERAL = new XQueryElementType("XQ_DECIMAL_LITERAL");
 
+  IElementType XQ_PRAGMA_START = new XQueryElementType("(#");
+  IElementType XQ_PRAGMA_CHAR = new XQueryElementType("XQ_PRAGMA_CHAR");
+  IElementType XQ_PRAGMA_END = new XQueryElementType("#)");
+
   // keywords
   IElementType KW_XQUERY = new XQueryElementType("XQUERY");
   IElementType KW_VERSION = new XQueryElementType("VERSION");

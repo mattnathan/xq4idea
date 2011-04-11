@@ -160,6 +160,9 @@ declare variable $comment := comment{"hello comment"};
 declare variable $pi := processing-instruction hello{"hello comment"};
 declare variable $pi := processing-instruction {"hello"} {"hello comment"};
 
+declare variable $pragma := (#some pragma content #) {};declare variable $pragma := (#some pragma content #) {};
+declare variable $pragma := (#q:name pragma content #)(# more pragma #) {};
+
 12.2e2234,
 "hello",
 <html>(::)</html>

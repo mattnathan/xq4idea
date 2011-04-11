@@ -206,6 +206,9 @@ import com.intellij.psi.tree.IElementType;
 %s _OPEN_SQUARE
 %s _CLOSE_SQUARE
 %x _CLOSE_TAG
+%s _PRAGMA
+%x _PRAGMA_
+%x _PRAGMA_CONTENT
 
 %s _SEP
 %s _VARNAME
@@ -622,6 +625,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "/" {popState(); return OP_SLASH;}
   "//" {popState(); return OP_SLASHSLASH; }
   "validate" {yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
+  "(#" {pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
   [^] {yypushback(yylength()); yybegin(_STEP_EXPR); }
 }
 <_VALIDATE_EXPR_X> {
@@ -634,6 +638,20 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_FILTER_EXPR> {
   "~" {}
 }
+<_PRAGMA> {
+  "(#" {pushState(); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
+  {S} {return WHITE_SPACE;}
+  [^] {yypushback(yylength()); popState(); }
+}
+<_PRAGMA_> {
+  {S} {return XQ_PRAGMA_CHAR; }
+  {QName} {yypushback(yylength()); pushState(_PRAGMA_CONTENT); yybegin(_QNAME); }
+}
+<_PRAGMA_CONTENT> {
+  [^#]|("#"[^)]) {return XQ_PRAGMA_CHAR; }
+  "#)" {popState(); return XQ_PRAGMA_END; }
+}
+
 <_STEP_EXPR> {
   // flattened Literals
   "\"" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(_STRINGLITERAL); }
