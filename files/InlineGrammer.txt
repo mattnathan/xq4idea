@@ -130,7 +130,7 @@
 [95]    DirAttributeList	            ::=  (S (QName S? "=" S? DirAttributeValue)?)*                                    /* ws: explicitXQ */
 [96]    DirAttributeValue	            ::=  ('"' (EscapeQuot | QuotAttrValueContent)* '"')
                                         |  ("'" (EscapeApos | AposAttrValueContent)* "'")                               /* ws: explicitXQ */
-[97]    QuotAttrValueContent	        ::=  QuotAttrCo ntentChar
+[97]    QuotAttrValueContent	        ::=  QuotAttrContentChar
                                         |  CommonContent
 [98]    AposAttrValueContent	        ::=  AposAttrContentChar
                                         |  CommonContent

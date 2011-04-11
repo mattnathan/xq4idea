@@ -35,6 +35,8 @@ public interface XQueryTokenTypes {
   IElementType OP_SLASHSLASH = new XQueryElementType("//");
   IElementType OP_COLONCOLON = new XQueryElementType("::");
   IElementType OP_AT = new XQueryElementType("@");
+  IElementType OP_LCURLYCURLY = new XQueryElementType("{{");
+  IElementType OP_RCURLYCURLY = new XQueryElementType("}}");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
@@ -54,8 +56,15 @@ public interface XQueryTokenTypes {
   IElementType XML_PI_END = new XQueryElementType("?>");
   IElementType XML_PI_NAME = new XQueryElementType("XML_PI_NAME");
   IElementType XML_PI_CHAR = new XQueryElementType("XML_PI_CHAR");
+  IElementType XML_STR_START = new XQueryElementType("XML_STR_START");
+  IElementType XML_STR_CHAR = new XQueryElementType("XML_STR_CHAR");
+  IElementType XML_STR_END = new XQueryElementType("XML_STR_END");
+  IElementType XML_STR_ESCAPE_QUOTE = new XQueryElementType("\"\"");
+  IElementType XML_STR_ESCAPE_APOS = new XQueryElementType("''");
+  IElementType XML_STR_CHAR_REF = new XQueryElementType("XML_STR_CHAR_REF");
+  IElementType XML_STR_ENT_REF = new XQueryElementType("XML_STR_ENT_REF");
 
-  // literals
+  // XQuery literals
   IElementType XQ_STR = new XQueryElementType("XQ_STR");
   IElementType XQ_STR_START = new XQueryElementType("XQ_STR_START");
   IElementType XQ_STR_CHAR = new XQueryElementType("XQ_STR_CHAR");

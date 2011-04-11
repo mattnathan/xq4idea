@@ -11,7 +11,7 @@ public class IntStack {
   private int size = 0;
 
   public IntStack() {
-    this(128);
+    this(256);
   }
 
   public IntStack(int size) {

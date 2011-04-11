@@ -37,6 +37,8 @@ import com.intellij.psi.tree.IElementType;
 // strings
 %x STR_START_QUOTE
 %x STR_START_APOS
+%x _XML_STR_START_QUOTE
+%x _XML_STR_START_APOS
 
 // partial matches required for comment handling
 %s _XQUERY
@@ -178,6 +180,8 @@ import com.intellij.psi.tree.IElementType;
 %s _XML_PI_END
 %x _XML_ATTRLIST_START
 %x _XML_ATTR_NAME
+%s _XML_ATTR_VALUE
+%x _XML_STR_COMMON_CONTENT
 
 %s _EMPTY_BRACES
 %s _EMPTY_BRACES_
@@ -216,6 +220,8 @@ IntegerLiteral = {Digits}
 // words
 
 Char = [\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]
+CharRef = ("&#"[0-9]+";") | ("&#x"[0-9a-fA-F]+";")
+PredefinedEntityRef = "&"("lt"|"gt"|"amp"|"quot"|"apos")";"
 
 // Character classes (XML 1.0)
 
@@ -690,7 +696,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   [^] { yypushback(yylength()); popState(); }
 }
 <_XML_ATTR_NAME> {
-  {QName} {yypushback(yylength()); pushState(_STRINGLITERAL); pushState(_EQUALS); yybegin(_QNAME); }
+  {QName} {yypushback(yylength()); pushState(_XML_ATTR_VALUE); pushState(_EQUALS); yybegin(_QNAME); }
   [^] {yypushback(yylength()); popState(); }
 }
 
@@ -806,6 +812,30 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "''" { return XQ_STR_ESCAPE_APOS; }
   "'" { popState(); return XQ_STR_END; }
   [^] { return XQ_STR_CHAR; }
+}
+<_XML_ATTR_VALUE> {
+  "\"" { yybegin(_XML_STR_START_QUOTE); return XML_STR_START; }
+  "'" {yybegin(_XML_STR_START_APOS); return XML_STR_START; }
+}
+<_XML_STR_START_QUOTE> {
+  "\"\"" { return XML_STR_ESCAPE_QUOTE; }
+  "\"" { popState(); return XML_STR_END; }
+  [^\"\{\}\<\&] { return XML_STR_CHAR; }
+  [^] { yypushback(yylength()); pushState(_XML_STR_START_QUOTE); yybegin(_XML_STR_COMMON_CONTENT); }
+}
+<_XML_STR_START_APOS> {
+  "''" { return XML_STR_ESCAPE_APOS; }
+  "'" { popState(); return XML_STR_END; }
+  [^\'\{\}\<\&] { return XML_STR_CHAR; }
+  [^] { yypushback(yylength()); pushState(_XML_STR_START_APOS); yybegin(_XML_STR_COMMON_CONTENT); }
+}
+<_XML_STR_COMMON_CONTENT> {
+  {CharRef} {popState(); return XML_STR_CHAR_REF; }
+  {PredefinedEntityRef} {popState(); return XML_STR_ENT_REF; }
+  "{{" {popState(); return OP_LCURLYCURLY; }
+  "}}" {popState(); return OP_RCURLYCURLY; }
+  "{" {yypushback(yylength()); yybegin(_EXPR_LIST_IN_CURLY); }
+  [^] {popState(); return BAD_CHARACTER; }
 }
 
 // ("at" URILiteral ("," URILiteral)*)?
