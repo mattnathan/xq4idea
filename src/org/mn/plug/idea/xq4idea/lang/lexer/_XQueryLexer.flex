@@ -37,6 +37,7 @@ import com.intellij.psi.tree.IElementType;
 // strings
 %x STR_START_QUOTE
 %x STR_START_APOS
+%x _STR_COMMON_CONTENT
 %x _XML_STR_START_QUOTE
 %x _XML_STR_START_APOS
 
@@ -806,12 +807,19 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <STR_START_QUOTE> {
   "\"\"" { return XQ_STR_ESCAPE_QUOTE; }
   "\"" { popState(); return XQ_STR_END; }
-  [^] { return XQ_STR_CHAR; }
+  [^\"\&] { return XQ_STR_CHAR; }
+  [^] { yypushback(yylength()); pushState(); yybegin(_STR_COMMON_CONTENT); }
 }
 <STR_START_APOS> {
   "''" { return XQ_STR_ESCAPE_APOS; }
   "'" { popState(); return XQ_STR_END; }
-  [^] { return XQ_STR_CHAR; }
+  [^\'\&] { return XQ_STR_CHAR; }
+  [^] { yypushback(yylength()); pushState(); yybegin(_STR_COMMON_CONTENT); }
+}
+<_STR_COMMON_CONTENT> {
+  {CharRef} {popState(); return XQ_STR_CHAR_REF; }
+  {PredefinedEntityRef} {popState(); return XQ_STR_ENT_REF;}
+  [^] {popState(); return BAD_CHARACTER; }
 }
 <_XML_ATTR_VALUE> {
   "\"" { yybegin(_XML_STR_START_QUOTE); return XML_STR_START; }
@@ -821,13 +829,13 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "\"\"" { return XML_STR_ESCAPE_QUOTE; }
   "\"" { popState(); return XML_STR_END; }
   [^\"\{\}\<\&] { return XML_STR_CHAR; }
-  [^] { yypushback(yylength()); pushState(_XML_STR_START_QUOTE); yybegin(_XML_STR_COMMON_CONTENT); }
+  [^] { yypushback(yylength()); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
 }
 <_XML_STR_START_APOS> {
   "''" { return XML_STR_ESCAPE_APOS; }
   "'" { popState(); return XML_STR_END; }
   [^\'\{\}\<\&] { return XML_STR_CHAR; }
-  [^] { yypushback(yylength()); pushState(_XML_STR_START_APOS); yybegin(_XML_STR_COMMON_CONTENT); }
+  [^] { yypushback(yylength()); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
 }
 <_XML_STR_COMMON_CONTENT> {
   {CharRef} {popState(); return XML_STR_CHAR_REF; }

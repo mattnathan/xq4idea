@@ -71,6 +71,8 @@ public interface XQueryTokenTypes {
   IElementType XQ_STR_END = new XQueryElementType("XQ_STR_END");
   IElementType XQ_STR_ESCAPE_QUOTE = new XQueryElementType("\"\"");
   IElementType XQ_STR_ESCAPE_APOS = new XQueryElementType("''");
+  IElementType XQ_STR_CHAR_REF = new XQueryElementType("XQ_STR_CHAR_REF");
+  IElementType XQ_STR_ENT_REF = new XQueryElementType("XQ_STR_ENT_REF");
   IElementType XQ_INTEGER_LITERAL = new XQueryElementType("XQ_INTEGER_LITERAL");
   IElementType XQ_DOUBLE_LITERAL = new XQueryElementType("XQ_DOUBLE_LITERAL");
   IElementType XQ_DECIMAL_LITERAL = new XQueryElementType("XQ_DECIMAL_LITERAL");

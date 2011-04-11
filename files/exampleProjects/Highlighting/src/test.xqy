@@ -49,11 +49,11 @@ declare variable $var :=
         for $var as void() at $var in ""
         return ""
     let $var2 := 7
-    return "";
+    return "&#333; some other string &apos;";
 declare variable $var :=
     for $var in ""
     return $var;
-declare variable $var as void() := 222.22e2122;
+declare variable $var as void() := 2222.2e2122;
 declare variable $var as void() external ;
 declare variable $var as item() external ;
 declare variable $var as item()* external ;
@@ -135,7 +135,7 @@ declare variable $var := self::comment()[0];
 declare variable $xmlComment := <!-- my xml comment-d -->;
 declare variable $xmlProcessingInstruction := <?name jjjj"" (::) ?>;
 declare variable $xmlProcessingInstruction :=
-    <?xml version="my&#333; hello &lt;" encoding="UTF-{$var}" ?>;
+    <?xml version="my&#333;hello &#x12abDE; &lt;" encoding="UTF-{$var}" ?>;
 
 
 12.2e2234
