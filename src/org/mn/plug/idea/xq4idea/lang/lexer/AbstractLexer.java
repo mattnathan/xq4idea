@@ -12,6 +12,8 @@ public abstract class AbstractLexer {
 
   abstract void yybegin(int state);
 
+  abstract int initialState();
+
   void pushState() {
     pushState(yystate());
   }
@@ -21,6 +23,11 @@ public abstract class AbstractLexer {
   }
 
   void popState() {
-    yybegin(stack.pop());
+    int pop = stack.pop();
+    if (pop == -1) {
+      yybegin(initialState());
+    } else {
+      yybegin(pop);
+    }
   }
 }

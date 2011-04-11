@@ -1,7 +1,6 @@
 
-[1]     Module	                      ::=  VersionDecl? (PrologExpr | LibraryModule)
+[1]     Module	                      ::=  VersionDecl? (PrologExpr | ( ModuleDecl Prolog ))
 [2]     VersionDecl	                  ::=  <"xquery" "version"> StringLiteral ("encoding" StringLiteral)? Separator
-[4]     LibraryModule	                ::=  ModuleDecl Prolog
 [5]     ModuleDecl	                  ::=  <"module" "namespace"> NCName "=" URILiteral Separator
 [6]     Prolog	                      ::=  ((Setter | SchemaImport |  ModuleImport | NamespaceDecl | DefaultNamespaceDecl) Separator)* ((VarDecl | FunctionDecl | OptionDecl) Separator)*
 [7]     Setter	                      ::=  BoundarySpaceDecl 

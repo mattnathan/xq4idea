@@ -26,6 +26,9 @@ import com.intellij.psi.tree.IElementType;
 /////////////////////// User code //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 %{
+  int initialState() {
+    return YYINITIAL;
+  }
 %}
 
 // these are top level states
@@ -187,6 +190,8 @@ import com.intellij.psi.tree.IElementType;
 %x _XML_TAG_NAME
 %x _XML_END_TAG
 %x _XML_CLOSE_TAG
+%x _XML_CDATA_CONTENT
+%x _XML_CDATA_END
 
 %s _EMPTY_BRACES
 %s _EMPTY_BRACES_
@@ -267,14 +272,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 %%
 
 <YYINITIAL> {
-  {IntegerLiteral} {return XQ_INTEGER_LITERAL; }
-  {DoubleLiteral} {return XQ_DOUBLE_LITERAL; }
-  {DecimalLiteral} {return XQ_DECIMAL_LITERAL; }
-
+  {S} { return WHITE_SPACE; }
   "xquery" { yybegin(_XQUERY); return KW_XQUERY; }
   "declare" { yybegin(_DECLARE); return KW_DECLARE; }
   "module" { yybegin(_MODULE); return KW_MODULE; }
   "import" {yybegin(_IMPORT); return KW_IMPORT; }
+  [^] {yypushback(yylength()); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); }
 }
 
 // xquery version "" (encoding "")? ;
@@ -644,8 +647,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   // flattened Ordered and Unordered Expressions
   "ordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
   "unordered" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
-  // todo: flattened Constructor
-  // flattened DirCommentConstructor
+  // flattened Constructor
   "<!--" { pushState(_PREDICATE_LIST); yybegin(XML_COMMENT); return XML_COMMENT_START; }
   "<?" { pushState(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
   "<" { pushState(_XML_END_TAG); pushState(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
@@ -723,7 +725,20 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   [^] {popState(); return BAD_CHARACTER;}
 }
 <_XML_ELEMENT_CONTENT> {
-  [^] {yypushback(yylength()); yybegin(_STRINGLITERAL); }
+  // note, wherever this is used it always repeats
+  // flattened DirElemConstructor
+  "<!--" { pushState(); yybegin(XML_COMMENT); return XML_COMMENT_START; }
+  "<?" { pushState(); pushState(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
+  "<![CDATA[" { pushState(); yybegin(_XML_CDATA_CONTENT); return XML_CDATA_START; }
+  // this is used to escape to the outer element
+  "</" {yypushback(yylength()); popState(); }
+  "<" { pushState(); pushState(_XML_END_TAG); pushState(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
+  [^\{\}\<\&]+ { return XML_ELEMENT_CHAR; }
+  [^] {yypushback(yylength()); pushState(); yybegin(_XML_STR_COMMON_CONTENT);}
+}
+<_XML_CDATA_CONTENT> {
+  [^\]]|("]"[^\]])|("]]"[^\>]) {return XML_CDATA_CHAR;}
+  "]]>" {popState(); return XML_CDATA_END; }
 }
 
 // common formats

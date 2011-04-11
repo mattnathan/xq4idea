@@ -138,12 +138,19 @@ declare variable $xmlProcessingInstruction :=
     <?xml version="my&#333;hello &#x12abDE; &lt;" encoding="UTF-{
             if ($var) then $var else $var
          } continue the string" ?>;
+declare variable $xml := <node> </node>;
 declare variable $xml :=
     <my:node attr = "value" code = "{$var}">
-            "content"
+        <node my="{self::text()}">text</node>
+        Hello, World
+        {"embedded expression"}
+        <![CDATA[ some content ]]>
     </my:node>;
+declare variable $name := "Bobby Brown";
+declare variable $helloWorld := <my:node val="Hello, {$name}!">How are you</node>;
 
-
-12.2e2234
-
-some other text
+12.2e2234,
+"hello",
+<html>(::)</html>
+(: comment :),
+$helloWorld

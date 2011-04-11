@@ -67,6 +67,10 @@ public interface XQueryTokenTypes {
   IElementType XML_STR_ESCAPE_APOS = new XQueryElementType("''");
   IElementType XML_STR_CHAR_REF = new XQueryElementType("XML_STR_CHAR_REF");
   IElementType XML_STR_ENT_REF = new XQueryElementType("XML_STR_ENT_REF");
+  IElementType XML_CDATA_START = new XQueryElementType("<![CDATA[");
+  IElementType XML_CDATA_CHAR = new XQueryElementType("XML_CDATA_CHAR");
+  IElementType XML_CDATA_END = new XQueryElementType("]]>");
+  IElementType XML_ELEMENT_CHAR = new XQueryElementType("XML_ELEMENT_CHAR");
 
   // XQuery literals
   IElementType XQ_STR = new XQueryElementType("XQ_STR");
