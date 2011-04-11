@@ -144,7 +144,7 @@ import com.intellij.psi.tree.IElementType;
 %s _PREDICATE_LIST
 
 // FLWOR states
-// allows for or let repeating, as soon as return, where or order are seen we trasition to body
+// allows for or let repeating, as soon as return, where or order are seen we transition to body
 %s _FLWOR_HEAD
 %s _FLWOR_BODY1
 %s _FLWOR_BODY2
