@@ -166,4 +166,7 @@ public interface XQueryTokenTypes {
   IElementType KW_PRECEDING_SIBLING = new XQueryElementType("PRECEDING_SIBLING");
   IElementType KW_DOCUMENT = new XQueryElementType("DOCUMENT");
   IElementType KW_CAST = new XQueryElementType("CAST");
+  IElementType KW_CASTABLE = new XQueryElementType("CASTABLE");
+  IElementType KW_OF = new XQueryElementType("OF");
+  IElementType KW_INSTANCE = new XQueryElementType("INSTANCE");
 }

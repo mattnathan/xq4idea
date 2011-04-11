@@ -77,16 +77,16 @@ import com.intellij.psi.tree.IElementType;
 
 %s _PARAM
 %s _AS
-%s _AS_
-%x _AS_OCC
-%s _AS_DN
-%s _AS_PI
-%s _AS_ATTR
-%s _AS_SATTR
-%s _AS_AorE
-%s _AS_AorE_
-%s _AS_AorE__
-%s _AS_SELEM
+%s _ITEM_TYPE
+%x _ITEM_TYPE_OCC
+%s _ITEM_TYPE_DN
+%s _ITEM_TYPE_PI
+%s _ITEM_TYPE_ATTR
+%s _ITEM_TYPE_SATTR
+%s _ITEM_TYPE_AorE
+%s _ITEM_TYPE_AorE_
+%s _ITEM_TYPE_AorE__
+%s _ITEM_TYPE_SELEM
 
 // Expression states
 %s _EXPR_SINGLE
@@ -144,10 +144,10 @@ import com.intellij.psi.tree.IElementType;
 %s _FORWARD_STEP
 %s _STEP_EXPR
 
-%s _CAST_AS_EXPR
-%s _CASABLE_EXPR
-%s _TREAT_EXPR
-%s _INSTANCEOF_EXPR
+%x _CAST_AS_EXPR
+%x _CASTABLE_AS_EXPR
+%x _TREAT_AS_EXPR
+%x _INSTANCEOF_EXPR
 
 %s _NODE_TEST
 
@@ -218,6 +218,7 @@ import com.intellij.psi.tree.IElementType;
 %s _COLONCOLON
 %x _EQUALS
 %s _KW_AS
+%s _KW_OF
 
 %s _NCNAME
 %s _QNAME
@@ -404,52 +405,52 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "$" {yypushback(1); pushState(_AS); yybegin(_VARNAME);}
 }
 <_AS> {
-  "as" {yybegin(_AS_); return KW_AS; }
+  "as" {yybegin(_ITEM_TYPE); return KW_AS; }
   {NS} {yypushback(yylength()); popState();}
 }
-<_AS_> {
+<_ITEM_TYPE> {
   "void" {yybegin(_EMPTY_BRACES); return KW_VOID;}
-  "item" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ITEM;}
-  "node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
-  "text" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
-  "comment" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
-  "document-node" {pushState(_AS_OCC); pushState(_AS_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
-  "processing-instruction" {pushState(_AS_OCC); pushState(_AS_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
-  "attribute" {pushState(_AS_OCC); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
-  "schema-attribute" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
-  "element" {pushState(_AS_OCC); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
-  "schema-element" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
-  {QName} {yypushback(yylength()); pushState(_AS_OCC); yybegin(_QNAME);}
+  "item" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_ITEM;}
+  "node" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
+  "text" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
+  "comment" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
+  "document-node" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
+  "processing-instruction" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
+  "attribute" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
+  "schema-attribute" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
+  "element" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
+  "schema-element" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
+  {QName} {yypushback(yylength()); pushState(_ITEM_TYPE_OCC); yybegin(_QNAME);}
 }
-<_AS_OCC> {
+<_ITEM_TYPE_OCC> {
   "?" {popState(); return OP_QUESTION;}
   "*" {popState(); return OP_STAR;}
   "+" {popState(); return OP_PLUS;}
   [^\?\*\+] {popState(); yypushback(1);}
 }
 // as processing-instruction( NCName | "")
-<_AS_PI> {
+<_ITEM_TYPE_PI> {
   "\""|"'" { pushState(_CLOSE_BRACE); yypushback(1); yybegin(_STRINGLITERAL); }
   {NCName} { pushState(_CLOSE_BRACE); yypushback(yylength()); yybegin(_NCNAME); }
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
 // as element( (QName|* (, QName "?"? )? )? )? )
-<_AS_AorE> {
-  "*" {yybegin(_AS_AorE_); return OP_STAR; }
-  {QName} {yypushback(yylength()); pushState(_AS_AorE_); yybegin(_QNAME); }
+<_ITEM_TYPE_AorE> {
+  "*" {yybegin(_ITEM_TYPE_AorE_); return OP_STAR; }
+  {QName} {yypushback(yylength()); pushState(_ITEM_TYPE_AorE_); yybegin(_QNAME); }
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
-<_AS_AorE_> {
-  "," {pushState(_AS_AorE__); yybegin(_QNAME); return OP_COMMA;}
+<_ITEM_TYPE_AorE_> {
+  "," {pushState(_ITEM_TYPE_AorE__); yybegin(_QNAME); return OP_COMMA;}
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
-<_AS_AorE__> {
+<_ITEM_TYPE_AorE__> {
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
   "?" {yybegin(_CLOSE_BRACE); return OP_QUESTION; }
 }
 // as document-node( (ElementTest | ElementSchemaTest)? )
-<_AS_DN> {
-  "element" {pushState(_CLOSE_BRACE); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
+<_ITEM_TYPE_DN> {
+  "element" {pushState(_CLOSE_BRACE); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
   "schema-element" {pushState(_CLOSE_BRACE); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
@@ -519,10 +520,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_TYPESWITCH_EXPR_CASE_> {
   "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_CASE_AS); yybegin(_VARNAME);}
-  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_AS_); }
+  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_ITEM_TYPE); }
 }
 <_TYPESWITCH_EXPR_CASE_AS> {
-  "as" {yybegin(_AS_); return KW_AS; }
+  "as" {yybegin(_ITEM_TYPE); return KW_AS; }
 }
 <_TYPESWITCH_EXPR_DEFAULT, _TYPESWITCH_EXPR_CASE2> {
   "default" {yybegin(_TYPESWITCH_EXPR_DEFAULT_); return KW_DEFAULT; }
@@ -624,16 +625,39 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_INSTANCEOF_EXPR> {
   "+" {return OP_PLUS; }
   "-" {return OP_MINUS; }
-  "/" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASH;}
-  "//" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASHSLASH; }
-  "validate" {pushState(_CAST_AS_EXPR); yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
-  "(#" {pushState(_CAST_AS_EXPR); pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
-  [^] {pushState(_CAST_AS_EXPR); yypushback(yylength()); yybegin(_STEP_EXPR); }
+  "/" {/*pushState(_CAST_AS_EXPR);*/ yybegin(_STEP_EXPR); return OP_SLASH;}
+  "//" {/*pushState(_CAST_AS_EXPR);*/ yybegin(_STEP_EXPR); return OP_SLASHSLASH; }
+  "validate" {/*pushState(_CAST_AS_EXPR);*/ yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
+  "(#" {/*pushState(_CAST_AS_EXPR);*/ pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
+  [^] {/*pushState(_CAST_AS_EXPR);*/ yypushback(yylength()); yybegin(_STEP_EXPR); }
 }
 <_CAST_AS_EXPR> {
-  "cast" { pushState(_OPT_QUESTION); pushState(_QNAME); pushState(_KW_AS); return KW_CAST;}
+  "castable" {yypushback(yylength()); yybegin(_CASTABLE_AS_EXPR); }
+  "cast" { pushState(_CASTABLE_AS_EXPR); pushState(_OPT_QUESTION); pushState(_QNAME); yybegin(_KW_AS); return KW_CAST;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  [:letter:]+ { yybegin(_CASTABLE_AS_EXPR); yypushback(yylength()); }
+  [^] { yybegin(_CASTABLE_AS_EXPR); yypushback(yylength()); }
+}
+<_CASTABLE_AS_EXPR> {
+  "castable" { pushState(_TREAT_AS_EXPR); pushState(_OPT_QUESTION); pushState(_QNAME); yybegin(_KW_AS); return KW_CASTABLE;}
+  {S} {return WHITE_SPACE;}
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  [:letter:]+ { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
+  [^] { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
+}
+<_TREAT_AS_EXPR> {
+  "treat" { pushState(_INSTANCEOF_EXPR); /*pushState(_ITEM_TYPE);*/ yybegin(_KW_AS); return KW_CASTABLE;}
+  {S} {return WHITE_SPACE;}
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  [:letter:]+ { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
+  [^] { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
+}
+<_INSTANCEOF_EXPR> {
+  "instance" { /*pushState(_ITEM_TYPE);*/ yybegin(_KW_OF); return KW_INSTANCE;}
+  {S} {return WHITE_SPACE;}
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  [:letter:]+ {yypushback(yylength()); popState(); }
   [^] {yypushback(yylength()); popState(); }
 }
 
@@ -730,16 +754,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_NODE_TEST> {
   "*" {popState(); return OP_STAR;}
   "void" {yybegin(_EMPTY_BRACES); return KW_VOID;}
-  "item" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_ITEM;}
-  "node" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
-  "text" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
-  "comment" {pushState(_AS_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
-  "document-node" {pushState(_AS_OCC); pushState(_AS_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
-  "processing-instruction" {pushState(_AS_OCC); pushState(_AS_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
-  "attribute" {pushState(_AS_OCC); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
-  "schema-attribute" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
-  "element" {pushState(_AS_OCC); pushState(_AS_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
-  "schema-element" {pushState(_AS_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
+  "item" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_ITEM;}
+  "node" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
+  "text" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
+  "comment" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
+  "document-node" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
+  "processing-instruction" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
+  "attribute" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
+  "schema-attribute" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
+  "element" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
+  "schema-element" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
   {WildcardQName} {yypushback(yylength()); yybegin(_WILDCARD_QNAME); }
 }
 
@@ -816,6 +840,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_KW_AS> {
   "as" {popState(); return KW_AS;}
+}
+<_KW_OF> {
+  "of" {popState(); return KW_OF;}
 }
 
 <_OPEN_BRACE> {
