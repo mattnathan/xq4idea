@@ -132,11 +132,6 @@ import com.intellij.psi.tree.IElementType;
 %s _MULT_EXPR
 %s _UNION_EXPR
 %s _INTERSECT_EXPR
-%s _INSTANCE_OF_EXPR
-%s _TREAT_EXPR
-%s _CASTABLE_EXPR
-%s _CAST_EXPR
-%s _INSTANCEOF_EXPR
 %s _VALUE_EXPR
 %s _VALIDATE_EXPR
 %s _VALIDATE_EXPR_X
@@ -148,6 +143,11 @@ import com.intellij.psi.tree.IElementType;
 %s _PARENTHESIZED_EXPR
 %s _FORWARD_STEP
 %s _STEP_EXPR
+
+%s _CAST_AS_EXPR
+%s _CASABLE_EXPR
+%s _TREAT_EXPR
+%s _INSTANCEOF_EXPR
 
 %s _NODE_TEST
 
@@ -210,12 +210,14 @@ import com.intellij.psi.tree.IElementType;
 %x _PRAGMA_
 %x _PRAGMA_CONTENT
 
+%x _OPT_QUESTION
 %s _SEP
 %s _VARNAME
 %s _STAR
 %s _COLON
 %s _COLONCOLON
 %x _EQUALS
+%s _KW_AS
 
 %s _NCNAME
 %s _QNAME
@@ -622,12 +624,19 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_INSTANCEOF_EXPR> {
   "+" {return OP_PLUS; }
   "-" {return OP_MINUS; }
-  "/" {popState(); return OP_SLASH;}
-  "//" {popState(); return OP_SLASHSLASH; }
-  "validate" {yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
-  "(#" {pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
-  [^] {yypushback(yylength()); yybegin(_STEP_EXPR); }
+  "/" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASH;}
+  "//" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASHSLASH; }
+  "validate" {pushState(_CAST_AS_EXPR); yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
+  "(#" {pushState(_CAST_AS_EXPR); pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
+  [^] {pushState(_CAST_AS_EXPR); yypushback(yylength()); yybegin(_STEP_EXPR); }
 }
+<_CAST_AS_EXPR> {
+  "cast" { pushState(_OPT_QUESTION); pushState(_QNAME); pushState(_KW_AS); return KW_CAST;}
+  {S} {return WHITE_SPACE;}
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  [^] {yypushback(yylength()); popState(); }
+}
+
 <_VALIDATE_EXPR_X> {
   "lax" {yybegin(_VALIDATE_EXPR_); return KW_LAX;}
   "strict" {yybegin(_VALIDATE_EXPR_); return KW_STRICT;}
@@ -798,6 +807,15 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {S} {return WHITE_SPACE;}
   "=" {popState(); return OP_EQUALS; }
   [^] {popState(); return BAD_CHARACTER; }
+}
+<_OPT_QUESTION> {
+  "?" { popState(); return OP_QUESTION; }
+  {S} { return WHITE_SPACE; }
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  [^] {yypushback(yylength()); popState(); }
+}
+<_KW_AS> {
+  "as" {popState(); return KW_AS;}
 }
 
 <_OPEN_BRACE> {

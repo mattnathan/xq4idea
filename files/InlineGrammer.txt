@@ -68,8 +68,8 @@
                                               |  RelativePathExpr
                                               |  Pragma+ "{" Expr? "}"
                                            )
-                                           ( <"cast" "as"> SingleType )?
-                                           ( <"castable" "as"> SingleType )?
+                                           ( <"cast" "as"> QName "?"? )?
+                                           ( <"castable" "as"> QName "?"? )?
                                            ( <"treat" "as"> SequenceType )?
                                            ( <"instance" "of"> SequenceType )?
 [59]    ValueExpr	                    ::=
@@ -150,7 +150,6 @@
                                         |  <"text" "{"> Expr "}"
                                         |  <"comment" "{"> Expr "}"
                                         |  (<"processing-instruction" NCName "{"> | (<"processing-instruction" "{"> Expr "} " "{")) Expr? "}"
-[115]   SingleType	                  ::=  QName "?"?
 [116]   TypeDeclaration	              ::=  "as" SequenceType
 [117]   SequenceType	                ::=  (ItemType ("?" | "*" | "+")?)
                                         |  <"void" "(" ")">

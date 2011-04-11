@@ -163,6 +163,8 @@ declare variable $pi := processing-instruction {"hello"} {"hello comment"};
 declare variable $pragma := (#some pragma content #) {};declare variable $pragma := (#some pragma content #) {};
 declare variable $pragma := (#q:name pragma content #)(# more pragma #) {};
 
+declare variable $castas := "hello" cast as my:type?;
+
 12.2e2234,
 "hello",
 <html>(::)</html>
