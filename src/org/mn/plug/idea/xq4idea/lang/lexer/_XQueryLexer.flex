@@ -4,10 +4,10 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
 // this lexer follows the principles set out in http://www.w3.org/TR/xquery-xpath-parsing/
+@SuppressWarnings({"UnusedAssignment", "FieldCanBeLocal", "AccessStaticViaInstance", "JavaDoc", "ConstantConditions"})
 /**
  * Generated lexer
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "FieldCanBeLocal", "AccessStaticViaInstance", "JavaDoc", "ConstantConditions"})
 %%
 
 %class _XQueryLexer
@@ -116,7 +116,6 @@ import com.intellij.psi.tree.IElementType;
 %s _TYPESWITCH_EXPR
 %s _TYPESWITCH_EXPR_
 %s _TYPESWITCH_EXPR__
-%s _TYPESWITCH_EXPR_DEFAULT
 %s _TYPESWITCH_EXPR_DEFAULT_
 %s _TYPESWITCH_EXPR_CASE
 %s _TYPESWITCH_EXPR_CASE2
@@ -125,23 +124,11 @@ import com.intellij.psi.tree.IElementType;
 %s _TYPESWITCH_EXPR_RETURN
 
 // other expressions
-%s _OR_EXPR
-%s _AND_EXPR
-%s _RANGE_EXPR
-%s _ADD_EXPR
-%s _MULT_EXPR
-%s _UNION_EXPR
-%s _INTERSECT_EXPR
 %s _VALUE_EXPR
-%s _VALIDATE_EXPR
 %s _VALIDATE_EXPR_X
 %s _VALIDATE_EXPR_
 %s _VALIDATE_EXPR__
-%s _PATH_EXPR
 %s _FILTER_EXPR
-%s _PRIMARY_EXPR
-%s _PARENTHESIZED_EXPR
-%s _FORWARD_STEP
 %s _STEP_EXPR
 
 %x _UNARY_EXPR
@@ -162,8 +149,6 @@ import com.intellij.psi.tree.IElementType;
 %s _FLWOR_BODY3
 
 %s _FOR_CLAUSE
-%s _FOR_CLAUSE_
-%s _FOR_CLAUSE_VAR
 %s _FOR_CLAUSE_VAR_POS
 %s _FOR_CLAUSE_VAR_POS_
 %s _FOR_CLAUSE_VAR_IN
@@ -181,7 +166,6 @@ import com.intellij.psi.tree.IElementType;
 %s _ORDER_CLAUSE_MODIFIER_EMPTY
 %s _ORDER_CLAUSE_MODIFIER_EMPTY_
 %s _ORDER_CLAUSE_MODIFIER_COLLATION
-%s _STABLE_ORDER_CLAUSE
 
 // xml states
 %x _XML_PI_NAME
@@ -526,7 +510,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_TYPESWITCH_EXPR_CASE_AS> {
   "as" {yybegin(_ITEM_TYPE); return KW_AS; }
 }
-<_TYPESWITCH_EXPR_DEFAULT, _TYPESWITCH_EXPR_CASE2> {
+<_TYPESWITCH_EXPR_CASE2> {
   "default" {yybegin(_TYPESWITCH_EXPR_DEFAULT_); return KW_DEFAULT; }
 }
 <_TYPESWITCH_EXPR_DEFAULT_> {
@@ -547,7 +531,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_FLWOR_BODY2, _FLWOR_BODY3, _FLWOR_HEAD> {
   "order" {pushState(_FLWOR_BODY3); yypushback(yylength()); yybegin(_ORDER_CLAUSE); }
-  "stable" {pushState(_FLWOR_BODY3); yypushback(yylength()); yybegin(_ORDER_CLAUSE); }
+  "stable" {pushState(_FLWOR_BODY3); yybegin(_ORDER_CLAUSE); return KW_STABLE; }
 }
 <_FLWOR_BODY3, _FLWOR_HEAD> {
   "return" {yybegin(_EXPR_SINGLE); return KW_RETURN;}
@@ -557,10 +541,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 //              ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*
 <_FOR_CLAUSE> {
   "for" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); yybegin(_PARAM); return KW_FOR; }
-}
-<_FOR_CLAUSE_> {
-  "," {yybegin(_FOR_CLAUSE); return OP_COMMA; }
-  {NS} {yypushback(yylength()); popState(); }
 }
 <_FOR_CLAUSE_VAR_POS> {
   "at" { yybegin(_VARNAME); return KW_AT; }
@@ -591,9 +571,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // OrderSpecList := OrderSpec ("," OrderSpec)*
 // OrderSpec     := ExprSingle OrderModifier
 // OrderModifier := ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?
-<_STABLE_ORDER_CLAUSE> {
-  "stable" {yybegin(_ORDER_CLAUSE); return KW_STABLE; }
-}
 <_ORDER_CLAUSE> {
   "order" {yybegin(_ORDER_CLAUSE_BY); return KW_ORDER; }
 }

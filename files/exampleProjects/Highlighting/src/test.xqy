@@ -52,6 +52,7 @@ declare variable $var :=
     return "&#333; some other string &apos;";
 declare variable $var :=
     for $var in ""
+    stable order by $var
     return $var;
 declare variable $var as void() := 2222.2e2122;
 declare variable $var as void() external ;

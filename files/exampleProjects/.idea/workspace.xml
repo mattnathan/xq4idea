@@ -62,13 +62,18 @@
       <file leaf-file-name="test.xqy" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="165" column="50" selection-start="6177" selection-end="6177" vertical-scroll-proportion="0.5887446">
+            <state line="54" column="10" selection-start="1613" selection-end="1613" vertical-scroll-proportion="0.34632036">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindManager">
+    <FindUsagesManager>
+      <setting name="OPEN_NEW_TAB" value="false" />
+    </FindUsagesManager>
   </component>
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
@@ -292,7 +297,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="165" column="50" selection-start="6177" selection-end="6177" vertical-scroll-proportion="0.5887446">
+        <state line="54" column="10" selection-start="1613" selection-end="1613" vertical-scroll-proportion="0.34632036">
           <folding />
         </state>
       </provider>
