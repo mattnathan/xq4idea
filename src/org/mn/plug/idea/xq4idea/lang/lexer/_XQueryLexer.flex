@@ -144,7 +144,7 @@ import com.intellij.psi.tree.IElementType;
 %s _FORWARD_STEP
 %s _STEP_EXPR
 
-%x _EXPR_TREE_START
+%x _UNARY_EXPR
 %x _CAST_AS_EXPR
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
@@ -465,7 +465,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
-  {_NS} {yypushback(yylength()); yybegin(_EXPR_TREE_START); }
+  {_NS} {yypushback(yylength()); yybegin(_UNARY_EXPR); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -623,7 +623,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
-<_EXPR_TREE_START> {
+<_UNARY_EXPR> {
   "+" {return OP_PLUS; }
   "-" {return OP_MINUS; }
   "/" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASH;}
