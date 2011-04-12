@@ -144,6 +144,7 @@ import com.intellij.psi.tree.IElementType;
 %s _FORWARD_STEP
 %s _STEP_EXPR
 
+%x _EXPR_TREE_START
 %x _CAST_AS_EXPR
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
@@ -464,7 +465,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
-  {_NS} {yypushback(yylength()); yybegin(_INSTANCEOF_EXPR); }
+  {_NS} {yypushback(yylength()); yybegin(_EXPR_TREE_START); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -622,14 +623,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
-<_INSTANCEOF_EXPR> {
+<_EXPR_TREE_START> {
   "+" {return OP_PLUS; }
   "-" {return OP_MINUS; }
-  "/" {/*pushState(_CAST_AS_EXPR);*/ yybegin(_STEP_EXPR); return OP_SLASH;}
-  "//" {/*pushState(_CAST_AS_EXPR);*/ yybegin(_STEP_EXPR); return OP_SLASHSLASH; }
-  "validate" {/*pushState(_CAST_AS_EXPR);*/ yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
-  "(#" {/*pushState(_CAST_AS_EXPR);*/ pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
-  [^] {/*pushState(_CAST_AS_EXPR);*/ yypushback(yylength()); yybegin(_STEP_EXPR); }
+  "/" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASH;}
+  "//" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASHSLASH; }
+  "validate" {pushState(_CAST_AS_EXPR); yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
+  "(#" {pushState(_CAST_AS_EXPR); pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] {pushState(_CAST_AS_EXPR); yypushback(yylength()); yybegin(_STEP_EXPR); }
 }
 <_CAST_AS_EXPR> {
   "castable" {yypushback(yylength()); yybegin(_CASTABLE_AS_EXPR); }
@@ -647,14 +650,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   [^] { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
 }
 <_TREAT_AS_EXPR> {
-  "treat" { pushState(_INSTANCEOF_EXPR); /*pushState(_ITEM_TYPE);*/ yybegin(_KW_AS); return KW_CASTABLE;}
+  "treat" { pushState(_INSTANCEOF_EXPR); pushState(_ITEM_TYPE); yybegin(_KW_AS); return KW_CASTABLE;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
   [^] { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
 }
 <_INSTANCEOF_EXPR> {
-  "instance" { /*pushState(_ITEM_TYPE);*/ yybegin(_KW_OF); return KW_INSTANCE;}
+  "instance" { pushState(_ITEM_TYPE); yybegin(_KW_OF); return KW_INSTANCE;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ {yypushback(yylength()); popState(); }

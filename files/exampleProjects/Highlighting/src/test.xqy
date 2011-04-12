@@ -163,9 +163,14 @@ declare variable $pi := processing-instruction {"hello"} {"hello comment"};
 declare variable $pragma := (#some pragma content #) {};declare variable $pragma := (#some pragma content #) {};
 declare variable $pragma := (#q:name pragma content #)(# more pragma #) {};
 
-declare variable $castas := "hello" cast as my:type?;
-declare variable $castas := "hello" cast as my:type? castable as type?;
-declare variable $castas := "hello" castable as my:type;
+declare variable $expr := "hello" cast as my:type;
+declare variable $expr := "hello" cast as my:type?;
+declare variable $expr := "hello" cast as my:type? castable as type?;
+declare variable $expr := "hello" cast as my:type castable as type treat as void() instance of node();
+declare variable $expr := "hello" castable as my:type;
+declare variable $expr := "hello" castable as my:type?;
+declare variable $expr := "hello" treat as my:type;
+declare variable $expr := "hello" instance of my:type;
 
 12.2e2234,
 "hello",
