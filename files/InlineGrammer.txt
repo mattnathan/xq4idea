@@ -59,8 +59,8 @@
 [50]    AdditiveExpr	                ::=  MultiplicativeExpr ( ("+" | "-") MultiplicativeExpr )*
 [51]    MultiplicativeExpr	          ::=  UnionExpr ( ("*" | "div" | "idiv" | "mod") UnionExpr )*
 [52]    UnionExpr	                    ::=  IntersectExceptExpr ( ("union" | "|") IntersectExceptExpr )*
-[53]    IntersectExceptExpr	          ::=  InstanceofExpr ( ("intersect" | "except") InstanceofExpr )*
-[54]    InstanceofExpr	              ::=  ("-" | "+")* (
+[53]    IntersectExceptExpr	          ::=  UnaryExpr ( ("intersect" | "except") UnaryExpr )*
+[58]    UnaryExpr	                    ::=  ("-" | "+")* (
                                                  <"validate" "{"> Expr "}"
                                               |  <"validate" ("lax" | "strict")> "{" Expr "}"
                                               |  ("/" RelativePathExpr?)

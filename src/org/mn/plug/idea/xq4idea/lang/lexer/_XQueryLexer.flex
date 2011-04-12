@@ -136,6 +136,8 @@ import com.intellij.psi.tree.IElementType;
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
 %x _INSTANCEOF_EXPR
+%x _INTERSECT_EXCEPT_EXPR
+%x _INTERSECT_EXCEPT_EXPR_
 
 %s _NODE_TEST
 
@@ -600,6 +602,17 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
+<_INTERSECT_EXCEPT_EXPR> {
+  [^] {yypushback(yylength()); pushState(_INTERSECT_EXCEPT_EXPR_); yybegin(_UNARY_EXPR); }
+}
+<_INTERSECT_EXCEPT_EXPR_> {
+  "intersect" {pushState(); yybegin(_UNARY_EXPR); return KW_INTERSECT;}
+  "except" {pushState(); yybegin(_UNARY_EXPR); return KW_EXCEPT;}
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
 <_UNARY_EXPR> {
   "+" {return OP_PLUS; }
   "-" {return OP_MINUS; }

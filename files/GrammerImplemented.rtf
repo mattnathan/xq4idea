@@ -1,210 +1,222 @@
-{\rtf1\ansi\ansicpg1252\deff0\deflang2057{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
-{\colortbl ;\red204\green204\blue204;\red0\green0\blue255;}
-{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sl240\slmult1\lang9\f0\fs22\par
-[1]   \tab Module\tab    ::=   \tab VersionDecl? (MainModule | LibraryModule)\par
-\cf1 [2]   \tab VersionDecl\tab    ::=   \tab <"xquery" "version"> StringLiteral ("encoding" StringLiteral)? Separator\cf0\par
-[3]   \tab MainModule\tab    ::=   \tab Prolog QueryBody\par
-[4]   \tab LibraryModule\tab    ::=   \tab ModuleDecl Prolog\par
-\cf1 [5]   \tab ModuleDecl\tab    ::=   \tab <"module" "namespace"> NCName "=" URILiteral Separator\cf0\par
-[6]   \tab Prolog\tab    ::=   \tab ((Setter | Import | NamespaceDecl | DefaultNamespaceDecl) Separator)* ((VarDecl | FunctionDecl | OptionDecl) Separator)*\par
-[7]   \tab Setter\tab    ::=   \tab BoundarySpaceDecl | DefaultCollationDecl | BaseURIDecl | ConstructionDecl | OrderingModeDecl | EmptyOrderDecl | CopyNamespacesDecl\par
-[8]   \tab Import\tab    ::=   \tab SchemaImport | ModuleImport\par
-\cf1 [9]   \tab Separator\tab    ::=   \tab ";"\cf0\par
-\cf1 [10]   \tab NamespaceDecl\tab    ::=   \tab <"declare" "namespace"> NCName "=" URILiteral\par
-[11]   \tab BoundarySpaceDecl\tab    ::=   \tab <"declare" "boundary-space"> ("preserve" | "strip")\par
-[12]   \tab DefaultNamespaceDecl\tab    ::=   \tab (<"declare" "default" "element"> | <"declare" "default" "function">) "namespace" URILiteral\par
-[13]   \tab OptionDecl\tab    ::=   \tab <"declare" "option"> QName StringLiteral\par
-[14]   \tab OrderingModeDecl\tab    ::=   \tab <"declare" "ordering"> ("ordered" | "unordered")\par
-[15]   \tab EmptyOrderDecl\tab    ::=   \tab <"declare" "default" "order"> (<"empty" "greatest"> | <"empty" "least">)\par
-[16]   \tab CopyNamespacesDecl\tab    ::=   \tab <"declare" "copy-namespaces"> PreserveMode "," InheritMode\par
-[17]   \tab PreserveMode\tab    ::=   \tab "preserve" | "no-preserve"\par
-[18]   \tab InheritMode\tab    ::=   \tab "inherit" | "no-inherit"\cf0\par
-\cf1 [19]   \tab DefaultCollationDecl\tab    ::=   \tab <"declare" "default" "collation"> URILiteral\par
-[20]   \tab BaseURIDecl\tab    ::=   \tab <"declare" "base-uri"> URILiteral\par
-[21]   \tab SchemaImport\tab    ::=   \tab <"import" "schema"> SchemaPrefix? URILiteral (<"at" URILiteral> ("," URILiteral)*)?\par
-[22]   \tab SchemaPrefix\tab    ::=   \tab ("namespace" NCName "=") | (<"default" "element"> "namespace")\par
-[23]   \tab ModuleImport\tab    ::=   \tab <"import" "module"> ("namespace" NCName "=")? URILiteral (<"at" URILiteral> ("," URILiteral)*)?\par
-[24]   \tab VarDecl\tab    ::=   \tab <"declare" "variable" "$"> VarName TypeDeclaration? ((":=" ExprSingle) | "external")\par
-[25]   \tab ConstructionDecl\tab    ::=   \tab <"declare" "construction"> ("preserve" | "strip")\par
-\cf0 [26]   \tab FunctionDecl\tab    ::=   \tab <"declare" "function"> <QName "("> ParamList? (")" | (<")" "as"> SequenceType)) (EnclosedExpr | "external")\par
-[27]   \tab ParamList\tab    ::=   \tab Param ("," Param)*\par
-\cf1 [28]   \tab Param\tab    ::=   \tab "$" VarName TypeDeclaration?\par
-\cf0 [29]   \tab EnclosedExpr\tab    ::=   \tab "\{" Expr "\}"\par
-[30]   \tab QueryBody\tab    ::=   \tab Expr\par
-\cf1 [31]   \tab Expr\tab    ::=   \tab ExprSingle ("," ExprSingle)*\par
-\cf0 [32]   \tab ExprSingle\tab    ::=   \tab\cf1 FLWORExpr\cf0\par
-\cf1 | QuantifiedExpr\par
-| TypeswitchExpr\par
-| IfExpr\par
-\cf0 | OrExpr\par
-\cf1 [33]   \tab FLWORExpr\tab    ::=   \tab (ForClause | LetClause)+ WhereClause? OrderByClause? "return" ExprSingle\par
-[34]   \tab ForClause\tab    ::=   \tab <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*\par
-[35]   \tab PositionalVar\tab    ::=   \tab "at" "$" VarName\par
-[36]   \tab LetClause\tab    ::=   \tab <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*\par
-[37]   \tab WhereClause\tab    ::=   \tab "where" ExprSingle\par
-[38]   \tab OrderByClause\tab    ::=   \tab (<"order" "by"> | <"stable" "order" "by">) OrderSpecList\par
-[39]   \tab OrderSpecList\tab    ::=   \tab OrderSpec ("," OrderSpec)*\par
-[40]   \tab OrderSpec\tab    ::=   \tab ExprSingle OrderModifier\par
-[41]   \tab OrderModifier\tab    ::=   \tab ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?\par
-[42]   \tab QuantifiedExpr\tab    ::=   \tab (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle\par
-[43]   \tab TypeswitchExpr\tab    ::=   \tab <"typeswitch" "("> Expr ")" CaseClause+ "default" ("$" VarName)? "return" ExprSingle\par
-[44]   \tab CaseClause\tab    ::=   \tab "case" ("$" VarName "as")? SequenceType "return" ExprSingle\par
-[45]   \tab IfExpr\tab    ::=   \tab <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle\par
-\cf0 [46]   \tab OrExpr\tab    ::=   \tab AndExpr ( "or" AndExpr )*\par
-[47]   \tab AndExpr\tab    ::=   \tab ComparisonExpr ( "and" ComparisonExpr )*\par
-[48]   \tab ComparisonExpr\tab    ::=   \tab RangeExpr ( (ValueComp\par
-| GeneralComp\par
-| NodeComp) RangeExpr )?\par
-[49]   \tab RangeExpr\tab    ::=   \tab AdditiveExpr ( "to" AdditiveExpr )?\par
-[50]   \tab AdditiveExpr\tab    ::=   \tab MultiplicativeExpr ( ("+" | "-") MultiplicativeExpr )*\par
-[51]   \tab MultiplicativeExpr\tab    ::=   \tab UnionExpr ( ("*" | "div" | "idiv" | "mod") UnionExpr )*\par
-[52]   \tab UnionExpr\tab    ::=   \tab IntersectExceptExpr ( ("union" | "|") IntersectExceptExpr )*\par
-[53]   \tab IntersectExceptExpr\tab    ::=   \tab InstanceofExpr ( ("intersect" | "except") InstanceofExpr )*\par
-[54]   \tab InstanceofExpr\tab    ::=   \tab TreatExpr ( <"instance" "of"> SequenceType )?\par
-[55]   \tab TreatExpr\tab    ::=   \tab CastableExpr ( <"treat" "as"> SequenceType )?\par
-[56]   \tab CastableExpr\tab    ::=   \tab CastExpr ( <"castable" "as"> SingleType )?\par
-[57]   \tab CastExpr\tab    ::=   \tab UnaryExpr ( <"cast" "as"> SingleType )?\par
-[58]   \tab UnaryExpr\tab    ::=   \tab ("-" | "+")* ValueExpr\par
-[59]   \tab ValueExpr\tab    ::=   \tab ValidateExpr | PathExpr | ExtensionExpr\par
-[60]   \tab GeneralComp\tab    ::=   \tab "=" | "!=" | "<" | "<=" | ">" | ">="\tab /* gn: ltXQ */\par
-[61]   \tab ValueComp\tab    ::=   \tab "eq" | "ne" | "lt" | "le" | "gt" | "ge"\par
-[62]   \tab NodeComp\tab    ::=   \tab "is" | "<<" | ">>"\par
-[63]   \tab ValidateExpr\tab    ::=   \tab (<"validate" "\{"> | (<"validate" ValidationMode> "\{")) Expr "\}"\par
-[64]   \tab ExtensionExpr\tab    ::=   \tab Pragma+ "\{" Expr? "\}"\par
-[65]   \tab Pragma\tab    ::=   \tab "(#" S? QName PragmaContents "#)"\tab /* ws: explicitXQ */\par
-[66]   \tab PragmaContents\tab    ::=   \tab (Char* - (Char* '#)' Char*))\par
-[67]   \tab PathExpr\tab    ::=   \tab ("/" RelativePathExpr?)\par
-| ("//" RelativePathExpr)\par
-| RelativePathExpr\tab /* gn: leading-lone-slashXQ */\par
-[68]   \tab RelativePathExpr\tab    ::=   \tab StepExpr (("/" | "//") StepExpr)*\par
-[69]   \tab StepExpr\tab    ::=   \tab AxisStep | FilterExpr\par
-[70]   \tab AxisStep\tab    ::=   \tab (ForwardStep | ReverseStep) PredicateList\par
-[71]   \tab ForwardStep\tab    ::=   \tab (ForwardAxis NodeTest) | AbbrevForwardStep\par
-[72]   \tab ForwardAxis\tab    ::=   \tab <"child" "::">\par
-| <"descendant" "::">\par
-| <"attribute" "::">\par
-| <"self" "::">\par
-| <"descendant-or-self" "::">\par
-| <"following-sibling" "::">\par
-| <"following" "::">\par
-[73]   \tab AbbrevForwardStep\tab    ::=   \tab "@"? NodeTest\par
-[74]   \tab ReverseStep\tab    ::=   \tab (ReverseAxis NodeTest) | AbbrevReverseStep\par
-[75]   \tab ReverseAxis\tab    ::=   \tab <"parent" "::">\par
-| <"ancestor" "::">\par
-| <"preceding-sibling" "::">\par
-| <"preceding" "::">\par
-| <"ancestor-or-self" "::">\par
-[76]   \tab AbbrevReverseStep\tab    ::=   \tab ".."\par
-[77]   \tab NodeTest\tab    ::=   \tab KindTest | NameTest\par
-[78]   \tab NameTest\tab    ::=   \tab QName | Wildcard\par
-[79]   \tab Wildcard\tab    ::=   \tab "*"\par
-| <NCName ":" "*">\par
-| <"*" ":" NCName>\tab /* ws: explicitXQ */\par
-[80]   \tab FilterExpr\tab    ::=   \tab PrimaryExpr PredicateList\par
-[81]   \tab PredicateList\tab    ::=   \tab Predicate*\par
-[82]   \tab Predicate\tab    ::=   \tab "[" Expr "]"\par
-[83]   \tab PrimaryExpr\tab    ::=   \tab\cf1 Literal | VarRef | ParenthesizedExpr | ContextItemExpr | FunctionCall\cf0  | Constructor |\cf1  OrderedExpr | UnorderedExpr\par
-[84]   \tab Literal\tab    ::=   \tab NumericLiteral | StringLiteral\cf0\par
-\cf1 [85]   \tab NumericLiteral\tab    ::=   \tab IntegerLiteral | DecimalLiteral | DoubleLiteral\cf0\par
-\cf1 [86]   \tab VarRef\tab    ::=   \tab "$" VarName\cf0\par
-\cf1 [87]   \tab ParenthesizedExpr\tab    ::=   \tab "(" Expr? ")"\par
-[88]   \tab ContextItemExpr\tab    ::=   \tab "."\par
-[89]   \tab OrderedExpr\tab    ::=   \tab <"ordered" "\{"> Expr "\}"\par
-[90]   \tab UnorderedExpr\tab    ::=   \tab <"unordered" "\{"> Expr "\}"\par
-[91]   \tab FunctionCall\tab    ::=   \tab <QName "("> (ExprSingle ("," ExprSingle)*)? ")"\tab /* gn: parensXQ */\par
-/* gn: reserved-function-namesXQ */\par
-\cf0 [92]   \tab Constructor\tab    ::=   \tab DirectConstructor\par
-| ComputedConstructor\par
-[93]   \tab DirectConstructor\tab    ::=   \tab DirElemConstructor\par
-| DirCommentConstructor\par
-| DirPIConstructor\par
-[94]   \tab DirElemConstructor\tab    ::=   \tab "<" QName DirAttributeList ("/>" | (">" DirElemContent* "</" QName S? ">"))\tab /* ws: explicitXQ */\par
-/* gn: ltXQ */\par
-[95]   \tab DirAttributeList\tab    ::=   \tab (S (QName S? "=" S? DirAttributeValue)?)*\tab /* ws: explicitXQ */\par
-[96]   \tab DirAttributeValue\tab    ::=   \tab ('"' (EscapeQuot | QuotAttrValueContent)* '"')\par
-| ("'" (EscapeApos | AposAttrValueContent)* "'")\tab /* ws: explicitXQ */\par
-[97]   \tab QuotAttrValueContent\tab    ::=   \tab QuotAttrContentChar\par
-| CommonContent\par
-[98]   \tab AposAttrValueContent\tab    ::=   \tab AposAttrContentChar\par
-| CommonContent\par
-[99]   \tab DirElemContent\tab    ::=   \tab DirectConstructor\par
-| ElementContentChar\par
-| CDataSection\par
-| CommonContent\par
-[100]   \tab CommonContent\tab    ::=   \tab PredefinedEntityRef | CharRef | "\{\{" | "\}\}" | EnclosedExpr\par
-[101]   \tab DirCommentConstructor\tab    ::=   \tab "<!--" DirCommentContents "-->"\tab /* ws: explicitXQ */\par
-[102]   \tab DirCommentContents\tab    ::=   \tab ((Char - '-') | <'-' (Char - '-')>)*\tab /* ws: explicitXQ */\par
-[103]   \tab DirPIConstructor\tab    ::=   \tab "<?" PITarget (S DirPIContents)? "?>"\tab /* ws: explicitXQ */\par
-[104]   \tab DirPIContents\tab    ::=   \tab (Char* - (Char* '?>' Char*))\tab /* ws: explicitXQ */\par
-[105]   \tab CDataSection\tab    ::=   \tab "<![CDATA[" CDataSectionContents "]]>"\tab /* ws: explicitXQ */\par
-[106]   \tab CDataSectionContents\tab    ::=   \tab (Char* - (Char* ']]>' Char*))\tab /* ws: explicitXQ */\par
-[107]   \tab ComputedConstructor\tab    ::=   \tab CompDocConstructor\par
-| CompElemConstructor\par
-| CompAttrConstructor\par
-| CompTextConstructor\par
-| CompCommentConstructor\par
-| CompPIConstructor\par
-[108]   \tab CompDocConstructor\tab    ::=   \tab <"document" "\{"> Expr "\}"\par
-[109]   \tab CompElemConstructor\tab    ::=   \tab (<"element" QName "\{"> | (<"element" "\{"> Expr "\}" "\{")) ContentExpr? "\}"\par
-[110]   \tab ContentExpr\tab    ::=   \tab Expr\par
-[111]   \tab CompAttrConstructor\tab    ::=   \tab (<"attribute" QName "\{"> | (<"attribute" "\{"> Expr "\}" "\{")) Expr? "\}"\par
-[112]   \tab CompTextConstructor\tab    ::=   \tab <"text" "\{"> Expr "\}"\par
-[113]   \tab CompCommentConstructor\tab    ::=   \tab <"comment" "\{"> Expr "\}"\par
-[114]   \tab CompPIConstructor\tab    ::=   \tab (<"processing-instruction" NCName "\{"> | (<"processing-instruction" "\{"> Expr "\}" "\{")) Expr? "\}"\par
-[115]   \tab SingleType\tab    ::=   \tab AtomicType "?"?\par
-\cf1 [116]   \tab TypeDeclaration\tab    ::=   \tab "as" SequenceType\cf0\par
-\cf1 [117]   \tab SequenceType\tab    ::=   \tab (ItemType OccurrenceIndicator?)\par
-| <"void" "(" ")">\cf0\par
-\cf1 [118]   \tab OccurrenceIndicator\tab    ::=   \tab "?" | "*" | "+"\tab /* gn: occurrence-indicatorsXQ */\cf0\par
-\cf1 [119]   \tab ItemType\tab    ::=   \tab AtomicType | KindTest | <"item" "(" ")">\cf0\par
-\cf1 [120]   \tab AtomicType\tab    ::=   \tab QName\cf0\par
-\cf1 [121]   \tab KindTest\tab    ::=   \tab DocumentTest\par
-| ElementTest\par
-| AttributeTest\par
-| SchemaElementTest\par
-| SchemaAttributeTest\par
-| PITest\par
-| CommentTest\par
-| TextTest\par
-| AnyKindTest\cf0\par
-\cf1 [122]   \tab AnyKindTest\tab    ::=   \tab <"node" "("> ")"\cf0\par
-\cf1 [123]   \tab DocumentTest\tab    ::=   \tab <"document-node" "("> (ElementTest | SchemaElementTest)? ")"\cf0\par
-\cf1 [124]   \tab TextTest\tab    ::=   \tab <"text" "("> ")"\cf0\par
-\cf1 [125]   \tab CommentTest\tab    ::=   \tab <"comment" "("> ")"\cf0\par
-\cf1 [126]   \tab PITest\tab    ::=   \tab <"processing-instruction" "("> (NCName | StringLiteral)? ")"\cf0\par
-\cf1 [127]   \tab AttributeTest\tab    ::=   \tab <"attribute" "("> (AttribNameOrWildcard ("," TypeName)?)? ")"\par
-[128]   \tab AttribNameOrWildcard\tab    ::=   \tab AttributeName | "*"\cf0\par
-\cf1 [129]   \tab SchemaAttributeTest\tab    ::=   \tab <"schema-attribute" "("> AttributeDeclaration ")"\cf0\par
-\cf1 [130]   \tab AttributeDeclaration\tab    ::=   \tab AttributeName\par
-[131]   \tab ElementTest\tab    ::=   \tab <"element" "("> (ElementNameOrWildcard ("," TypeName "?"?)?)? ")"\par
-[132]   \tab ElementNameOrWildcard\tab    ::=   \tab ElementName | "*"\cf0\par
-\cf1 [133]   \tab SchemaElementTest\tab    ::=   \tab <"schema-element" "("> ElementDeclaration ")"\par
-[134]   \tab ElementDeclaration\tab    ::=   \tab ElementName\par
-[135]   \tab AttributeName\tab    ::=   \tab QName\par
-[136]   \tab ElementName\tab    ::=   \tab QName\par
-[137]   \tab TypeName\tab    ::=   \tab QName\cf0\par
-\cf1 [138]   \tab IntegerLiteral\tab    ::=   \tab Digits\par
-[139]   \tab DecimalLiteral\tab    ::=   \tab ("." Digits) | (Digits "." [0-9]*)\tab /* ws: explicitXQ */\par
-[140]   \tab DoubleLiteral\tab    ::=   \tab (("." Digits) | (Digits ("." [0-9]*)?)) [eE] [+-]? Digits\tab /* ws: explicitXQ */\cf0\par
-\cf1 [141]   \tab URILiteral\tab    ::=   \tab StringLiteral\cf0\par
-[142]   \tab StringLiteral\tab    ::=   \tab ('"' (PredefinedEntityRef | CharRef | ('"' '"') | [^"&])* '"') | ("'" (PredefinedEntityRef | CharRef | ("'" "'") | [^'&])* "'")\tab /* ws: explicitXQ */\par
-[143]   \tab PITarget\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-PITarget]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-PITarget]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
-\cf1 [144]   \tab VarName\tab    ::=   \tab QName\cf0\par
-\pard\sl276\slmult1\cf1 [145]   \tab ValidationMode\tab    ::=   \tab "lax" | "strict"\par
-\pard\sl240\slmult1 [146]   \tab Digits\tab    ::=   \tab [0-9]+\cf0\par
-[147]   \tab PredefinedEntityRef\tab    ::=   \tab "&" ("lt" | "gt" | "amp" | "quot" | "apos") ";"\tab /* ws: explicitXQ */\par
-[148]   \tab CharRef\tab    ::=   \tab [{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-CharRef]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-CharRef]XML}}}\f0\fs22\tab /* gn: xml-versionXQ */\par
-\cf1 [149]   \tab EscapeQuot\tab    ::=   \tab '""'\par
-[150]   \tab EscapeApos\tab    ::=   \tab "''"\cf0\par
-[151]   \tab ElementContentChar\tab    ::=   \tab Char - [\{\}<&]\par
-[152]   \tab QuotAttrContentChar\tab    ::=   \tab Char - ["\{\}<&]\par
-[153]   \tab AposAttrContentChar\tab    ::=   \tab Char - ['\{\}<&]\par
-\cf1 [154]   \tab Comment\tab    ::=   \tab "(:" (CommentContents | Comment)* ":)"\tab /* ws: explicitXQ */\par
-/* gn: commentsXQ */\par
-[155]   \tab CommentContents\tab    ::=   \tab (Char+ - (Char* ':)' Char*))\cf0\par
-\cf1 [156]   \tab QName\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-QName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-QName]Names}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\par
-[157]   \tab NCName\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\par
-[158]   \tab S\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-S]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-S]XML}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\par
-\pard\ri-1352\sl240\slmult1 [159]   \tab Char\tab    ::=   \tab [\cf0{\field{\*\fldinst{HYPERLINK "http://www.w3.org/TR/REC-xml#NT-Char]XML"}}{\fldrslt{\ul\cf2 http://www.w3.org/TR/REC-xml#NT-Char]XML}}}\cf1\f0\fs22\tab /* gn: xml-versionXQ */\cf0\par
+{\rtf1\ansi\deff1\adeflang1025
+{\fonttbl{\f0\froman\fprq2\fcharset128 Liberation Serif{\*\falt Times New Roman};}{\f1\fnil\fprq0\fcharset0 Calibri;}{\f2\fswiss\fprq2\fcharset128 Liberation Sans{\*\falt Arial};}{\f3\fnil\fprq0\fcharset0 Calibri;}{\f4\fnil\fprq2\fcharset128 DejaVu LGC Sans;}}
+{\colortbl;\red0\green0\blue0;\red204\green204\blue204;\red230\green230\blue230;\red0\green0\blue255;\red0\green0\blue128;\red128\green128\blue128;}
+{\stylesheet{\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057\snext1 Normal;}
+{\s2\sb240\sa120\keepn\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af4\afs28\lang2057\ltrch\dbch\af4\langfe2057\hich\f2\fs28\lang2057\loch\f2\fs28\lang2057\sbasedon1\snext3 Heading;}
+{\s3\sa120\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057\sbasedon1\snext3 Body Text;}
+{\s4\sa120\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057\sbasedon3\snext4 List;}
+{\s5\sb120\sa120\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ai\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\i\loch\f1\fs24\lang2057\i\sbasedon1\snext5 caption;}
+{\s6\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057\sbasedon1\snext6 Index;}
+{\*\cs8\cf5\ul\ulc0\rtlch\af1\afs24\lang255\ltrch\dbch\af1\langfe255\hich\f1\fs24\lang255\loch\f1\fs24\lang255 Internet link;}
 }
- 
+{\info{\creatim\yr0\mo0\dy0\hr0\min0}{\revtim\yr0\mo0\dy0\hr0\min0}{\printim\yr0\mo0\dy0\hr0\min0}{\comment StarWriter}{\vern3100}}\deftab720
+{\*\pgdsctbl
+{\pgdsc0\pgdscuse195\pgwsxn12240\pghsxn15840\marglsxn1800\margrsxn1800\margtsxn1440\margbsxn1440\pgdscnxt0 Standard;}}
+{\*\pgdscno0}\paperh15840\paperw12240\margl1800\margr1800\margt1440\margb1440\sectd\sbknone\pgwsxn12240\pghsxn15840\marglsxn1800\margrsxn1800\margtsxn1440\margbsxn1440\ftnbj\ftnstart1\ftnrstcont\ftnnar\aenddoc\aftnrstcont\aftnstart1\aftnnrlc
+\pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [1]   \tab Module\tab    ::=   \tab VersionDecl? (MainModule | LibraryModule)}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [2]   \tab VersionDecl\tab    ::=   \tab <"xquery" "version"> StringLiteral ("encoding" StringLiteral)? Separator}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [3]   \tab MainModule\tab    ::=   \tab Prolog QueryBody}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [4]   \tab LibraryModule\tab    ::=   \tab ModuleDecl Prolog}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [5]   \tab ModuleDecl\tab    ::=   \tab <"module" "namespace"> NCName "=" URILiteral Separator}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [6]   \tab Prolog\tab    ::=   \tab ((Setter | Import | NamespaceDecl | DefaultNamespaceDecl) Separator)* ((VarDecl | FunctionDecl | OptionDecl) Separator)*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [7]   \tab Setter\tab    ::=   \tab BoundarySpaceDecl | DefaultCollationDecl | BaseURIDecl | ConstructionDecl | OrderingModeDecl | EmptyOrderDecl | CopyNamespacesDecl}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [8]   \tab Import\tab    ::=   \tab SchemaImport | ModuleImport}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [9]   \tab Separator\tab    ::=   \tab ";"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [10]   \tab NamespaceDecl\tab    ::=   \tab <"declare" "namespace"> NCName "=" URILiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [11]   \tab BoundarySpaceDecl\tab    ::=   \tab <"declare" "boundary-space"> ("preserve" | "strip")}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [12]   \tab DefaultNamespaceDecl\tab    ::=   \tab (<"declare" "default" "element"> | <"declare" "default" "function">) "namespace" URILiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [13]   \tab OptionDecl\tab    ::=   \tab <"declare" "option"> QName StringLiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [14]   \tab OrderingModeDecl\tab    ::=   \tab <"declare" "ordering"> ("ordered" | "unordered")}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [15]   \tab EmptyOrderDecl\tab    ::=   \tab <"declare" "default" "order"> (<"empty" "greatest"> | <"empty" "least">)}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [16]   \tab CopyNamespacesDecl\tab    ::=   \tab <"declare" "copy-namespaces"> PreserveMode "," InheritMode}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [17]   \tab PreserveMode\tab    ::=   \tab "preserve" | "no-preserve"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [18]   \tab InheritMode\tab    ::=   \tab "inherit" | "no-inherit"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [19]   \tab DefaultCollationDecl\tab    ::=   \tab <"declare" "default" "collation"> URILiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [20]   \tab BaseURIDecl\tab    ::=   \tab <"declare" "base-uri"> URILiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [21]   \tab SchemaImport\tab    ::=   \tab <"import" "schema"> SchemaPrefix? URILiteral (<"at" URILiteral> ("," URILiteral)*)?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [22]   \tab SchemaPrefix\tab    ::=   \tab ("namespace" NCName "=") | (<"default" "element"> "namespace")}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [23]   \tab ModuleImport\tab    ::=   \tab <"import" "module"> ("namespace" NCName "=")? URILiteral (<"at" URILiteral> ("," URILiteral)*)?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [24]   \tab VarDecl\tab    ::=   \tab <"declare" "variable" "$"> VarName TypeDeclaration? ((":=" ExprSingle) | "external")}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [25]   \tab ConstructionDecl\tab    ::=   \tab <"declare" "construction"> ("preserve" | "strip")}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [26]   \tab FunctionDecl\tab    ::=   \tab <"declare" "function"> <QName "("> ParamList? (")" | (<")" "as"> SequenceType)) (EnclosedExpr | "external")}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [27]   \tab ParamList\tab    ::=   \tab Param ("," Param)*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [28]   \tab Param\tab    ::=   \tab "$" VarName TypeDeclaration?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [29]   \tab EnclosedExpr\tab    ::=   \tab "\{" Expr "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [30]   \tab QueryBody\tab    ::=   \tab Expr}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [31]   \tab Expr\tab    ::=   \tab ExprSingle ("," ExprSingle)*}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [32]   \tab ExprSingle\tab    ::=   \tab }}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 FLWORExpr}}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | QuantifiedExpr}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | TypeswitchExpr}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | IfExpr}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | OrExpr}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [33]   \tab FLWORExpr\tab    ::=   \tab (ForClause | LetClause)+ WhereClause? OrderByClause? "return" ExprSingle}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [34]   \tab ForClause\tab    ::=   \tab <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [35]   \tab PositionalVar\tab    ::=   \tab "at" "$" VarName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [36]   \tab LetClause\tab    ::=   \tab <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [37]   \tab WhereClause\tab    ::=   \tab "where" ExprSingle}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [38]   \tab OrderByClause\tab    ::=   \tab (<"order" "by"> | <"stable" "order" "by">) OrderSpecList}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [39]   \tab OrderSpecList\tab    ::=   \tab OrderSpec ("," OrderSpec)*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [40]   \tab OrderSpec\tab    ::=   \tab ExprSingle OrderModifier}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [41]   \tab OrderModifier\tab    ::=   \tab ("ascending" | "descending")? (<"empty" "greatest"> | <"empty" "least">)? ("collation" URILiteral)?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [42]   \tab QuantifiedExpr\tab    ::=   \tab (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [43]   \tab TypeswitchExpr\tab    ::=   \tab <"typeswitch" "("> Expr ")" CaseClause+ "default" ("$" VarName)? "return" ExprSingle}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [44]   \tab CaseClause\tab    ::=   \tab "case" ("$" VarName "as")? SequenceType "return" ExprSingle}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [45]   \tab IfExpr\tab    ::=   \tab <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [46]   \tab OrExpr\tab    ::=   \tab AndExpr ( "or" AndExpr )*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [47]   \tab AndExpr\tab    ::=   \tab ComparisonExpr ( "and" ComparisonExpr )*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [48]   \tab ComparisonExpr\tab    ::=   \tab RangeExpr ( (ValueComp}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | GeneralComp}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | NodeComp) RangeExpr )?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [49]   \tab RangeExpr\tab    ::=   \tab AdditiveExpr ( "to" AdditiveExpr )?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [50]   \tab AdditiveExpr\tab    ::=   \tab MultiplicativeExpr ( ("+" | "-") MultiplicativeExpr )*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [51]   \tab MultiplicativeExpr\tab    ::=   \tab UnionExpr ( ("*" | "div" | "idiv" | "mod") UnionExpr )*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [52]   \tab UnionExpr\tab    ::=   \tab IntersectExceptExpr ( ("union" | "|") IntersectExceptExpr )*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [53]   \tab IntersectExceptExpr\tab    ::=   \tab InstanceofExpr ( ("intersect" | "except") InstanceofExpr )*}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [54]   \tab InstanceofExpr\tab    ::=   \tab TreatExpr ( <"instance" "of"> SequenceType )?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [55]   \tab TreatExpr\tab    ::=   \tab CastableExpr ( <"treat" "as"> SequenceType )?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [56]   \tab CastableExpr\tab    ::=   \tab CastExpr ( <"castable" "as"> SingleType )?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [57]   \tab CastExpr\tab    ::=   \tab UnaryExpr ( <"cast" "as"> SingleType )?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [58]   \tab UnaryExpr\tab    ::=   \tab ("-" | "+")* ValueExpr}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [59]   \tab ValueExpr\tab    ::=   \tab ValidateExpr | PathExpr | ExtensionExpr}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [60]   \tab GeneralComp\tab    ::=   \tab "=" | "!=" | "<" | "<=" | ">" | ">="\tab /* gn: ltXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [61]   \tab ValueComp\tab    ::=   \tab "eq" | "ne" | "lt" | "le" | "gt" | "ge"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [62]   \tab NodeComp\tab    ::=   \tab "is" | "<<" | ">>"}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [63]   \tab ValidateExpr\tab    ::=   \tab (<"validate" "\{"> | (<"validate" ValidationMode> "\{")) Expr "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [64]   \tab ExtensionExpr\tab    ::=   \tab Pragma+ "\{" Expr? "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [65]   \tab Pragma\tab    ::=   \tab "(#" S? QName PragmaContents "#)"\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [66]   \tab PragmaContents\tab    ::=   \tab (Char* - (Char* '#)' Char*))}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [67]   \tab PathExpr\tab    ::=   \tab ("/" RelativePathExpr?)}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | ("//" RelativePathExpr)}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | RelativePathExpr\tab /* gn: leading-lone-slashXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [68]   \tab RelativePathExpr\tab    ::=   \tab StepExpr (("/" | "//") StepExpr)*}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [69]   \tab StepExpr\tab    ::=   \tab AxisStep | FilterExpr}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [70]   \tab AxisStep\tab    ::=   \tab (ForwardStep | ReverseStep) PredicateList}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [71]   \tab ForwardStep\tab    ::=   \tab (ForwardAxis NodeTest) | AbbrevForwardStep}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [72]   \tab ForwardAxis\tab    ::=   \tab <"child" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"descendant" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"attribute" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"self" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"descendant-or-self" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"following-sibling" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"following" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [73]   \tab AbbrevForwardStep\tab    ::=   \tab "@"? NodeTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [74]   \tab ReverseStep\tab    ::=   \tab (ReverseAxis NodeTest) | AbbrevReverseStep}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [75]   \tab ReverseAxis\tab    ::=   \tab <"parent" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"ancestor" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"preceding-sibling" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"preceding" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"ancestor-or-self" "::">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [76]   \tab AbbrevReverseStep\tab    ::=   \tab ".."}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [77]   \tab NodeTest\tab    ::=   \tab KindTest | NameTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [78]   \tab NameTest\tab    ::=   \tab QName | Wildcard}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [79]   \tab Wildcard\tab    ::=   \tab "*"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <NCName ":" "*">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"*" ":" NCName>\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [80]   \tab FilterExpr\tab    ::=   \tab PrimaryExpr PredicateList}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [81]   \tab PredicateList\tab    ::=   \tab Predicate*}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [82]   \tab Predicate\tab    ::=   \tab "[" Expr "]"}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [83]   \tab PrimaryExpr\tab    ::=   \tab }}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 Literal | VarRef | ParenthesizedExpr | ContextItemExpr | FunctionCall}{\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9  | Constructor |}{\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9  OrderedExpr | UnorderedExpr}}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [84]   \tab Literal\tab    ::=   \tab NumericLiteral | StringLiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [85]   \tab NumericLiteral\tab    ::=   \tab IntegerLiteral | DecimalLiteral | DoubleLiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [86]   \tab VarRef\tab    ::=   \tab "$" VarName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [87]   \tab ParenthesizedExpr\tab    ::=   \tab "(" Expr? ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [88]   \tab ContextItemExpr\tab    ::=   \tab "."}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [89]   \tab OrderedExpr\tab    ::=   \tab <"ordered" "\{"> Expr "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [90]   \tab UnorderedExpr\tab    ::=   \tab <"unordered" "\{"> Expr "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [91]   \tab FunctionCall\tab    ::=   \tab <QName "("> (ExprSingle ("," ExprSingle)*)? ")"\tab /* gn: parensXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 /* gn: reserved-function-namesXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [92]   \tab Constructor\tab    ::=   \tab DirectConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | ComputedConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [93]   \tab DirectConstructor\tab    ::=   \tab DirElemConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | DirCommentConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | DirPIConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [94]   \tab DirElemConstructor\tab    ::=   \tab "<" QName DirAttributeList ("/>" | (">" DirElemContent* "</" QName S? ">"))\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 /* gn: ltXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [95]   \tab DirAttributeList\tab    ::=   \tab (S (QName S? "=" S? DirAttributeValue)?)*\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [96]   \tab DirAttributeValue\tab    ::=   \tab ('"' (EscapeQuot | QuotAttrValueContent)* '"')}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | ("'" (EscapeApos | AposAttrValueContent)* "'")\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [97]   \tab QuotAttrValueContent\tab    ::=   \tab QuotAttrContentChar}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CommonContent}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [98]   \tab AposAttrValueContent\tab    ::=   \tab AposAttrContentChar}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CommonContent}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [99]   \tab DirElemContent\tab    ::=   \tab DirectConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | ElementContentChar}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CDataSection}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CommonContent}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [100]   \tab CommonContent\tab    ::=   \tab PredefinedEntityRef | CharRef | "\{\{" | "\}\}" | EnclosedExpr}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [101]   \tab DirCommentConstructor\tab    ::=   \tab "<!--" DirCommentContents "-->"\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [102]   \tab DirCommentContents\tab    ::=   \tab ((Char - '-') | <'-' (Char - '-')>)*\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [103]   \tab DirPIConstructor\tab    ::=   \tab "<?" PITarget (S DirPIContents)? "?>"\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [104]   \tab DirPIContents\tab    ::=   \tab (Char* - (Char* '?>' Char*))\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [105]   \tab CDataSection\tab    ::=   \tab "<![CDATA[" CDataSectionContents "]]>"\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [106]   \tab CDataSectionContents\tab    ::=   \tab (Char* - (Char* ']]>' Char*))\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [107]   \tab ComputedConstructor\tab    ::=   \tab CompDocConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CompElemConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CompAttrConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CompTextConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CompCommentConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CompPIConstructor}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [108]   \tab CompDocConstructor\tab    ::=   \tab <"document" "\{"> Expr "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [109]   \tab CompElemConstructor\tab    ::=   \tab (<"element" QName "\{"> | (<"element" "\{"> Expr "\}" "\{")) ContentExpr? "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [110]   \tab ContentExpr\tab    ::=   \tab Expr}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [111]   \tab CompAttrConstructor\tab    ::=   \tab (<"attribute" QName "\{"> | (<"attribute" "\{"> Expr "\}" "\{")) Expr? "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [112]   \tab CompTextConstructor\tab    ::=   \tab <"text" "\{"> Expr "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [113]   \tab CompCommentConstructor\tab    ::=   \tab <"comment" "\{"> Expr "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [114]   \tab CompPIConstructor\tab    ::=   \tab (<"processing-instruction" NCName "\{"> | (<"processing-instruction" "\{"> Expr "\}" "\{")) Expr? "\}"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [115]   \tab SingleType\tab    ::=   \tab AtomicType "?"?}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [116]   \tab TypeDeclaration\tab    ::=   \tab "as" SequenceType}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [117]   \tab SequenceType\tab    ::=   \tab (ItemType OccurrenceIndicator?)}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | <"void" "(" ")">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [118]   \tab OccurrenceIndicator\tab    ::=   \tab "?" | "*" | "+"\tab /* gn: occurrence-indicatorsXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [119]   \tab ItemType\tab    ::=   \tab AtomicType | KindTest | <"item" "(" ")">}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [120]   \tab AtomicType\tab    ::=   \tab QName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [121]   \tab KindTest\tab    ::=   \tab DocumentTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | ElementTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | AttributeTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | SchemaElementTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | SchemaAttributeTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | PITest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | CommentTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | TextTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 | AnyKindTest}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [122]   \tab AnyKindTest\tab    ::=   \tab <"node" "("> ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [123]   \tab DocumentTest\tab    ::=   \tab <"document-node" "("> (ElementTest | SchemaElementTest)? ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [124]   \tab TextTest\tab    ::=   \tab <"text" "("> ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [125]   \tab CommentTest\tab    ::=   \tab <"comment" "("> ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [126]   \tab PITest\tab    ::=   \tab <"processing-instruction" "("> (NCName | StringLiteral)? ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [127]   \tab AttributeTest\tab    ::=   \tab <"attribute" "("> (AttribNameOrWildcard ("," TypeName)?)? ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [128]   \tab AttribNameOrWildcard\tab    ::=   \tab AttributeName | "*"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [129]   \tab SchemaAttributeTest\tab    ::=   \tab <"schema-attribute" "("> AttributeDeclaration ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [130]   \tab AttributeDeclaration\tab    ::=   \tab AttributeName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [131]   \tab ElementTest\tab    ::=   \tab <"element" "("> (ElementNameOrWildcard ("," TypeName "?"?)?)? ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [132]   \tab ElementNameOrWildcard\tab    ::=   \tab ElementName | "*"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [133]   \tab SchemaElementTest\tab    ::=   \tab <"schema-element" "("> ElementDeclaration ")"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [134]   \tab ElementDeclaration\tab    ::=   \tab ElementName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [135]   \tab AttributeName\tab    ::=   \tab QName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [136]   \tab ElementName\tab    ::=   \tab QName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [137]   \tab TypeName\tab    ::=   \tab QName}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [138]   \tab IntegerLiteral\tab    ::=   \tab Digits}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [139]   \tab DecimalLiteral\tab    ::=   \tab ("." Digits) | (Digits "." [0-9]*)\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [140]   \tab DoubleLiteral\tab    ::=   \tab (("." Digits) | (Digits ("." [0-9]*)?)) [eE] [+-]? Digits\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [141]   \tab URILiteral\tab    ::=   \tab StringLiteral}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [142]   \tab StringLiteral\tab    ::=   \tab ('"' (PredefinedEntityRef | CharRef | ('"' '"') | [^"&])* '"') | ("'" (PredefinedEntityRef | CharRef | ("'" "'") | [^'&])* "'")\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [143]   \tab PITarget\tab    ::=   \tab [}}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\field{\*\fldinst HYPERLINK "http://www.w3.org/TR/REC-xml" \\l "T-PITarget]XML" }{\fldrslt \*\cs8\cf5\ul\ulc0\rtlch\ltrch\dbch\hich\f1\fs24\lang255\loch\f1\fs24\lang255{\cf2\ul\ulc0\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 http://www.w3.org/TR/REC-xml#NT-PITarget]XML}}}{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 \tab /* gn: xml-versionXQ */}}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [144]   \tab VarName\tab    ::=   \tab QName}
+\par \pard\plain \ltrpar\s1\cf2\sl276\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [145]   \tab ValidationMode\tab    ::=   \tab "lax" | "strict"}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [146]   \tab Digits\tab    ::=   \tab [0-9]+}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [147]   \tab PredefinedEntityRef\tab    ::=   \tab "&" ("lt" | "gt" | "amp" | "quot" | "apos") ";"\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [148]   \tab CharRef\tab    ::=   \tab [}}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\field{\*\fldinst HYPERLINK "http://www.w3.org/TR/REC-xml" \\l "T-CharRef]XML" }{\fldrslt \*\cs8\cf5\ul\ulc0\rtlch\ltrch\dbch\hich\f1\fs24\lang255\loch\f1\fs24\lang255{\cf2\ul\ulc0\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 http://www.w3.org/TR/REC-xml#NT-CharRef]XML}}}{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 \tab /* gn: xml-versionXQ */}}
+\par \pard\plain \ltrpar\s1\cf2\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs22\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs22\lang9\loch\f1\fs22\lang9 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [149]   \tab EscapeQuot\tab    ::=   \tab '""'}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [150]   \tab EscapeApos\tab    ::=   \tab "''"}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [151]   \tab ElementContentChar\tab    ::=   \tab Char - [\{\}<&]}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [152]   \tab QuotAttrContentChar\tab    ::=   \tab Char - ["\{\}<&]}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [153]   \tab AposAttrContentChar\tab    ::=   \tab Char - ['\{\}<&]}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [154]   \tab Comment\tab    ::=   \tab "(:" (CommentContents | Comment)* ":)"\tab /* ws: explicitXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 /* gn: commentsXQ */}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057 {\rtlch \ltrch\loch\f1\fs22\lang9\i0\b0 [155]   \tab CommentContents\tab    ::=   \tab (Char+ - (Char* ':)' Char*))}
+\par \pard\plain \ltrpar\s1\cf0\sl240\slmult1{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [156]   \tab QName\tab    ::=   \tab [}}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\field{\*\fldinst HYPERLINK "http://www.w3.org/TR/REC-xml-names/" \\l "T-QName]Names" }{\fldrslt \*\cs8\cf5\ul\ulc0\rtlch\ltrch\dbch\hich\f1\fs24\lang255\loch\f1\fs24\lang255{\cf4\ul\ulc0\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 http://www.w3.org/TR/REC-xml-names/#NT-QName]Names}}}{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 \tab /* gn: xml-versionXQ */}}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [157]   \tab NCName\tab    ::=   \tab [}}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\field{\*\fldinst HYPERLINK "http://www.w3.org/TR/REC-xml-names/" \\l "T-NCName]Names" }{\fldrslt \*\cs8\cf5\ul\ulc0\rtlch\ltrch\dbch\hich\f1\fs24\lang255\loch\f1\fs24\lang255{\cf4\ul\ulc0\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 http://www.w3.org/TR/REC-xml-names/#NT-NCName]Names}}}{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 \tab /* gn: xml-versionXQ */}}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [158]   \tab S\tab    ::=   \tab [}}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\field{\*\fldinst HYPERLINK "http://www.w3.org/TR/REC-xml" \\l "T-S]XML" }{\fldrslt \*\cs8\cf5\ul\ulc0\rtlch\ltrch\dbch\hich\f1\fs24\lang255\loch\f1\fs24\lang255{\cf4\ul\ulc0\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 http://www.w3.org/TR/REC-xml#NT-S]XML}}}{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 \tab /* gn: xml-versionXQ */}}
+\par \pard\plain \ltrpar\s1\cf0{\*\hyphen2\hyphlead2\hyphtrail2\hyphmax0}\rtlch\af1\afs24\lang2057\ltrch\dbch\af1\langfe2057\hich\f1\fs24\lang2057\loch\f1\fs24\lang2057{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 [159]   \tab Char\tab    ::=   \tab [}}{\rtlch \ltrch\loch\f1\fs24\lang2057\i0\b0{\field{\*\fldinst HYPERLINK "http://www.w3.org/TR/REC-xml" \\l "T-Char]XML" }{\fldrslt \*\cs8\cf5\ul\ulc0\rtlch\ltrch\dbch\hich\f1\fs24\lang255\loch\f1\fs24\lang255{\cf4\ul\ulc0\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 http://www.w3.org/TR/REC-xml#NT-Char]XML}}}{\cf2\rtlch\ltrch\dbch\hich\fs22\lang9\loch\fs22\lang9 \tab /* gn: xml-versionXQ */}}
+\par }

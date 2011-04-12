@@ -169,4 +169,6 @@ public interface XQueryTokenTypes {
   IElementType KW_CASTABLE = new XQueryElementType("CASTABLE");
   IElementType KW_OF = new XQueryElementType("OF");
   IElementType KW_INSTANCE = new XQueryElementType("INSTANCE");
+  IElementType KW_EXCEPT = new XQueryElementType("EXCEPT");
+  IElementType KW_INTERSECT = new XQueryElementType("INTERSECT");
 }
