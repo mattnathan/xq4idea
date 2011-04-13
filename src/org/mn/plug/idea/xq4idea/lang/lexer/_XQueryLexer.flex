@@ -89,7 +89,7 @@ import com.intellij.psi.tree.IElementType;
 %s _ITEM_TYPE_SELEM
 
 // Expression states
-%s _EXPR_SINGLE
+%x _EXPR_SINGLE
 %s _EXPR_LIST
 %s _EXPR_LIST_IN_CURLY
 %s _OPT_EXPR_LIST_IN_BRACE
@@ -136,6 +136,10 @@ import com.intellij.psi.tree.IElementType;
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
 %x _INSTANCEOF_EXPR
+%x _RANGE_EXPR
+%x _RANGE_EXPR_
+%x _ADD_EXPR
+%x _ADD_EXPR_
 %x _MULT_EXPR
 %x _MULT_EXPR_
 %x _UNION_EXPR
@@ -455,7 +459,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
-  {_NS} {yypushback(yylength()); yybegin(_MULT_EXPR); }
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] {yypushback(yylength()); yybegin(_RANGE_EXPR); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -606,6 +613,27 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
+<_RANGE_EXPR> {
+  [^] {yypushback(yylength()); pushState(_RANGE_EXPR_); yybegin(_ADD_EXPR); }
+}
+<_RANGE_EXPR_> {
+  "to" { yybegin(_ADD_EXPR); return KW_TO; }
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] {yypushback(yylength()); popState(); }
+}
+<_ADD_EXPR> {
+  [^] {yypushback(yylength()); pushState(_ADD_EXPR_); yybegin(_MULT_EXPR); }
+}
+<_ADD_EXPR_> {
+  "+" {pushState(); yybegin(_MULT_EXPR); return OP_PLUS;}
+  "-" {pushState(); yybegin(_MULT_EXPR); return OP_MINUS;}
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
 <_MULT_EXPR> {
   [^] {yypushback(yylength()); pushState(_MULT_EXPR_); yybegin(_UNION_EXPR); }
 }

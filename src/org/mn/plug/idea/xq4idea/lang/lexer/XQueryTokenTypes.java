@@ -176,4 +176,5 @@ public interface XQueryTokenTypes {
   IElementType KW_EXCEPT = new XQueryElementType("EXCEPT");
   IElementType KW_INTERSECT = new XQueryElementType("INTERSECT");
   IElementType KW_UNION = new XQueryElementType("UNION");
+  IElementType KW_TO = new XQueryElementType("TO");
 }

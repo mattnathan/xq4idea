@@ -180,6 +180,10 @@ declare variable $expr := "hello" div 2 ;
 declare variable $expr := "hello" idiv 2 ;
 declare variable $expr := "hello" mod 2 ;
 declare variable $expr := "hello" * 2 union "hello" except "" cast as type;
+declare variable $expr := "hello" - "lo" + 7;
+declare variable $expr := "hello" + 7 * 2 union "hello" except "" cast as type;
+declare variable $expr := "hello" to 9;
+declare variable $expr := "hello" to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
 
 12.2e2234,
 "hello",
