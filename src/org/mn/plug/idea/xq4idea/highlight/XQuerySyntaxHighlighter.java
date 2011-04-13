@@ -28,6 +28,8 @@ public class XQuerySyntaxHighlighter extends SyntaxHighlighterBase {
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.KEYWORDS, SyntaxHighlighterColors.KEYWORD);
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.STRING_LITERALS, SyntaxHighlighterColors.STRING);
     fillMap(ATTRIBUTES, XQueryTokenTypeSets.NUMBER_LITERALS, SyntaxHighlighterColors.NUMBER);
+
+    ATTRIBUTES.put(XQueryTokenTypes.BAD_CHARACTER2, HighlighterColors.BAD_CHARACTER);
   }
 
   @NotNull

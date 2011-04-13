@@ -6,6 +6,7 @@ package org.mn.plug.idea.xq4idea.lang.lexer;
  * @author Matt Nathan
  */
 public class IntStack {
+  private static final boolean DEBUG = false;
 
   private int[] values;
   private int size = 0;
@@ -37,7 +38,9 @@ public class IntStack {
         int[] newStack = new int[values.length << 1];
         System.arraycopy(values, 0, newStack, 0, size);
         values = newStack;
-        System.err.println("Growing stack: " + size + " -> " + values.length);
+        if (DEBUG) {
+          System.err.println("Growing stack: " + size + " -> " + values.length);
+        }
       } else {
         throw new ArrayIndexOutOfBoundsException("Stack is full!");
       }
@@ -46,5 +49,13 @@ public class IntStack {
 
   private boolean checkCanPop() {
     return size > 0;
+  }
+
+  public int size() {
+    return size;
+  }
+
+  public void clear() {
+    size = 0;
   }
 }

@@ -29,13 +29,65 @@ import com.intellij.psi.tree.IElementType;
   int initialState() {
     return YYINITIAL;
   }
+  int wordSep() {
+    return _WORD_SEP;
+  }
+  int optWordSep() {
+    return _OPT_WORD_SEP;
+  }
 %}
 
+// comment or space
+%x _WORD_SEP
+%x _OPT_WORD_SEP
+%x _COMMA
+%x _SEMI
+
+// the top level module file
+%x MODULE
+%x LIBRARY_OR_MAIN
+%x LIBRARY_MODULE
+%x MAIN_MODULE
+
+// VersionDecl
+%x VERSION_DECL
+%x VERSION_DECL_VERSION
+%x VERSION_DECL_ENCODING
+
+// ModuleDecl
+%x MODULE_DECL
+
+// "declare" ...
+%x DECLARE_DECL
+
+// "import" ...
+%x IMPORT_DECL
+
+%x DECLARE_X
+%x DECLARE_COPYNS_PRESERVE_OR_NOT
+%x _DECLARE_COPYNS_
+%x _DECLARE_COPYNS__
+%x _DECLARE_DEFAULT
+%x _DECLARE_DEFAULT_ORDER
+%x _DECLARE_DEFAULT_ORDER_EMPTY
+%x _DECLARE_DEFAULT_NAMESPACE
+%x _DECLARE_VARIABLE
+%x _IMPORT
+%x _IMPORT_SCHEMA
+%x _IMPORT_SCHEMA_DEFAULT
+%x _IMPORT_SCHEMA_DEFAULT_ELEMENT
+%x _IMPORT_MODULE
+
+%x NAMESPACE_NAME
+
+
+
+// below here we shouldn't be using anything ---------------------------------------------------------------------------
+
 // these are top level states
-%x EXPR_COMMENT
+%x XQ_COMMENT
 %x XML_COMMENT
 %s DECLAREORDERING
-%s NAMESPACEDECL
 
 // strings
 %x STR_START_QUOTE
@@ -44,31 +96,13 @@ import com.intellij.psi.tree.IElementType;
 %x _XML_STR_START_QUOTE
 %x _XML_STR_START_APOS
 
-// partial matches required for comment handling
-%s _XQUERY
-%s _XQUERY_VERSION
+%s _NAMESPACE_DECL
 
-%s _MODULE
 
-%s _DECLARE
-%s _DECLARE_COPYNS
-%s _DECLARE_COPYNS_
-%s _DECLARE_COPYNS__
-%s _DECLARE_DEFAULT
-%s _DECLARE_DEFAULT_ORDER
-%s _DECLARE_DEFAULT_ORDER_EMPTY
-%s _DECLARE_DEFAULT_NAMESPACE
-%s _DECLARE_VARIABLE
-
-%s _IMPORT
-%s _IMPORT_SCHEMA
-%s _IMPORT_SCHEMA_DEFAULT
-%s _IMPORT_SCHEMA_DEFAULT_ELEMENT
-%s _IMPORT_MODULE
 
 %s _PRESERVE_OR_STRIP
 %s _URILITERAL
-%s _STRINGLITERAL
+%s STRING_LITERAL
 
 %s _NAMESPACEDECL_
 
@@ -129,6 +163,8 @@ import com.intellij.psi.tree.IElementType;
 %s _VALIDATE_EXPR_
 %s _VALIDATE_EXPR__
 %s _FILTER_EXPR
+%x _RELATIVE_PATH_EXPR
+%x _RELATIVE_PATH_EXPR_
 %s _STEP_EXPR
 
 %x _UNARY_EXPR
@@ -212,7 +248,6 @@ import com.intellij.psi.tree.IElementType;
 %x _PRAGMA_CONTENT
 
 %x _OPT_QUESTION
-%s _SEP
 %s _VARNAME
 %s _STAR
 %s _COLON
@@ -234,6 +269,7 @@ import com.intellij.psi.tree.IElementType;
 S = [\x20\x09\x0D\x0A]+
 NS = [^\x20\x09\x0D\x0A]+
 _NS = [^\x20\x09\x0D\x0A]
+ELSE = ([:letter:]+)|[^]
 
 Digits = [0-9]+
 DecimalLiteral = ("." {Digits}) | ({Digits} "." [0-9]*)
@@ -245,6 +281,7 @@ IntegerLiteral = {Digits}
 Char = [\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]
 CharRef = ("&#"[0-9]+";") | ("&#x"[0-9a-fA-F]+";")
 PredefinedEntityRef = "&"("lt"|"gt"|"amp"|"quot"|"apos")";"
+WordSep = !({Char})
 
 // Character classes (XML 1.0)
 
@@ -282,120 +319,170 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 %%
 
+// get into a state quickly
 <YYINITIAL> {
-  {S} { return WHITE_SPACE; }
-  "xquery" { yybegin(_XQUERY); return KW_XQUERY; }
-  "declare" { yybegin(_DECLARE); return KW_DECLARE; }
-  "module" { yybegin(_MODULE); return KW_MODULE; }
-  "import" {yybegin(_IMPORT); return KW_IMPORT; }
-  [^] {yypushback(yylength()); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); }
+  {ELSE} { yypushback(yylength()); optSpaceThen(MODULE); }
+}
+
+//<MODULE> {
+//  "import" {spaceThen(_IMPORT); return KW_IMPORT; }
+//
+//  [^] {pushState(_EXPR_LIST); retryAs(_EXPR_SINGLE); }
+//  [^] {return BAD_CHARACTER; }
+//}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+// VersionDecl, ModuleDecl and Prolog
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+// VersionDecl entry point
+// only available as the first non-space line in a file
+<VERSION_DECL, MODULE> {
+  "xquery" { pushOptSpaceThen(LIBRARY_OR_MAIN); pushOptSpaceThen(_SEMI); spaceThen(VERSION_DECL_VERSION); return KW_XQUERY; }
+}
+// ModuleDecl entry point
+<MODULE_DECL, MODULE, LIBRARY_OR_MAIN> {
+  "module" { pushOptSpaceThen(LIBRARY_MODULE); pushOptSpaceThen(_SEMI); spaceThen(_NAMESPACE_DECL); return KW_MODULE; }
+  {ELSE} { retryAs(MAIN_MODULE); }
+}
+// SchemaImport entry point
+<IMPORT_DECL, MODULE, LIBRARY_OR_MAIN, LIBRARY_MODULE, MAIN_MODULE> {
+  "import" {pushOptSpaceThen(_SEMI); spaceThen(_IMPORT); return KW_IMPORT; }
+}
+// "declare" XXX entry point
+<DECLARE_DECL, MODULE, LIBRARY_OR_MAIN, LIBRARY_MODULE, MAIN_MODULE> {
+  "declare" { pushOptSpaceThen(_SEMI); spaceThen(DECLARE_X); return KW_DECLARE; }
+}
+<MODULE, MAIN_MODULE, LIBRARY_MODULE> {
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // xquery version "" (encoding "")? ;
-<_XQUERY> {
-  "version" { pushState(_XQUERY_VERSION); yybegin(_STRINGLITERAL); return KW_VERSION; }
+<VERSION_DECL_VERSION> {
+  "version" {
+    pushOptSpaceThen(VERSION_DECL_ENCODING);
+    optSpaceThen(STRING_LITERAL);
+    return KW_VERSION;
+  }
+  {ELSE} {return BAD_CHARACTER; }
 }
 
-<_XQUERY_VERSION> {
-  "encoding" {pushState(_SEP); yybegin(_STRINGLITERAL); return KW_ENCODING; }
-  ";" { yybegin(YYINITIAL); return OP_SEPERATOR; }
-}
-
-// module namespace ...
-<_MODULE> {
-  "namespace" {pushState(_SEP); yybegin(NAMESPACEDECL); return KW_MODULE; }
+<VERSION_DECL_ENCODING> {
+  "encoding" { optSpaceThen(STRING_LITERAL); return KW_ENCODING; }
+  {ELSE} { retry(); }
 }
 
 // declare ...
-<_DECLARE> {
-  "option" {pushState(_SEP); pushState(_STRINGLITERAL); yybegin(_QNAME); return KW_OPTION;}
-  "ordering" {yybegin(DECLAREORDERING); return KW_ORDERING; }
-  "boundary-space" {yybegin(_PRESERVE_OR_STRIP); return KW_BOUNDARY_SPACE; }
-  "namespace" {pushState(_SEP); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
-  "base-uri" {pushState(_SEP); yybegin(_URILITERAL); return KW_BASE_URI; }
-  "copy-namespaces" {yybegin(_DECLARE_COPYNS); return KW_COPY_NAMESPACES; }
-  "construction" {yybegin(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
-  "default" {yybegin(_DECLARE_DEFAULT); return KW_DEFAULT; }
-  "variable" {pushState(_SEP); pushState(_DECLARE_VARIABLE); yybegin(_PARAM); return KW_VARIABLE; }
+<DECLARE_X> {
+  "option" { pushSpaceThen(STRING_LITERAL); spaceThen(_QNAME); return KW_OPTION;}
+  "ordering" { spaceThen(DECLAREORDERING); return KW_ORDERING; }
+  "boundary-space" {spaceThen(_PRESERVE_OR_STRIP); return KW_BOUNDARY_SPACE; }
+  "base-uri" { spaceThen(_URILITERAL); return KW_BASE_URI; }
+  "copy-namespaces" {spaceThen(DECLARE_COPYNS_PRESERVE_OR_NOT); return KW_COPY_NAMESPACES; }
+  "construction" {spaceThen(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
+  "default" {spaceThen(_DECLARE_DEFAULT); return KW_DEFAULT; }
+  "variable" { pushSpaceThen(_DECLARE_VARIABLE); spaceThen(_PARAM); return KW_VARIABLE; }
 }
 
-<_SEP> {
-  ";" {yybegin(YYINITIAL); return OP_SEPERATOR; }
+// module namespace ...
+// declare namespace ...
+<_NAMESPACE_DECL, DECLARE_X> {
+  "namespace" { optSpaceThen(NAMESPACE_NAME); return KW_MODULE; }
+  {ELSE} { return BAD_CHARACTER; }
+}
+
+<_SEMI> {
+  ";" {popState(); return OP_SEPERATOR; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // DECLARE DEFAULT ...
 <_DECLARE_DEFAULT> {
-  "collation" {pushState(_SEP); yybegin(_URILITERAL); return KW_COLLATION; }
-  "order" {yybegin(_DECLARE_DEFAULT_ORDER); return KW_ORDER; }
-  "function" {yybegin(_DECLARE_DEFAULT_NAMESPACE); return KW_FUNCTION; }
-  "element" {yybegin(_DECLARE_DEFAULT_NAMESPACE); return KW_ELEMENT; }
+  "collation" { spaceThen(_URILITERAL); return KW_COLLATION; }
+  "order" {spaceThen(_DECLARE_DEFAULT_ORDER); return KW_ORDER; }
+  "function" {spaceThen(_DECLARE_DEFAULT_NAMESPACE); return KW_FUNCTION; }
+  "element" {spaceThen(_DECLARE_DEFAULT_NAMESPACE); return KW_ELEMENT; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // declare default empty (greatest | least)
 <_DECLARE_DEFAULT_ORDER> {
-  "empty" {yybegin(_DECLARE_DEFAULT_ORDER_EMPTY); return KW_EMPTY; }
+  "empty" {spaceThen(_DECLARE_DEFAULT_ORDER_EMPTY); return KW_EMPTY; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_DECLARE_DEFAULT_ORDER_EMPTY> {
-  "greatest" {yybegin(_SEP); return KW_GREATEST;}
-  "least" {yybegin(_SEP); return KW_LEAST;}
+  "greatest" { popState(); return KW_GREATEST;}
+  "least" { popState(); return KW_LEAST;}
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // declare default (function | element) namespace ""
 <_DECLARE_DEFAULT_NAMESPACE> {
-  "namespace" {pushState(_SEP); yybegin(_URILITERAL); return KW_NAMESPACE; }
+  "namespace" { spaceThen(_URILITERAL); return KW_NAMESPACE; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // ORDERING
 <DECLAREORDERING> {
-  "ordered" {yybegin(_SEP); return KW_ORDERED; }
-  "unordered" {yybegin(_SEP); return KW_UNORDERED; }
+  "ordered" { popState(); return KW_ORDERED; }
+  "unordered" { popState(); return KW_UNORDERED; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
-// NAMESPACEDECL
-<NAMESPACEDECL> {
-  {NCName} {yybegin(_NAMESPACEDECL_); return XQ_LOCAL_NAME; }
+// {NCName} = ""
+<NAMESPACE_NAME> {
+  {NCName} {optSpaceThen(_NAMESPACEDECL_); return XQ_LOCAL_NAME; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_NAMESPACEDECL_> {
-  "=" {yybegin(_URILITERAL); return OP_EQUALS; }
+  "=" {optSpaceThen(_URILITERAL); return OP_EQUALS; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
-// _DECLARE_COPYNS
-<_DECLARE_COPYNS> {
-  "preserve" {yybegin(_DECLARE_COPYNS_); return KW_PRESERVE; }
-  "no-preserve" {yybegin(_DECLARE_COPYNS_); return KW_NO_PRESERVE;}
-}
-<_DECLARE_COPYNS_> {
-  "," {yybegin(_DECLARE_COPYNS__); return OP_COMMA;}
+// DECLARE_COPYNS_PRESERVE_OR_NOT
+<DECLARE_COPYNS_PRESERVE_OR_NOT> {
+  "preserve" {pushOptSpaceThen(_DECLARE_COPYNS__); optSpaceThen(_COMMA); return KW_PRESERVE; }
+  "no-preserve" {pushOptSpaceThen(_DECLARE_COPYNS__); optSpaceThen(_COMMA); return KW_NO_PRESERVE;}
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_DECLARE_COPYNS__> {
-  "inherit" {yybegin(_SEP); return KW_INHERIT; }
-  "no-inherit" {yybegin(_SEP); return KW_NO_INHERIT; }
+  "inherit" { popState(); return KW_INHERIT; }
+  "no-inherit" { popState(); return KW_NO_INHERIT; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // declare variable...
 <_DECLARE_VARIABLE> {
-  ":=" { yybegin(_EXPR_SINGLE); return OP_ASSIGN;}
+  ":=" { optSpaceThen(_EXPR_SINGLE); return OP_ASSIGN;}
   "external" {popState(); return KW_EXTERNAL;}
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // import ...
 <_IMPORT> {
-  "schema" {yybegin(_IMPORT_SCHEMA); return KW_SCHEMA; }
-  "module" {yybegin(_IMPORT_MODULE); return KW_MODULE; }
+  "schema" {spaceThen(_IMPORT_SCHEMA); return KW_SCHEMA; }
+  "module" {spaceThen(_IMPORT_MODULE); return KW_MODULE; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 // import schema (namespace =) | (default element namespace) "" (at "" (, "")*)?
 <_IMPORT_SCHEMA> {
-  "namespace" { pushState(_SEP); pushState(_ATLIST); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
-  "default" { yybegin(_IMPORT_SCHEMA_DEFAULT); return KW_DEFAULT; }
+  "namespace" { pushSpaceThen(_ATLIST); spaceThen(NAMESPACE_NAME); return KW_NAMESPACE; }
+  "default" { spaceThen(_IMPORT_SCHEMA_DEFAULT); return KW_DEFAULT; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_IMPORT_SCHEMA_DEFAULT> {
-  "element" { yybegin(_IMPORT_SCHEMA_DEFAULT_ELEMENT); return KW_ELEMENT; }
+  "element" { spaceThen(_IMPORT_SCHEMA_DEFAULT_ELEMENT); return KW_ELEMENT; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_IMPORT_SCHEMA_DEFAULT_ELEMENT> {
-  "namespace" {pushState(_SEP); pushState(_ATLIST); yybegin(_URILITERAL); return KW_NAMESPACE; }
+  "namespace" { pushSpaceThen(_ATLIST); spaceThen(_URILITERAL); return KW_NAMESPACE; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_IMPORT_MODULE> {
-  "namespace" { pushState(_SEP); pushState(_ATLIST); yybegin(NAMESPACEDECL); return KW_NAMESPACE; }
+  "namespace" { pushSpaceThen(_ATLIST); optSpaceThen(NAMESPACE_NAME); return KW_NAMESPACE; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 
@@ -431,7 +518,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 // as processing-instruction( NCName | "")
 <_ITEM_TYPE_PI> {
-  "\""|"'" { pushState(_CLOSE_BRACE); yypushback(1); yybegin(_STRINGLITERAL); }
+  "\""|"'" { pushState(_CLOSE_BRACE); yypushback(1); yybegin(STRING_LITERAL); }
   {NCName} { pushState(_CLOSE_BRACE); yypushback(yylength()); yybegin(_NCNAME); }
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
@@ -456,6 +543,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
 }
 
+<MAIN_MODULE> {
+  {ELSE} {pushOptSpaceThen(_EXPR_LIST); pushOptSpaceThen(_EXPR_SINGLE); retry();}
+}
 // Expr := ExprSingle ( "," ExprSingle )?
 // ExprSingle
 <_EXPR_SINGLE> {
@@ -466,7 +556,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] {yypushback(yylength()); yybegin(_OR_EXPR); }
 }
@@ -574,7 +664,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "let" {pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return KW_LET;}
 }
 <_LET_CLAUSE_> {
-  "," { pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return OP_COMMA;}
+  "," { pushState(); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return OP_COMMA;}
   {NS} {yypushback(yylength()); popState(); }
 }
 <_LET_CLAUSE_VAR> {
@@ -623,9 +713,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   [^] {yypushback(yylength()); pushState(_OR_EXPR_); yybegin(_AND_EXPR); }
 }
 <_OR_EXPR_> {
-  "or" {pushState(); yybegin(_AND_EXPR); return KW_OR;}
+  "or" / {WordSep} {pushState(); yybegin(_AND_EXPR); return KW_OR;}
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] { yypushback(yylength()); popState(); }
 }
@@ -635,7 +725,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_AND_EXPR_> {
   "and" {pushState(); yybegin(_COMPARE_EXPR); return KW_AND;}
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] { yypushback(yylength()); popState(); }
 }
@@ -659,7 +749,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "<<" { yybegin(_RANGE_EXPR); return OP_LTLT; }
   ">>" { yybegin(_RANGE_EXPR); return OP_GTGT; }
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] {yypushback(yylength()); popState(); }
 }
@@ -669,7 +759,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_RANGE_EXPR_> {
   "to" { yybegin(_ADD_EXPR); return KW_TO; }
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] {yypushback(yylength()); popState(); }
 }
@@ -680,7 +770,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "+" {pushState(); yybegin(_MULT_EXPR); return OP_PLUS;}
   "-" {pushState(); yybegin(_MULT_EXPR); return OP_MINUS;}
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] { yypushback(yylength()); popState(); }
 }
@@ -693,7 +783,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "idiv" {pushState(); yybegin(_UNION_EXPR); return OP_IDIV;}
   "mod" {pushState(); yybegin(_UNION_EXPR); return OP_MOD;}
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] { yypushback(yylength()); popState(); }
 }
@@ -704,7 +794,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "union" {pushState(); yybegin(_INTERSECT_EXCEPT_EXPR); return KW_UNION;}
   "|" {pushState(); yybegin(_INTERSECT_EXCEPT_EXPR); return OP_PIPE;}
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] { yypushback(yylength()); popState(); }
 }
@@ -715,18 +805,18 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "intersect" {pushState(); yybegin(_UNARY_EXPR); return KW_INTERSECT;}
   "except" {pushState(); yybegin(_UNARY_EXPR); return KW_EXCEPT;}
 
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] { yypushback(yylength()); popState(); }
 }
 <_UNARY_EXPR> {
   "+" {return OP_PLUS; }
   "-" {return OP_MINUS; }
-  "/" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASH;}
-  "//" {pushState(_CAST_AS_EXPR); yybegin(_STEP_EXPR); return OP_SLASHSLASH; }
+//  "/" {pushState(_CAST_AS_EXPR); yybegin(_RELATIVE_PATH_EXPR); return OP_SLASH;}
+//  "//" {pushState(_CAST_AS_EXPR); yybegin(_RELATIVE_PATH_EXPR); return OP_SLASHSLASH; }
   "validate" {pushState(_CAST_AS_EXPR); yybegin(_VALIDATE_EXPR_X); return KW_VALIDATE; }
   "(#" {pushState(_CAST_AS_EXPR); pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
   [^] {pushState(_CAST_AS_EXPR); yypushback(yylength()); yybegin(_STEP_EXPR); }
 }
@@ -734,28 +824,28 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "castable" {yypushback(yylength()); yybegin(_CASTABLE_AS_EXPR); }
   "cast" { pushState(_CASTABLE_AS_EXPR); pushState(_OPT_QUESTION); pushState(_QNAME); yybegin(_KW_AS); return KW_CAST;}
   {S} {return WHITE_SPACE;}
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ { yybegin(_CASTABLE_AS_EXPR); yypushback(yylength()); }
   [^] { yybegin(_CASTABLE_AS_EXPR); yypushback(yylength()); }
 }
 <_CASTABLE_AS_EXPR> {
   "castable" { pushState(_TREAT_AS_EXPR); pushState(_OPT_QUESTION); pushState(_QNAME); yybegin(_KW_AS); return KW_CASTABLE;}
   {S} {return WHITE_SPACE;}
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
   [^] { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
 }
 <_TREAT_AS_EXPR> {
   "treat" { pushState(_INSTANCEOF_EXPR); pushState(_ITEM_TYPE); yybegin(_KW_AS); return KW_CASTABLE;}
   {S} {return WHITE_SPACE;}
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
   [^] { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
 }
 <_INSTANCEOF_EXPR> {
   "instance" { pushState(_ITEM_TYPE); yybegin(_KW_OF); return KW_INSTANCE;}
   {S} {return WHITE_SPACE;}
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ {yypushback(yylength()); popState(); }
   [^] {yypushback(yylength()); popState(); }
 }
@@ -784,10 +874,21 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "#)" {popState(); return XQ_PRAGMA_END; }
 }
 
+<_RELATIVE_PATH_EXPR> {
+  [^] {yypushback(yylength()); pushState(_RELATIVE_PATH_EXPR_); yybegin(_STEP_EXPR); }
+}
+<_RELATIVE_PATH_EXPR_> {
+  "/" {pushState(); yybegin(_STEP_EXPR); return OP_SLASH;}
+  "//" {pushState(); yybegin(_STEP_EXPR); return OP_SLASHSLASH;}
+
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
 <_STEP_EXPR> {
   // flattened Literals
-  "\"" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(_STRINGLITERAL); }
-  "'" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(_STRINGLITERAL); }
+  "\"" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(STRING_LITERAL); }
+  "'" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(STRING_LITERAL); }
   {DoubleLiteral} { yybegin(_PREDICATE_LIST); return XQ_DOUBLE_LITERAL; }
   {DecimalLiteral} { yybegin(_PREDICATE_LIST); return XQ_DECIMAL_LITERAL; }
   {IntegerLiteral} { yybegin(_PREDICATE_LIST); return XQ_INTEGER_LITERAL; }
@@ -831,7 +932,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   // the @ is optional so we need to test here for the rest
   "@" { pushState(_PREDICATE_LIST); yybegin(_NODE_TEST); return OP_AT;}
-  {_NS} {yypushback(yylength()); pushState(_PREDICATE_LIST); yybegin(_NODE_TEST);}
+  [^] {yypushback(yylength()); pushState(_PREDICATE_LIST); yybegin(_NODE_TEST);}
   // flattened FunctionCall
   {QName} { pushState(_PREDICATE_LIST);  yypushback(yylength()); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
 }
@@ -934,7 +1035,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_OPT_QUESTION> {
   "?" { popState(); return OP_QUESTION; }
   {S} { return WHITE_SPACE; }
-  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   [^] {yypushback(yylength()); popState(); }
 }
 <_KW_AS> {
@@ -996,8 +1097,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // ("preserve" | "split") ";"
 <_PRESERVE_OR_STRIP> {
-  "preserve" {yybegin(_SEP); return KW_PRESERVE; }
-  "strip" {yybegin(_SEP); return KW_STRIP; }
+  "preserve" {popState(); return KW_PRESERVE; }
+  "strip" {popState(); return KW_STRIP; }
 }
 
 <_QNAME> {
@@ -1035,19 +1136,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {NCName} {popState(); return XQ_NCNAME; }
 }
 
-<EXPR_COMMENT> {
-  ":)" { popState(); return XQ_COMMENT_END; }
-  "(:" { pushState(); return XQ_COMMENT_START; }
-  [^] { return XQ_COMMENT_CHAR; }
-}
-<XML_COMMENT> {
-  "-->" {popState(); return XML_COMMENT_END;}
-  [^\-]|(-[^\-]) {return XML_COMMENT_CHAR; }
-  [^] { return BAD_CHARACTER; }
-}
 
-
-<_STRINGLITERAL,_URILITERAL> {
+<STRING_LITERAL,_URILITERAL> {
   "\"" { yybegin(STR_START_QUOTE); return XQ_STR_START; }
   "'" {yybegin(STR_START_APOS); return XQ_STR_START; }
 }
@@ -1111,8 +1201,34 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "$" {yybegin(_QNAME); return OP_VARSTART; }
 }
 
+<XQ_COMMENT> {
+  ":)" { popState(); return XQ_COMMENT_END; }
+  "(:" { pushState(); return XQ_COMMENT_START; }
+  [^] { return XQ_COMMENT_CHAR; }
+}
+<XML_COMMENT> {
+  "-->" {popState(); return XML_COMMENT_END;}
+  [^\-]|(-[^\-]) {return XML_COMMENT_CHAR; }
+  [^] { return BAD_CHARACTER; }
+}
 
-"(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+<_COMMA> {
+  "," {popState(); return OP_COMMA;}
+}
+
+<_OPT_WORD_SEP> {
+  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  {ELSE} { retry(); }
+}
+<_WORD_SEP> {
+  "(:" { pushState(_OPT_WORD_SEP); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
+  {S} { yybegin(_OPT_WORD_SEP); return WHITE_SPACE; }
+  {ELSE} { popState(); return BAD_CHARACTER; }
+}
+
+// todo: get rid of these after migrating all states to be explicit
+"(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
 {S} { return WHITE_SPACE; }
-//[:letter:]+ { return BAD_WORD; }
-[^] { yybegin(YYINITIAL); return BAD_CHARACTER; }
+[:letter:]+ { return BAD_WORD; }
+{ELSE} { return BAD_CHARACTER2; }

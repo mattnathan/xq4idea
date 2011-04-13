@@ -45,6 +45,19 @@ declare default element namespace "http://function.com/";
 
 declare variable $var external;
 declare variable $var :=
+    for $var in ""
+    return "";
+declare variable $var :=
+    let $var := ""
+    return $var;
+declare variable $var :=
+    let $var :=
+        let $var := ""
+        return ""
+    for $var in ""
+    strict order by $var
+    return "";
+declare variable $var :=
     let $var as void() :=
         for $var as void() at $var in ""
         return ""
@@ -204,6 +217,9 @@ declare variable $expr := "hello" and "me";
 declare variable $expr := "hello" and "me" eq 3 to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
 declare variable $expr := "hello" or "him";
 declare variable $expr := "hello" or "him" and "me" eq 3 to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
+
+declare variable $attr := @myAttr;
+declare variable $xpath := <node/>//me:elem/@attr;
 
 12.2e2234,
 "hello",

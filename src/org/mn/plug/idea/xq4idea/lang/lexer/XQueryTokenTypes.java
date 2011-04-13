@@ -9,6 +9,7 @@ import com.intellij.psi.tree.IElementType;
 public interface XQueryTokenTypes {
   // core types
   IElementType BAD_CHARACTER = TokenType.BAD_CHARACTER;
+  IElementType BAD_CHARACTER2 = new XQueryElementType("BAD_CHARACTER");
   IElementType BAD_WORD = TokenType.ERROR_ELEMENT;
   IElementType WHITE_SPACE = TokenType.WHITE_SPACE;
 

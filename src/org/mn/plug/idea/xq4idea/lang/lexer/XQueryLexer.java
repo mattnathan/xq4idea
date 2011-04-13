@@ -23,4 +23,10 @@ public class XQueryLexer extends FlexAdapter {
   public XQueryLexer() {
     super(new _XQueryLexer((Reader) null));
   }
+
+  @Override
+  public void start(CharSequence buffer, int startOffset, int endOffset, int initialState) {
+    ((_XQueryLexer) getFlex()).stack.clear();
+    super.start(buffer, startOffset, endOffset, initialState);
+  }
 }
