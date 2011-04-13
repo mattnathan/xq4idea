@@ -175,6 +175,11 @@ declare variable $expr := "hello" instance of my:type;
 declare variable $expr := "hello" intersect "hello";
 declare variable $expr := "hello" | "hello";
 declare variable $expr := "hello" union "hello" except "" cast as type;
+declare variable $expr := "hello" * 2 ;
+declare variable $expr := "hello" div 2 ;
+declare variable $expr := "hello" idiv 2 ;
+declare variable $expr := "hello" mod 2 ;
+declare variable $expr := "hello" * 2 union "hello" except "" cast as type;
 
 12.2e2234,
 "hello",

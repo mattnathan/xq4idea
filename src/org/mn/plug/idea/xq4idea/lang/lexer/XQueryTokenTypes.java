@@ -38,6 +38,9 @@ public interface XQueryTokenTypes {
   IElementType OP_LCURLYCURLY = new XQueryElementType("{{");
   IElementType OP_RCURLYCURLY = new XQueryElementType("}}");
   IElementType OP_PIPE = new XQueryElementType("|");
+  IElementType OP_DIV = new XQueryElementType("DIV");
+  IElementType OP_IDIV = new XQueryElementType("IDIV");
+  IElementType OP_MOD = new XQueryElementType("MOD");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");

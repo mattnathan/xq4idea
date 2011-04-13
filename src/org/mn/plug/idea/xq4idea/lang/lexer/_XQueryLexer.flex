@@ -136,6 +136,8 @@ import com.intellij.psi.tree.IElementType;
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
 %x _INSTANCEOF_EXPR
+%x _MULT_EXPR
+%x _MULT_EXPR_
 %x _UNION_EXPR
 %x _UNION_EXPR_
 %x _INTERSECT_EXCEPT_EXPR
@@ -453,7 +455,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
-  {_NS} {yypushback(yylength()); yybegin(_UNION_EXPR); }
+  {_NS} {yypushback(yylength()); yybegin(_MULT_EXPR); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -604,6 +606,19 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
+<_MULT_EXPR> {
+  [^] {yypushback(yylength()); pushState(_MULT_EXPR_); yybegin(_UNION_EXPR); }
+}
+<_MULT_EXPR_> {
+  "*" {pushState(); yybegin(_UNION_EXPR); return OP_STAR;}
+  "div" {pushState(); yybegin(_UNION_EXPR); return OP_DIV;}
+  "idiv" {pushState(); yybegin(_UNION_EXPR); return OP_IDIV;}
+  "mod" {pushState(); yybegin(_UNION_EXPR); return OP_MOD;}
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
 <_UNION_EXPR> {
   [^] {yypushback(yylength()); pushState(_UNION_EXPR_); yybegin(_INTERSECT_EXCEPT_EXPR); }
 }

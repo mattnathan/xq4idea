@@ -41,6 +41,7 @@ public interface XQueryTokenTypeSets extends XQueryTokenTypes {
       KW_DOCUMENT, KW_CAST, KW_CASTABLE,
       KW_EXCEPT, KW_INTERSECT, KW_PARENT, KW_ANCESTOR, KW_ANCESTOR_OR_SELF, KW_PRECEDING, KW_PRECEDING_SIBLING,
       KW_UNION,
-      XML_PI_NAME
+      XML_PI_NAME,
+      OP_DIV, OP_IDIV, OP_MOD
   );
 }
