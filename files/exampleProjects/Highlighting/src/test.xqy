@@ -172,6 +172,8 @@ declare variable $expr := "hello" castable as my:type;
 declare variable $expr := "hello" castable as my:type?;
 declare variable $expr := "hello" treat as my:type;
 declare variable $expr := "hello" instance of my:type;
+declare variable $expr := "hello" intersect "hello";
+declare variable $expr := "hello" union "hello";
 
 12.2e2234,
 "hello",

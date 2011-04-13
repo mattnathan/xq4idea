@@ -10,6 +10,16 @@ import java.io.Reader;
  * @author Matt Nathan
  */
 public class XQueryLexer extends FlexAdapter {
+  public static void main(String[] args) {
+    XQueryLexer lexer = new XQueryLexer();
+    String content = "declare variable $s := '';";
+    lexer.start(content);
+    do {
+      lexer.advance();
+      System.out.println("lexer.getTokenText() = " + lexer.getTokenText());
+    } while (lexer.getTokenEnd() < content.length());
+  }
+
   public XQueryLexer() {
     super(new _XQueryLexer((Reader) null));
   }

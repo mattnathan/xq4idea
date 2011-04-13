@@ -37,6 +37,7 @@ public interface XQueryTokenTypes {
   IElementType OP_AT = new XQueryElementType("@");
   IElementType OP_LCURLYCURLY = new XQueryElementType("{{");
   IElementType OP_RCURLYCURLY = new XQueryElementType("}}");
+  IElementType OP_PIPE = new XQueryElementType("|");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");
@@ -171,4 +172,5 @@ public interface XQueryTokenTypes {
   IElementType KW_INSTANCE = new XQueryElementType("INSTANCE");
   IElementType KW_EXCEPT = new XQueryElementType("EXCEPT");
   IElementType KW_INTERSECT = new XQueryElementType("INTERSECT");
+  IElementType KW_UNION = new XQueryElementType("UNION");
 }

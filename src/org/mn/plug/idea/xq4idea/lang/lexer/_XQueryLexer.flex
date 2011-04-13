@@ -136,6 +136,8 @@ import com.intellij.psi.tree.IElementType;
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
 %x _INSTANCEOF_EXPR
+%x _UNION_EXPR
+%x _UNION_EXPR_
 %x _INTERSECT_EXCEPT_EXPR
 %x _INTERSECT_EXCEPT_EXPR_
 
@@ -451,7 +453,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "some" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "every" {yypushback(yylength()); yybegin(_QUANT_EXPR); }
   "typeswitch" {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR); }
-  {_NS} {yypushback(yylength()); yybegin(_UNARY_EXPR); }
+  {_NS} {yypushback(yylength()); yybegin(_UNION_EXPR); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -602,6 +604,17 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
+<_UNION_EXPR> {
+  [^] {yypushback(yylength()); pushState(_UNION_EXPR_); yybegin(_INTERSECT_EXCEPT_EXPR); }
+}
+<_UNION_EXPR_> {
+  "union" {pushState(); yybegin(_INTERSECT_EXCEPT_EXPR); return KW_UNION;}
+  "|" {pushState(); yybegin(_INTERSECT_EXCEPT_EXPR); return OP_PIPE;}
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
 <_INTERSECT_EXCEPT_EXPR> {
   [^] {yypushback(yylength()); pushState(_INTERSECT_EXCEPT_EXPR_); yybegin(_UNARY_EXPR); }
 }
