@@ -136,6 +136,10 @@ import com.intellij.psi.tree.IElementType;
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
 %x _INSTANCEOF_EXPR
+%x _OR_EXPR
+%x _OR_EXPR_
+%x _AND_EXPR
+%x _AND_EXPR_
 %x _COMPARE_EXPR
 %x _COMPARE_EXPR_
 %x _RANGE_EXPR
@@ -464,7 +468,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] {yypushback(yylength()); yybegin(_COMPARE_EXPR); }
+  [^] {yypushback(yylength()); yybegin(_OR_EXPR); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -615,6 +619,26 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
+<_OR_EXPR> {
+  [^] {yypushback(yylength()); pushState(_OR_EXPR_); yybegin(_AND_EXPR); }
+}
+<_OR_EXPR_> {
+  "or" {pushState(); yybegin(_AND_EXPR); return KW_OR;}
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
+<_AND_EXPR> {
+  [^] {yypushback(yylength()); pushState(_AND_EXPR_); yybegin(_COMPARE_EXPR); }
+}
+<_AND_EXPR_> {
+  "and" {pushState(); yybegin(_COMPARE_EXPR); return KW_AND;}
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] { yypushback(yylength()); popState(); }
+}
 <_COMPARE_EXPR> {
   [^] {yypushback(yylength()); pushState(_COMPARE_EXPR_); yybegin(_RANGE_EXPR); }
 }

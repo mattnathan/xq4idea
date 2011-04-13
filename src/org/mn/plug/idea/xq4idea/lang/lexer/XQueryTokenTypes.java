@@ -191,4 +191,6 @@ public interface XQueryTokenTypes {
   IElementType KW_INTERSECT = new XQueryElementType("INTERSECT");
   IElementType KW_UNION = new XQueryElementType("UNION");
   IElementType KW_TO = new XQueryElementType("TO");
+  IElementType KW_AND = new XQueryElementType("AND");
+  IElementType KW_OR = new XQueryElementType("OR");
 }

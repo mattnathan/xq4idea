@@ -200,6 +200,10 @@ declare variable $expr := "hello" is 3;
 declare variable $expr := "hello" >> 3;
 declare variable $expr := "hello" << 3;
 declare variable $expr := "hello" eq 3 to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
+declare variable $expr := "hello" and "me";
+declare variable $expr := "hello" and "me" eq 3 to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
+declare variable $expr := "hello" or "him";
+declare variable $expr := "hello" or "him" and "me" eq 3 to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
 
 12.2e2234,
 "hello",
