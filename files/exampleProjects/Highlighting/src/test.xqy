@@ -184,6 +184,22 @@ declare variable $expr := "hello" - "lo" + 7;
 declare variable $expr := "hello" + 7 * 2 union "hello" except "" cast as type;
 declare variable $expr := "hello" to 9;
 declare variable $expr := "hello" to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
+declare variable $expr := "hello" = 3;
+declare variable $expr := "hello" != 3;
+declare variable $expr := "hello" < 3;
+declare variable $expr := "hello" > 3;
+declare variable $expr := "hello" <= 3;
+declare variable $expr := "hello" >= 3;
+declare variable $expr := "hello" eq 3;
+declare variable $expr := "hello" ne 3;
+declare variable $expr := "hello" lt 3;
+declare variable $expr := "hello" le 3;
+declare variable $expr := "hello" gt 3;
+declare variable $expr := "hello" ge 3;
+declare variable $expr := "hello" is 3;
+declare variable $expr := "hello" >> 3;
+declare variable $expr := "hello" << 3;
+declare variable $expr := "hello" eq 3 to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
 
 12.2e2234,
 "hello",

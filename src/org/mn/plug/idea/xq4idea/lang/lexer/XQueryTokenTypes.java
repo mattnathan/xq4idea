@@ -41,6 +41,20 @@ public interface XQueryTokenTypes {
   IElementType OP_DIV = new XQueryElementType("DIV");
   IElementType OP_IDIV = new XQueryElementType("IDIV");
   IElementType OP_MOD = new XQueryElementType("MOD");
+  IElementType OP_NE = new XQueryElementType("!=");
+  IElementType OP_LT = new XQueryElementType("<");
+  IElementType OP_LE = new XQueryElementType("<=");
+  IElementType OP_GT = new XQueryElementType(">");
+  IElementType OP_GE = new XQueryElementType(">=");
+  IElementType OP_LTLT = new XQueryElementType("<<");
+  IElementType OP_GTGT = new XQueryElementType(">>");
+  IElementType OP_KW_EQ = new XQueryElementType("eq");
+  IElementType OP_KW_NE = new XQueryElementType("ne");
+  IElementType OP_KW_LT = new XQueryElementType("lt");
+  IElementType OP_KW_LE = new XQueryElementType("le");
+  IElementType OP_KW_GT = new XQueryElementType("gt");
+  IElementType OP_KW_GE = new XQueryElementType("ge");
+  IElementType OP_KW_IS = new XQueryElementType("is");
 
   // names
   IElementType XQ_PREFIX_NAME = new XQueryElementType("XQ_PREFIX_NAME");

@@ -136,6 +136,8 @@ import com.intellij.psi.tree.IElementType;
 %x _CASTABLE_AS_EXPR
 %x _TREAT_AS_EXPR
 %x _INSTANCEOF_EXPR
+%x _COMPARE_EXPR
+%x _COMPARE_EXPR_
 %x _RANGE_EXPR
 %x _RANGE_EXPR_
 %x _ADD_EXPR
@@ -462,7 +464,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] {yypushback(yylength()); yybegin(_RANGE_EXPR); }
+  [^] {yypushback(yylength()); yybegin(_COMPARE_EXPR); }
 }
 <_EXPR_LIST> {
   "," {pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_COMMA; }
@@ -613,6 +615,30 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // other expressions
+<_COMPARE_EXPR> {
+  [^] {yypushback(yylength()); pushState(_COMPARE_EXPR_); yybegin(_RANGE_EXPR); }
+}
+<_COMPARE_EXPR_> {
+  "=" { yybegin(_RANGE_EXPR); return OP_EQUALS; }
+  "!=" { yybegin(_RANGE_EXPR); return OP_NE; }
+  "<" { yybegin(_RANGE_EXPR); return OP_LT; }
+  "<=" { yybegin(_RANGE_EXPR); return OP_LE; }
+  ">" { yybegin(_RANGE_EXPR); return OP_GT; }
+  ">=" { yybegin(_RANGE_EXPR); return OP_GE; }
+  "eq" { yybegin(_RANGE_EXPR); return OP_KW_EQ; }
+  "ne" { yybegin(_RANGE_EXPR); return OP_KW_NE; }
+  "lt" { yybegin(_RANGE_EXPR); return OP_KW_LT; }
+  "le" { yybegin(_RANGE_EXPR); return OP_KW_LE; }
+  "gt" { yybegin(_RANGE_EXPR); return OP_KW_GT; }
+  "ge" { yybegin(_RANGE_EXPR); return OP_KW_GE; }
+  "is" { yybegin(_RANGE_EXPR); return OP_KW_IS; }
+  "<<" { yybegin(_RANGE_EXPR); return OP_LTLT; }
+  ">>" { yybegin(_RANGE_EXPR); return OP_GTGT; }
+
+  "(:" { pushState(); yybegin(EXPR_COMMENT); return XQ_COMMENT_START; }
+  {S} { return WHITE_SPACE; }
+  [^] {yypushback(yylength()); popState(); }
+}
 <_RANGE_EXPR> {
   [^] {yypushback(yylength()); pushState(_RANGE_EXPR_); yybegin(_ADD_EXPR); }
 }
