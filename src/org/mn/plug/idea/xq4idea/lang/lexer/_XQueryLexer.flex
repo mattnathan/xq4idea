@@ -60,6 +60,7 @@ import com.intellij.psi.tree.IElementType;
 %x XQ_COMMENT
 %x STRING_LITERAL
 %x VARNAME
+%x OPT_VARNAME
 
 // the top level module file
 %x MODULE
@@ -152,6 +153,14 @@ import com.intellij.psi.tree.IElementType;
 %x QUANTIFIED_EXPR_IN
 %x QUANTIFIED_EXPR_SATISFIES
 
+// TypeSwitch expression
+%x TYPESWITCH_EXPR
+%x TYPESWITCH_EXPR_CASE
+%x TYPESWITCH_EXPR_CASE2
+%x TYPESWITCH_EXPR_CASE_OPT_VAR
+%x TYPESWITCH_EXPR_CASE_OPT_VAR_AS
+%x TYPESWITCH_EXPR_RETURN
+
 
 
 // below here we shouldn't be using anything ---------------------------------------------------------------------------
@@ -174,16 +183,6 @@ import com.intellij.psi.tree.IElementType;
 %s _EL_IN_CURLY_OR_NCNAME
 
 
-// TypeSwitch expression
-%s _TYPESWITCH_EXPR
-%s _TYPESWITCH_EXPR_
-%s _TYPESWITCH_EXPR__
-%s _TYPESWITCH_EXPR_DEFAULT_
-%s _TYPESWITCH_EXPR_CASE
-%s _TYPESWITCH_EXPR_CASE2
-%s _TYPESWITCH_EXPR_CASE_
-%s _TYPESWITCH_EXPR_CASE_AS
-%s _TYPESWITCH_EXPR_RETURN
 
 // other expressions
 %s _VALUE_EXPR
@@ -583,6 +582,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { retry(); }
 }
 
+// default state cleanup
 <MAIN_MODULE> {
   {ELSE} { pushList(EXPR_SINGLE, EXPR_REPEATER); retry();}
 }
@@ -598,18 +598,25 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // Expr := ExprSingle ( "," ExprSingle )?
 // ExprSingle
 <EXPR_SINGLE> {
-  "typeswitch" {retryAs(_TYPESWITCH_EXPR); }
   // start of FLWOR expression
   "for" {pushState(_FLWOR_HEAD); retryAs(_FOR_CLAUSE); }
   "let" {pushState(_FLWOR_HEAD); retryAs(_LET_CLAUSE); }
 }
+
 // IfExpr := <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle
 <IF_EXPR, EXPR_SINGLE> "if" {pushOptSpaceThen(IFTHEN_EXPR); optSpaceThen(_EXPR_LIST_IN_BRACE); return KW_IF;}
+
 // QuantifiedExpr := (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle
 //                    ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle
 <QUANTIFIED_EXPR, EXPR_SINGLE> {
   "some" {startList(QUANTIFIED_EXPR_VAR, QUANTIFIED_EXPR_REPEATER); return KW_SOME;}
   "every" {startList(QUANTIFIED_EXPR_VAR, QUANTIFIED_EXPR_REPEATER); return KW_EVERY;}
+}
+// "typeswitch" "(" Expr ")" CaseClause+ "default" ("$" VarName)? "return" ExprSingle
+<TYPESWITCH_EXPR, EXPR_SINGLE> "typeswitch" {
+  pushOptSpaceThen(TYPESWITCH_EXPR_CASE);
+  optSpaceThen(_EXPR_LIST_IN_BRACE); 
+  return KW_TYPESWITCH; 
 }
 
 // default case happens after all others may have matched
@@ -618,6 +625,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "," {optSpaceRepeat(); optSpaceThen(EXPR_SINGLE); return OP_COMMA; }
   {ELSE} { retry(); }
 }
+
 
 // if expression body
 <IFTHEN_EXPR> {
@@ -628,6 +636,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "else" {optSpaceThen(EXPR_SINGLE); return KW_ELSE; }
   {ELSE} {return BAD_CHARACTER; }
 }
+
 
 // quantified expression body
 <QUANTIFIED_EXPR_VAR> {
@@ -646,36 +655,33 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { return BAD_CHARACTER; }
 }
 
-// Typeswitch expressions
-<_TYPESWITCH_EXPR> {
-  "typeswitch" {yybegin(_TYPESWITCH_EXPR_); return KW_TYPESWITCH; }
+
+// Typeswitch body
+<TYPESWITCH_EXPR_CASE2> {
+  "default" { pushOptSpaceThen(TYPESWITCH_EXPR_RETURN); optSpaceThen(OPT_VARNAME); return KW_DEFAULT; }
 }
-<_TYPESWITCH_EXPR_> {
-  "(" {pushState(_TYPESWITCH_EXPR__); startList(EXPR_SINGLE, EXPR_REPEATER); return OP_LBRACE; }
+<TYPESWITCH_EXPR_CASE,TYPESWITCH_EXPR_CASE2> {
+  "case" {
+    pushOptSpaceThen(TYPESWITCH_EXPR_CASE2);
+    pushOptSpaceThen(TYPESWITCH_EXPR_RETURN);
+    optSpaceThen(TYPESWITCH_EXPR_CASE_OPT_VAR);
+    return KW_CASE;
+  }
+  {ELSE} { return BAD_CHARACTER; }
 }
-<_TYPESWITCH_EXPR__> {
-  ")" {yybegin(_TYPESWITCH_EXPR_CASE); return OP_RBRACE; }
+<TYPESWITCH_EXPR_CASE_OPT_VAR> {
+  "$" {pushOptSpaceThen(TYPESWITCH_EXPR_CASE_OPT_VAR_AS); retryAs(VARNAME);}
+  {ELSE} {retryAs(SEQUENCE_TYPE); }
 }
-<_TYPESWITCH_EXPR_CASE,_TYPESWITCH_EXPR_CASE2> {
-  "case" {pushState(_TYPESWITCH_EXPR_CASE2); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(_TYPESWITCH_EXPR_CASE_); return KW_CASE;}
+<TYPESWITCH_EXPR_CASE_OPT_VAR_AS> {
+  "as" {spaceThen(SEQUENCE_TYPE); return KW_AS; }
+  {ELSE} { return BAD_CHARACTER; }
 }
-<_TYPESWITCH_EXPR_CASE_> {
-  "$" {undo(); pushState(_TYPESWITCH_EXPR_CASE_AS); yybegin(VARNAME);}
-  [^\$\x20\x09\x0D\x0A]+ {undo(); yybegin(ITEM_TYPE); }
+<TYPESWITCH_EXPR_RETURN> {
+  "return" {optSpaceThen(EXPR_SINGLE); return KW_RETURN; }
+  {ELSE} { return BAD_CHARACTER; }
 }
-<_TYPESWITCH_EXPR_CASE_AS> {
-  "as" {yybegin(ITEM_TYPE); return KW_AS; }
-}
-<_TYPESWITCH_EXPR_CASE2> {
-  "default" {yybegin(_TYPESWITCH_EXPR_DEFAULT_); return KW_DEFAULT; }
-}
-<_TYPESWITCH_EXPR_DEFAULT_> {
-  "$" {undo(); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(VARNAME); }
-  [^\$\x20\x09\x0D\x0A]+ {undo(); yybegin(_TYPESWITCH_EXPR_RETURN); }
-}
-<_TYPESWITCH_EXPR_RETURN> {
-  "return" {yybegin(EXPR_SINGLE); return KW_RETURN; }
-}
+
 
 // FLWOR Expressions
 <_FLWOR_HEAD> {
@@ -1262,6 +1268,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <VARNAME> {
   "$" {yybegin(_QNAME); return OP_VARSTART; }
   {ELSE} { return BAD_CHARACTER; }
+}
+<OPT_VARNAME> {
+  "$" {retryAs(VARNAME); }
+  {ELSE} { retry(); }
 }
 
 <XQ_COMMENT> {
