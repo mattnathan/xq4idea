@@ -56,11 +56,11 @@ declare variable $var :=
         let $var := ""
         return ""
     for $var in ""
-    strict order by $var
+    stable order by $var
     return "";
 declare variable $var :=
-    let $var as void() :=
-        for $var as void() at $var in ""
+    let $var as node() :=
+        for $var as node() at $var in ""
         return ""
     let $var2 := 7
     return "&#333; some other string &apos;";
@@ -68,8 +68,8 @@ declare variable $var :=
     for $var in ""
     stable order by $var
     return $var;
-declare variable $var as void() := 2222.2e2122;
-declare variable $var as void() external ;
+declare variable $var as node() := 2222.2e2122;
+declare variable $var as node() external ;
 declare variable $var as item() external ;
 declare variable $var as item()* external ;
 declare variable $var as node()? external ;
@@ -119,18 +119,18 @@ declare variable $var :=
     if (12, "", $var) then "true" else "false";
 
 declare variable $var :=
-    some $var as void()
+    some $var as node()
         in $var
         satisfies $var ;
 declare variable $var :=
-    every $var as void()
+    every $var as node()
         in $var
         satisfies $var ;
 
 declare variable $var :=
     typeswitch($var)
-        case $var as void() return ""
-        case void() return ""
+        case $var as node() return ""
+        case node() return ""
         case my:something return ""
         default return "";
 
@@ -181,7 +181,7 @@ declare variable $pragma := (#q:name pragma content #)(# more pragma #) {};
 declare variable $expr := "hello" cast as my:type;
 declare variable $expr := "hello" cast as my:type?;
 declare variable $expr := "hello" cast as my:type? castable as type?;
-declare variable $expr := "hello" cast as my:type castable as type treat as void() instance of node();
+declare variable $expr := "hello" cast as my:type castable as type treat as node() instance of node();
 declare variable $expr := "hello" castable as my:type;
 declare variable $expr := "hello" castable as my:type?;
 declare variable $expr := "hello" treat as my:type;
