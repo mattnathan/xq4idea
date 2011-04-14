@@ -161,6 +161,12 @@ import com.intellij.psi.tree.IElementType;
 %x TYPESWITCH_EXPR_CASE_OPT_VAR_AS
 %x TYPESWITCH_EXPR_RETURN
 
+// FLWOR states
+%x FLWOR_EXPR
+%x FLWOR_EXPR_OPT_WHERE
+%x FLWOR_EXPR_OPT_ORDER
+%x FLWOR_EXPR_RETURN
+
 
 
 // below here we shouldn't be using anything ---------------------------------------------------------------------------
@@ -222,11 +228,6 @@ import com.intellij.psi.tree.IElementType;
 
 // FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we transition to body
-%s _FLWOR_HEAD
-%s _FLWOR_BODY1
-%s _FLWOR_BODY2
-%s _FLWOR_BODY3
-
 %s _FOR_CLAUSE
 %s _FOR_CLAUSE_VAR_POS
 %s _FOR_CLAUSE_VAR_POS_
@@ -595,14 +596,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-// Expr := ExprSingle ( "," ExprSingle )?
-// ExprSingle
-<EXPR_SINGLE> {
-  // start of FLWOR expression
-  "for" {pushState(_FLWOR_HEAD); retryAs(_FOR_CLAUSE); }
-  "let" {pushState(_FLWOR_HEAD); retryAs(_LET_CLAUSE); }
-}
-
 // IfExpr := <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle
 <IF_EXPR, EXPR_SINGLE> "if" {pushOptSpaceThen(IFTHEN_EXPR); optSpaceThen(_EXPR_LIST_IN_BRACE); return KW_IF;}
 
@@ -617,6 +610,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   pushOptSpaceThen(TYPESWITCH_EXPR_CASE);
   optSpaceThen(_EXPR_LIST_IN_BRACE); 
   return KW_TYPESWITCH; 
+}
+
+<FLWOR_EXPR, EXPR_SINGLE> {
+  "for" {pushOptSpaceThen(FLWOR_EXPR); retryAs(_FOR_CLAUSE); }
+  "let" {pushOptSpaceThen(FLWOR_EXPR); retryAs(_LET_CLAUSE); }
 }
 
 // default case happens after all others may have matched
@@ -684,32 +682,33 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 
 // FLWOR Expressions
-<_FLWOR_HEAD> {
-  "for" {pushState(_FLWOR_HEAD); undo(); yybegin(_FOR_CLAUSE); }
-  "let" {pushState(_FLWOR_HEAD); undo(); yybegin(_LET_CLAUSE); }
+// fall through to where clause
+<FLWOR_EXPR> {ELSE} {retryAs(FLWOR_EXPR_OPT_WHERE); }
+<FLWOR_EXPR_OPT_WHERE> {
+  "where" {pushOptSpaceThen(FLWOR_EXPR_OPT_ORDER); retryAs(_WHERE_CLAUSE); }
+  {ELSE} { retryAs(FLWOR_EXPR_OPT_ORDER); }
 }
-<_FLWOR_BODY1, _FLWOR_BODY2, _FLWOR_BODY3, _FLWOR_HEAD> {
-  "where" {pushState(_FLWOR_BODY2); undo(); yybegin(_WHERE_CLAUSE); }
+<FLWOR_EXPR_OPT_ORDER> {
+  "order" {pushOptSpaceThen(FLWOR_EXPR_RETURN); retryAs(_ORDER_CLAUSE); }
+  "stable" {pushOptSpaceThen(FLWOR_EXPR_RETURN); yybegin(_ORDER_CLAUSE); return KW_STABLE; }
+  {ELSE} { retryAs(FLWOR_EXPR_RETURN); }
 }
-<_FLWOR_BODY2, _FLWOR_BODY3, _FLWOR_HEAD> {
-  "order" {pushState(_FLWOR_BODY3); undo(); yybegin(_ORDER_CLAUSE); }
-  "stable" {pushState(_FLWOR_BODY3); yybegin(_ORDER_CLAUSE); return KW_STABLE; }
-}
-<_FLWOR_BODY3, _FLWOR_HEAD> {
+<FLWOR_EXPR_RETURN> {
   "return" {yybegin(EXPR_SINGLE); return KW_RETURN;}
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // ForClause := <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle
 //              ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*
 <_FOR_CLAUSE> {
-  "for" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_FOR; }
+  "for" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); spaceThen(VARNAME_THEN_OPT_TYPE_DECL); return KW_FOR; }
 }
 <_FOR_CLAUSE_VAR_POS> {
-  "at" { yybegin(VARNAME); return KW_AT; }
-  {NS} { undo(); popState(); }
+  "at" { spaceThen(VARNAME); return KW_AT; }
+  {ELSE} { retry(); }
 }
 <_FOR_CLAUSE_VAR_IN> {
-  "in" { yybegin(EXPR_SINGLE); return KW_IN;}
+  "in" { spaceThen(EXPR_SINGLE); return KW_IN;}
 }
 
 // LetClause := <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*
