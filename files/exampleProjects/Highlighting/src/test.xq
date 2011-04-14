@@ -1,9 +1,14 @@
-(: simple (::) file for testing xquery syntax :)
-(::)
-xquery version "" encoding "";
+xquery version "1.0-ml" encoding "UTF-8";
 
-module namespace lib = "my.ns";
-declare namespace import = "another.ns";
+import schema namespace hello = "";
+import schema namespace hello = "" at "";
+import schema namespace hello = "" at "", "";
+import schema default element namespace "";
+import schema default element namespace "" at "";
+import schema default element namespace "" at "", "";
+import module namespace hello = "";
+import module namespace hello = "" at "";
+import module namespace hello = "" at "", "";
 
 
 

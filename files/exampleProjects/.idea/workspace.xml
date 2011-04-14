@@ -59,19 +59,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="test.xq" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="test.xq" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xq">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="40" selection-start="158" selection-end="158" vertical-scroll-proportion="0.0">
+            <state line="0" column="41" selection-start="41" selection-end="41" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test.xqy" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="test.xqy" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="41" selection-start="203" selection-end="203" vertical-scroll-proportion="0.16030534">
+            <state line="7" column="41" selection-start="203" selection-end="203" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -87,8 +87,9 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/Highlighting/src/test.xq" />
         <option value="$PROJECT_DIR$/Highlighting/src/test.xqy" />
+        <option value="$PROJECT_DIR$/Highlighting/src/imports.xqy" />
+        <option value="$PROJECT_DIR$/Highlighting/src/test.xq" />
       </list>
     </option>
   </component>
@@ -122,9 +123,8 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
-      <pane id="Favorites" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -159,6 +159,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Favorites" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -299,14 +300,21 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xq">
+    <entry file="file://$PROJECT_DIR$/Highlighting/src/imports.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="40" selection-start="158" selection-end="158" vertical-scroll-proportion="0.0" />
+        <state line="8" column="42" selection-start="392" selection-end="392" vertical-scroll-proportion="0.17964073">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="41" selection-start="203" selection-end="203" vertical-scroll-proportion="0.16030534">
+        <state line="7" column="41" selection-start="203" selection-end="203" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xq">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="41" selection-start="41" selection-end="41" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>

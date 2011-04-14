@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
  */
 public abstract class AbstractLexer {
   private static final boolean DEBUG = true;
+  private int initialState = -1;
 
   final IntStack stack = new IntStack();
 
@@ -26,13 +27,21 @@ public abstract class AbstractLexer {
 
   abstract int optWordSep();
 
+  private int initialStateImpl() {
+    return this.initialState == -1 ? initialState() : initialState;
+  }
+
+  void setInitialState(int initialState) {
+    this.initialState = initialState;
+  }
+
   void pushState() {
     pushState(yystate());
   }
 
   void pushState(int state) {
     if (DEBUG) {
-      System.err.println(indentString() + "push(" + prettyState(state) + ");");
+      System.err.println(indentString() + "push(" + prettyState(yystate()) + " -> " + prettyState(state) + ");");
     }
     stack.push(state);
   }
@@ -40,10 +49,10 @@ public abstract class AbstractLexer {
   void popState() {
     int pop = stack.pop();
     if (pop == -1) {
-      pop = initialState();
+      pop = initialStateImpl();
     }
     if (DEBUG) {
-      System.err.println(indentString() + "pop-(" + prettyState(pop) + ");");
+      System.err.println(indentString() + "pop-(" + prettyState(yystate()) + " -> " + prettyState(pop) + ");");
     }
     yybegin(pop);
   }
@@ -66,6 +75,22 @@ public abstract class AbstractLexer {
   void optSpaceThen(int state) {
     pushState(state);
     yybegin(optWordSep());
+  }
+
+  /**
+   * Call this method to setup a repeating loop with possible space between each iteration.
+   */
+  void optSpaceRepeat() {
+    pushState(yystate());
+    pushState(optWordSep());
+  }
+
+  /**
+   * Call this method to setup a repeating loop with guarenteed space between each iteration.
+   */
+  void spaceRepeat() {
+    pushState(yystate());
+    pushState(wordSep());
   }
 
   /**
