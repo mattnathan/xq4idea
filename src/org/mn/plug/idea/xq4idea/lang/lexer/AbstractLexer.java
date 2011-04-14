@@ -52,7 +52,7 @@ public abstract class AbstractLexer {
       pop = initialStateImpl();
     }
     if (DEBUG) {
-      System.err.println(indentString() + "pop-(" + prettyState(yystate()) + " -> " + prettyState(pop) + ");");
+      System.err.println(indentString(1) + "pop-(" + prettyState(yystate()) + " -> " + prettyState(pop) + ");");
     }
     yybegin(pop);
   }
@@ -91,6 +91,28 @@ public abstract class AbstractLexer {
   void spaceRepeat() {
     pushState(yystate());
     pushState(wordSep());
+  }
+
+  /**
+   * Start a list. This is in the form (initialState (repeaterState)*)
+   *
+   * @param initialState  The initial state
+   * @param repeaterState The repeater state
+   */
+  void startList(int initialState, int repeaterState) {
+    pushOptSpaceThen(repeaterState);
+    optSpaceThen(initialState);
+  }
+
+  /**
+   * Start a list. This is in the form (initialState (repeaterState)*)
+   *
+   * @param initialState  The initial state
+   * @param repeaterState The repeater state
+   */
+  void pushList(int initialState, int repeaterState) {
+    pushOptSpaceThen(repeaterState);
+    pushOptSpaceThen(initialState);
   }
 
   /**
@@ -165,8 +187,12 @@ public abstract class AbstractLexer {
   }
 
   private String indentString() {
+    return indentString(0);
+  }
+
+  private String indentString(int offset) {
     StringBuilder buf = new StringBuilder();
-    for (int i = stack.size(); i > 0; i--) {
+    for (int i = stack.size() + offset; i > 0; i--) {
       buf.append("| ");
     }
     return buf.toString();
