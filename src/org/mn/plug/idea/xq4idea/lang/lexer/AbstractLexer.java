@@ -81,16 +81,14 @@ public abstract class AbstractLexer {
    * Call this method to setup a repeating loop with possible space between each iteration.
    */
   void optSpaceRepeat() {
-    pushState(yystate());
-    pushState(optWordSep());
+    pushOptSpaceThen(yystate());
   }
 
   /**
    * Call this method to setup a repeating loop with guarenteed space between each iteration.
    */
   void spaceRepeat() {
-    pushState(yystate());
-    pushState(wordSep());
+    pushSpaceThen(yystate());
   }
 
   /**

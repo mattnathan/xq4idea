@@ -171,6 +171,10 @@ import com.intellij.psi.tree.IElementType;
 %x FLWOR_FOR_REPEATER
 %x FLWOR_FOR_OPT_POSITIONAL
 %x FLWOR_FOR_IN
+// FLWOR let
+%x FLWOR_LET
+%x FLWOR_LET_REPEATER
+%x FLWOR_LET_ASSIGN
 
 
 
@@ -233,10 +237,6 @@ import com.intellij.psi.tree.IElementType;
 
 // FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we transition to body
-%s _LET_CLAUSE
-%s _LET_CLAUSE_
-%s _LET_CLAUSE_VAR
-
 %s _WHERE_CLAUSE
 
 %s _ORDER_CLAUSE
@@ -614,7 +614,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 <FLWOR_EXPR, EXPR_SINGLE> {
   "for" {pushOptSpaceThen(FLWOR_EXPR); retryAs(FLWOR_FOR); }
-  "let" {pushOptSpaceThen(FLWOR_EXPR); retryAs(_LET_CLAUSE); }
+  "let" {pushOptSpaceThen(FLWOR_EXPR); retryAs(FLWOR_LET); }
 }
 
 // default case happens after all others may have matched
@@ -711,6 +711,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <FLWOR_FOR_REPEATER> {
   "," {
+    optSpaceRepeat();
     pushState(FLWOR_FOR_IN);
     pushOptSpaceThen(FLWOR_FOR_OPT_POSITIONAL);
     spaceThen(VARNAME_THEN_OPT_TYPE_DECL);
@@ -728,15 +729,26 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // LetClause := <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*
-<_LET_CLAUSE> {
-  "let" {pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_LET;}
+<FLWOR_LET> {
+  "let" {
+    pushOptSpaceThen(FLWOR_LET_REPEATER);
+    pushOptSpaceThen(FLWOR_LET_ASSIGN);
+    optSpaceThen(VARNAME_THEN_OPT_TYPE_DECL);
+    return KW_LET;
+  }
 }
-<_LET_CLAUSE_> {
-  "," { pushState(); pushState(_LET_CLAUSE_VAR); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return OP_COMMA;}
-  {NS} {undo(); popState(); }
+<FLWOR_LET_REPEATER> {
+  "," {
+    optSpaceRepeat();
+    pushOptSpaceThen(FLWOR_LET_ASSIGN);
+    optSpaceThen(VARNAME_THEN_OPT_TYPE_DECL);
+    return OP_COMMA;
+  }
+  {ELSE} { retry(); }
 }
-<_LET_CLAUSE_VAR> {
-  ":=" { yybegin(EXPR_SINGLE); return OP_ASSIGN;}
+<FLWOR_LET_ASSIGN> {
+  ":=" { optSpaceThen(EXPR_SINGLE); return OP_ASSIGN;}
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // WhereClause := "where" ExprSingle

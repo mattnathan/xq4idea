@@ -77,10 +77,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="flworForExpr.xqy" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="flworLetExpr.xqy" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Highlighting/src/flworLetExpr.xqy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="12" column="28" selection-start="258" selection-end="258" vertical-scroll-proportion="0.26946107">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="flworForExpr.xqy" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/flworForExpr.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="31" selection-start="261" selection-end="261" vertical-scroll-proportion="0.26946107">
+            <state line="12" column="31" selection-start="261" selection-end="261" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -104,6 +113,7 @@
         <option value="$PROJECT_DIR$/Highlighting/src/typeswitchExpr.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/test.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/flworForExpr.xqy" />
+        <option value="$PROJECT_DIR$/Highlighting/src/flworLetExpr.xqy" />
       </list>
     </option>
   </component>
@@ -137,7 +147,8 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Favorites" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -172,8 +183,7 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
+      <pane id="Favorites" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -190,6 +200,11 @@
     <property name="GoToClass.includeLibraries" value="false" />
     <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Highlighting/src" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration default="true" type="Remote" factoryName="Remote">
@@ -346,14 +361,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="20" selection-start="1448" selection-end="1448" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="48" column="20" selection-start="1448" selection-end="1448" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/flworForExpr.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="31" selection-start="261" selection-end="261" vertical-scroll-proportion="0.26946107">
+        <state line="12" column="31" selection-start="261" selection-end="261" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Highlighting/src/flworLetExpr.xqy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="28" selection-start="258" selection-end="258" vertical-scroll-proportion="0.26946107">
           <folding />
         </state>
       </provider>
