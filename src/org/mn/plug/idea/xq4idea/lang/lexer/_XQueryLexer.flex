@@ -37,11 +37,16 @@ import com.intellij.psi.tree.IElementType;
   }
 %}
 
+// utility matchers, generally one word/letter matching
 // comment or space
 %x _WORD_SEP
 %x _OPT_WORD_SEP
 %x _COMMA
 %x _SEMI
+%x _EQUALS
+
+// literals
+%x STRING_LITERAL
 
 // the top level module file
 %x MODULE
@@ -63,22 +68,24 @@ import com.intellij.psi.tree.IElementType;
 // "import" ...
 %x IMPORT_DECL
 
+// "declare" ...
 %x DECLARE_X
 %x DECLARE_COPYNS_PRESERVE_OR_NOT
-%x _DECLARE_COPYNS_
-%x _DECLARE_COPYNS__
-%x _DECLARE_DEFAULT
-%x _DECLARE_DEFAULT_ORDER
-%x _DECLARE_DEFAULT_ORDER_EMPTY
-%x _DECLARE_DEFAULT_NAMESPACE
-%x _DECLARE_VARIABLE
-%x _IMPORT
-%x _IMPORT_SCHEMA
-%x _IMPORT_SCHEMA_DEFAULT
-%x _IMPORT_SCHEMA_DEFAULT_ELEMENT
-%x _IMPORT_MODULE
+%x DECLARE_COPYNS_INHERIT_OR_NOT
+%x DECLARE_DEFAULT_X
+%x DECLARE_DEFAULT_ORDER_EMPTY
+%x GREATEST_OR_LEAST
+%x NAMESPACE_THEN_URI
+%x IMPORT_SCHEMA_OR_MODULE
+%x IMPORT_SCHEMA_NAMESPACE_OR_DEFAULT
+%x IMPORT_ELEMENT
+%x IMPORT_ELEMENT_NAMESPACE
+%x IMPORT_MODULE_NAMESPACE
 
-%x NAMESPACE_NAME
+// (":=" ExprSingle) | "external"
+%x ASSIGN_OR_EXTERNAL
+// {NCName} = UriLiteral
+%x NCNAME_EQUALS_URI
 
 
 
@@ -96,15 +103,12 @@ import com.intellij.psi.tree.IElementType;
 %x _XML_STR_START_QUOTE
 %x _XML_STR_START_APOS
 
-%s _NAMESPACE_DECL
+%s NAMESPACE_THEN_NCNAME_EQUALS_URI
 
 
 
 %s _PRESERVE_OR_STRIP
-%s _URILITERAL
-%s STRING_LITERAL
-
-%s _NAMESPACEDECL_
+%s URI_LITERAL
 
 %s _ATLIST
 %s _ATLIST_
@@ -252,7 +256,6 @@ import com.intellij.psi.tree.IElementType;
 %s _STAR
 %s _COLON
 %s _COLONCOLON
-%x _EQUALS
 %s _KW_AS
 %s _KW_OF
 
@@ -325,7 +328,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 //<MODULE> {
-//  "import" {spaceThen(_IMPORT); return KW_IMPORT; }
+//  "import" {spaceThen(IMPORT_SCHEMA_OR_MODULE); return KW_IMPORT; }
 //
 //  [^] {pushState(_EXPR_LIST); retryAs(_EXPR_SINGLE); }
 //  [^] {return BAD_CHARACTER; }
@@ -344,12 +347,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 // ModuleDecl entry point
 <MODULE_DECL, MODULE, LIBRARY_OR_MAIN> {
-  "module" { pushOptSpaceThen(LIBRARY_MODULE); pushOptSpaceThen(_SEMI); spaceThen(_NAMESPACE_DECL); return KW_MODULE; }
+  "module" { pushOptSpaceThen(LIBRARY_MODULE); pushOptSpaceThen(_SEMI); spaceThen(NAMESPACE_THEN_NCNAME_EQUALS_URI); return KW_MODULE; }
   {ELSE} { retryAs(MAIN_MODULE); }
 }
 // SchemaImport entry point
 <IMPORT_DECL, MODULE, LIBRARY_OR_MAIN, LIBRARY_MODULE, MAIN_MODULE> {
-  "import" {pushOptSpaceThen(_SEMI); spaceThen(_IMPORT); return KW_IMPORT; }
+  "import" {pushOptSpaceThen(_SEMI); spaceThen(IMPORT_SCHEMA_OR_MODULE); return KW_IMPORT; }
 }
 // "declare" XXX entry point
 <DECLARE_DECL, MODULE, LIBRARY_OR_MAIN, LIBRARY_MODULE, MAIN_MODULE> {
@@ -379,48 +382,42 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "option" { pushSpaceThen(STRING_LITERAL); spaceThen(_QNAME); return KW_OPTION;}
   "ordering" { spaceThen(DECLAREORDERING); return KW_ORDERING; }
   "boundary-space" {spaceThen(_PRESERVE_OR_STRIP); return KW_BOUNDARY_SPACE; }
-  "base-uri" { spaceThen(_URILITERAL); return KW_BASE_URI; }
+  "base-uri" { spaceThen(URI_LITERAL); return KW_BASE_URI; }
   "copy-namespaces" {spaceThen(DECLARE_COPYNS_PRESERVE_OR_NOT); return KW_COPY_NAMESPACES; }
   "construction" {spaceThen(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
-  "default" {spaceThen(_DECLARE_DEFAULT); return KW_DEFAULT; }
-  "variable" { pushSpaceThen(_DECLARE_VARIABLE); spaceThen(_PARAM); return KW_VARIABLE; }
+  "default" {spaceThen(DECLARE_DEFAULT_X); return KW_DEFAULT; }
+  "variable" { pushSpaceThen(ASSIGN_OR_EXTERNAL); spaceThen(_PARAM); return KW_VARIABLE; }
 }
 
-// module namespace ...
-// declare namespace ...
-<_NAMESPACE_DECL, DECLARE_X> {
-  "namespace" { optSpaceThen(NAMESPACE_NAME); return KW_MODULE; }
-  {ELSE} { return BAD_CHARACTER; }
-}
-
-<_SEMI> {
-  ";" {popState(); return OP_SEPERATOR; }
+// "namespace" NCName "=" UriLiteral
+<NAMESPACE_THEN_NCNAME_EQUALS_URI, DECLARE_X> {
+  "namespace" { optSpaceThen(NCNAME_EQUALS_URI); return KW_MODULE; }
   {ELSE} { return BAD_CHARACTER; }
 }
 
 // DECLARE DEFAULT ...
-<_DECLARE_DEFAULT> {
-  "collation" { spaceThen(_URILITERAL); return KW_COLLATION; }
-  "order" {spaceThen(_DECLARE_DEFAULT_ORDER); return KW_ORDER; }
-  "function" {spaceThen(_DECLARE_DEFAULT_NAMESPACE); return KW_FUNCTION; }
-  "element" {spaceThen(_DECLARE_DEFAULT_NAMESPACE); return KW_ELEMENT; }
+<DECLARE_DEFAULT_X> {
+  "collation" { spaceThen(URI_LITERAL); return KW_COLLATION; }
+  "order" {spaceThen(DECLARE_DEFAULT_ORDER_EMPTY); return KW_ORDER; }
+  "function" {spaceThen(NAMESPACE_THEN_URI); return KW_FUNCTION; }
+  "element" {spaceThen(NAMESPACE_THEN_URI); return KW_ELEMENT; }
   {ELSE} { return BAD_CHARACTER; }
 }
 
 // declare default empty (greatest | least)
-<_DECLARE_DEFAULT_ORDER> {
-  "empty" {spaceThen(_DECLARE_DEFAULT_ORDER_EMPTY); return KW_EMPTY; }
+<DECLARE_DEFAULT_ORDER_EMPTY> {
+  "empty" {spaceThen(GREATEST_OR_LEAST); return KW_EMPTY; }
   {ELSE} { return BAD_CHARACTER; }
 }
-<_DECLARE_DEFAULT_ORDER_EMPTY> {
+<GREATEST_OR_LEAST> {
   "greatest" { popState(); return KW_GREATEST;}
   "least" { popState(); return KW_LEAST;}
   {ELSE} { return BAD_CHARACTER; }
 }
 
-// declare default (function | element) namespace ""
-<_DECLARE_DEFAULT_NAMESPACE> {
-  "namespace" { spaceThen(_URILITERAL); return KW_NAMESPACE; }
+// "namespace" URI_LITERAL
+<NAMESPACE_THEN_URI> {
+  "namespace" { spaceThen(URI_LITERAL); return KW_NAMESPACE; }
   {ELSE} { return BAD_CHARACTER; }
 }
 
@@ -431,57 +428,54 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { return BAD_CHARACTER; }
 }
 
-// {NCName} = ""
-<NAMESPACE_NAME> {
-  {NCName} {optSpaceThen(_NAMESPACEDECL_); return XQ_LOCAL_NAME; }
-  {ELSE} { return BAD_CHARACTER; }
-}
-<_NAMESPACEDECL_> {
-  "=" {optSpaceThen(_URILITERAL); return OP_EQUALS; }
+// {NCName} = URI_LITERAL
+<NCNAME_EQUALS_URI> {
+  {NCName} { pushOptSpaceThen(URI_LITERAL); optSpaceThen(_EQUALS); return XQ_LOCAL_NAME; }
   {ELSE} { return BAD_CHARACTER; }
 }
 
-// DECLARE_COPYNS_PRESERVE_OR_NOT
+// ("preserve" | "no-preserve") "," DECLARE_COPYNS_INHERIT_OR_NOT
 <DECLARE_COPYNS_PRESERVE_OR_NOT> {
-  "preserve" {pushOptSpaceThen(_DECLARE_COPYNS__); optSpaceThen(_COMMA); return KW_PRESERVE; }
-  "no-preserve" {pushOptSpaceThen(_DECLARE_COPYNS__); optSpaceThen(_COMMA); return KW_NO_PRESERVE;}
+  "preserve" {pushOptSpaceThen(DECLARE_COPYNS_INHERIT_OR_NOT); optSpaceThen(_COMMA); return KW_PRESERVE; }
+  "no-preserve" {pushOptSpaceThen(DECLARE_COPYNS_INHERIT_OR_NOT); optSpaceThen(_COMMA); return KW_NO_PRESERVE;}
   {ELSE} { return BAD_CHARACTER; }
 }
-<_DECLARE_COPYNS__> {
+// "inherit" | "no-inherit"
+<DECLARE_COPYNS_INHERIT_OR_NOT> {
   "inherit" { popState(); return KW_INHERIT; }
   "no-inherit" { popState(); return KW_NO_INHERIT; }
   {ELSE} { return BAD_CHARACTER; }
 }
 
-// declare variable...
-<_DECLARE_VARIABLE> {
+// (":=" ExprSingle) | "external"
+<ASSIGN_OR_EXTERNAL> {
   ":=" { optSpaceThen(_EXPR_SINGLE); return OP_ASSIGN;}
   "external" {popState(); return KW_EXTERNAL;}
   {ELSE} { return BAD_CHARACTER; }
 }
 
 // import ...
-<_IMPORT> {
-  "schema" {spaceThen(_IMPORT_SCHEMA); return KW_SCHEMA; }
-  "module" {spaceThen(_IMPORT_MODULE); return KW_MODULE; }
+<IMPORT_SCHEMA_OR_MODULE> {
+  "schema" {spaceThen(IMPORT_SCHEMA_NAMESPACE_OR_DEFAULT); return KW_SCHEMA; }
+  "module" {spaceThen(IMPORT_MODULE_NAMESPACE); return KW_MODULE; }
   {ELSE} { return BAD_CHARACTER; }
 }
 // import schema (namespace =) | (default element namespace) "" (at "" (, "")*)?
-<_IMPORT_SCHEMA> {
-  "namespace" { pushSpaceThen(_ATLIST); spaceThen(NAMESPACE_NAME); return KW_NAMESPACE; }
-  "default" { spaceThen(_IMPORT_SCHEMA_DEFAULT); return KW_DEFAULT; }
+<IMPORT_SCHEMA_NAMESPACE_OR_DEFAULT> {
+  "namespace" { pushSpaceThen(_ATLIST); spaceThen(NCNAME_EQUALS_URI); return KW_NAMESPACE; }
+  "default" { spaceThen(IMPORT_ELEMENT); return KW_DEFAULT; }
   {ELSE} { return BAD_CHARACTER; }
 }
-<_IMPORT_SCHEMA_DEFAULT> {
-  "element" { spaceThen(_IMPORT_SCHEMA_DEFAULT_ELEMENT); return KW_ELEMENT; }
+<IMPORT_ELEMENT> {
+  "element" { spaceThen(IMPORT_ELEMENT_NAMESPACE); return KW_ELEMENT; }
   {ELSE} { return BAD_CHARACTER; }
 }
-<_IMPORT_SCHEMA_DEFAULT_ELEMENT> {
-  "namespace" { pushSpaceThen(_ATLIST); spaceThen(_URILITERAL); return KW_NAMESPACE; }
+<IMPORT_ELEMENT_NAMESPACE> {
+  "namespace" { pushSpaceThen(_ATLIST); spaceThen(URI_LITERAL); return KW_NAMESPACE; }
   {ELSE} { return BAD_CHARACTER; }
 }
-<_IMPORT_MODULE> {
-  "namespace" { pushSpaceThen(_ATLIST); optSpaceThen(NAMESPACE_NAME); return KW_NAMESPACE; }
+<IMPORT_MODULE_NAMESPACE> {
+  "namespace" { pushSpaceThen(_ATLIST); optSpaceThen(NCNAME_EQUALS_URI); return KW_NAMESPACE; }
   {ELSE} { return BAD_CHARACTER; }
 }
 
@@ -490,7 +484,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // "$" VarName TypeDeclaration?
 //
 <_PARAM> {
-  "$" {yypushback(1); pushState(_AS); yybegin(_VARNAME);}
+  "$" {yypushback(yylength()); pushState(_AS); yybegin(_VARNAME);}
 }
 <_AS> {
   "as" {yybegin(_ITEM_TYPE); return KW_AS; }
@@ -704,7 +698,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "least" {yybegin(_ORDER_CLAUSE_MODIFIER_COLLATION); return KW_LEAST; }
 }
 <_ORDER_CLAUSE_MODIFIER_COLLATION> {
-  "collation" {yybegin(_URILITERAL); return KW_COLLATION; }
+  "collation" {yybegin(URI_LITERAL); return KW_COLLATION; }
   {_NS} {yypushback(1); popState(); }
 }
 
@@ -1028,9 +1022,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "::" {popState(); return OP_COLONCOLON; }
 }
 <_EQUALS> {
-  {S} {return WHITE_SPACE;}
   "=" {popState(); return OP_EQUALS; }
-  [^] {popState(); return BAD_CHARACTER; }
+  {ELSE} {return BAD_CHARACTER; }
+}
+<_SEMI> {
+  ";" {popState(); return OP_SEPERATOR; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_OPT_QUESTION> {
   "?" { popState(); return OP_QUESTION; }
@@ -1137,9 +1134,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 
-<STRING_LITERAL,_URILITERAL> {
+<STRING_LITERAL,URI_LITERAL> {
   "\"" { yybegin(STR_START_QUOTE); return XQ_STR_START; }
   "'" {yybegin(STR_START_APOS); return XQ_STR_START; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 <STR_START_QUOTE> {
@@ -1188,11 +1186,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // ("at" URILiteral ("," URILiteral)*)?
 <_ATLIST> {
-  "at" {pushState(_ATLIST_); yybegin(_URILITERAL); return KW_AT;}
+  "at" {pushState(_ATLIST_); yybegin(URI_LITERAL); return KW_AT;}
   {NS} {yypushback(yylength()); popState();}
 }
 <_ATLIST_> {
-  "," {pushState(_ATLIST_); yybegin(_URILITERAL); return OP_COMMA;}
+  "," {pushState(_ATLIST_); yybegin(URI_LITERAL); return OP_COMMA;}
   {NS} {yypushback(yylength()); popState();}
 }
 
