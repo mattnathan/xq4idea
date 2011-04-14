@@ -46,6 +46,7 @@ declare default element namespace "http://function.com/";
 declare variable $var external;
 declare variable $var :=
     for $var in ""
+    for $other in ""
     return "";
 declare variable $var :=
     let $var := ""

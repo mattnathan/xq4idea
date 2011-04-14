@@ -59,10 +59,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="typeswitchExpr.xqy" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="typeswitchExpr.xqy" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Highlighting/src/typeswitchExpr.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="23" selection-start="301" selection-end="301" vertical-scroll-proportion="0.24700598">
+            <state line="11" column="23" selection-start="301" selection-end="301" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test.xqy" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="48" column="20" selection-start="1448" selection-end="1448" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="flworForExpr.xqy" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Highlighting/src/flworForExpr.xqy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="12" column="31" selection-start="261" selection-end="261" vertical-scroll-proportion="0.26946107">
               <folding />
             </state>
           </provider>
@@ -78,13 +96,14 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/Highlighting/src/test.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/imports.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/test.xq" />
         <option value="$PROJECT_DIR$/Highlighting/src/declareVar.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/ifExpr.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/quantifiedExp.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/typeswitchExpr.xqy" />
+        <option value="$PROJECT_DIR$/Highlighting/src/test.xqy" />
+        <option value="$PROJECT_DIR$/Highlighting/src/flworForExpr.xqy" />
       </list>
     </option>
   </component>
@@ -119,8 +138,6 @@
     </navigator>
     <panes>
       <pane id="Favorites" />
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -155,6 +172,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -320,14 +339,21 @@
         <state line="1" column="36" selection-start="61" selection-end="61" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="41" selection-start="203" selection-end="203" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/typeswitchExpr.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="23" selection-start="301" selection-end="301" vertical-scroll-proportion="0.24700598">
+        <state line="11" column="23" selection-start="301" selection-end="301" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="20" selection-start="1448" selection-end="1448" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Highlighting/src/flworForExpr.xqy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="31" selection-start="261" selection-end="261" vertical-scroll-proportion="0.26946107">
           <folding />
         </state>
       </provider>

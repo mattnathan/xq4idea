@@ -166,6 +166,11 @@ import com.intellij.psi.tree.IElementType;
 %x FLWOR_EXPR_OPT_WHERE
 %x FLWOR_EXPR_OPT_ORDER
 %x FLWOR_EXPR_RETURN
+// FLWOR for
+%x FLWOR_FOR
+%x FLWOR_FOR_REPEATER
+%x FLWOR_FOR_OPT_POSITIONAL
+%x FLWOR_FOR_IN
 
 
 
@@ -228,11 +233,6 @@ import com.intellij.psi.tree.IElementType;
 
 // FLWOR states
 // allows for or let repeating, as soon as return, where or order are seen we transition to body
-%s _FOR_CLAUSE
-%s _FOR_CLAUSE_VAR_POS
-%s _FOR_CLAUSE_VAR_POS_
-%s _FOR_CLAUSE_VAR_IN
-
 %s _LET_CLAUSE
 %s _LET_CLAUSE_
 %s _LET_CLAUSE_VAR
@@ -613,7 +613,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 <FLWOR_EXPR, EXPR_SINGLE> {
-  "for" {pushOptSpaceThen(FLWOR_EXPR); retryAs(_FOR_CLAUSE); }
+  "for" {pushOptSpaceThen(FLWOR_EXPR); retryAs(FLWOR_FOR); }
   "let" {pushOptSpaceThen(FLWOR_EXPR); retryAs(_LET_CLAUSE); }
 }
 
@@ -700,15 +700,31 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // ForClause := <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle
 //              ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*
-<_FOR_CLAUSE> {
-  "for" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); spaceThen(VARNAME_THEN_OPT_TYPE_DECL); return KW_FOR; }
+<FLWOR_FOR> {
+  "for" { 
+    pushOptSpaceThen(FLWOR_FOR_REPEATER);
+    pushOptSpaceThen(FLWOR_FOR_IN);
+    pushOptSpaceThen(FLWOR_FOR_OPT_POSITIONAL);
+    spaceThen(VARNAME_THEN_OPT_TYPE_DECL); 
+    return KW_FOR; 
+  }
 }
-<_FOR_CLAUSE_VAR_POS> {
+<FLWOR_FOR_REPEATER> {
+  "," {
+    pushState(FLWOR_FOR_IN);
+    pushOptSpaceThen(FLWOR_FOR_OPT_POSITIONAL);
+    spaceThen(VARNAME_THEN_OPT_TYPE_DECL);
+    return OP_COMMA;
+  }
+  {ELSE} { retry(); }
+}
+<FLWOR_FOR_OPT_POSITIONAL> {
   "at" { spaceThen(VARNAME); return KW_AT; }
   {ELSE} { retry(); }
 }
-<_FOR_CLAUSE_VAR_IN> {
+<FLWOR_FOR_IN> {
   "in" { spaceThen(EXPR_SINGLE); return KW_IN;}
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // LetClause := <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*
