@@ -159,7 +159,7 @@ public abstract class AbstractLexer {
    * @param state The state to move to after resetting the scanner
    */
   void retryAs(int state) {
-    yypushback(yylength());
+    undo();
     yybegin(state);
   }
 
@@ -167,8 +167,15 @@ public abstract class AbstractLexer {
    * Retry matching again from the next state up the stack.
    */
   void retry() {
-    yypushback(yylength());
+    undo();
     popState();
+  }
+
+  /**
+   * Rollback the scanner state
+   */
+  void undo() {
+    yypushback(yylength());
   }
 
   private String prettyState(int state) {

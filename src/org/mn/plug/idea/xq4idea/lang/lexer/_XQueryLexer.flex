@@ -145,6 +145,13 @@ import com.intellij.psi.tree.IElementType;
 %x IFTHEN_EXPR
 %x IFTHEN_ELSE
 
+// Quantified Expression
+%x QUANTIFIED_EXPR
+%x QUANTIFIED_EXPR_VAR
+%x QUANTIFIED_EXPR_REPEATER
+%x QUANTIFIED_EXPR_IN
+%x QUANTIFIED_EXPR_SATISFIES
+
 
 
 // below here we shouldn't be using anything ---------------------------------------------------------------------------
@@ -166,11 +173,6 @@ import com.intellij.psi.tree.IElementType;
 %s _EL_IN_CURLY_OR_QNAME
 %s _EL_IN_CURLY_OR_NCNAME
 
-// Quantified Expression
-%s _QUANT_EXPR
-%s _QUANT_EXPR_LIST
-%s _QUANT_EXPR_IN
-%s _QUANT_EXPR_SATISFIES
 
 // TypeSwitch expression
 %s _TYPESWITCH_EXPR
@@ -339,7 +341,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // get into a state quickly
 <YYINITIAL> {
-  {ELSE} { yypushback(yylength()); optSpaceThen(MODULE); }
+  {ELSE} { undo(); optSpaceThen(MODULE); }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -596,25 +598,28 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // Expr := ExprSingle ( "," ExprSingle )?
 // ExprSingle
 <EXPR_SINGLE> {
+  "typeswitch" {retryAs(_TYPESWITCH_EXPR); }
+  // start of FLWOR expression
   "for" {pushState(_FLWOR_HEAD); retryAs(_FOR_CLAUSE); }
   "let" {pushState(_FLWOR_HEAD); retryAs(_LET_CLAUSE); }
-  "if" {retryAs(IF_EXPR); }
-  "some" {retryAs(_QUANT_EXPR); }
-  "every" {retryAs(_QUANT_EXPR); }
-  "typeswitch" {retryAs(_TYPESWITCH_EXPR); }
-
-  {ELSE} { retryAs(_OR_EXPR); }
 }
+// IfExpr := <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle
+<IF_EXPR, EXPR_SINGLE> "if" {pushOptSpaceThen(IFTHEN_EXPR); optSpaceThen(_EXPR_LIST_IN_BRACE); return KW_IF;}
+// QuantifiedExpr := (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle
+//                    ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle
+<QUANTIFIED_EXPR, EXPR_SINGLE> {
+  "some" {startList(QUANTIFIED_EXPR_VAR, QUANTIFIED_EXPR_REPEATER); return KW_SOME;}
+  "every" {startList(QUANTIFIED_EXPR_VAR, QUANTIFIED_EXPR_REPEATER); return KW_EVERY;}
+}
+
+// default case happens after all others may have matched
+<EXPR_SINGLE> {ELSE} { retryAs(_OR_EXPR); }
 <EXPR_REPEATER> {
   "," {optSpaceRepeat(); optSpaceThen(EXPR_SINGLE); return OP_COMMA; }
   {ELSE} { retry(); }
 }
 
-// IfExpr := <"if" "("> Expr ")" "then" ExprSingle "else" ExprSingle
-<IF_EXPR> {
-  "if" {pushOptSpaceThen(IFTHEN_EXPR); optSpaceThen(_EXPR_LIST_IN_BRACE); return KW_IF;}
-  {ELSE} {return BAD_CHARACTER; }
-}
+// if expression body
 <IFTHEN_EXPR> {
   "then" {pushOptSpaceThen(IFTHEN_ELSE); optSpaceThen(EXPR_SINGLE); return KW_THEN; }
   {ELSE} {return BAD_CHARACTER; }
@@ -624,21 +629,21 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} {return BAD_CHARACTER; }
 }
 
-// QuantifiedExpr := (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle
-//                    ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle
-<_QUANT_EXPR> {
-  "some" {pushState(_QUANT_EXPR_IN); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_SOME;}
-  "every" {pushState(_QUANT_EXPR_IN); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_EVERY;}
+// quantified expression body
+<QUANTIFIED_EXPR_VAR> {
+  {ELSE} {pushOptSpaceThen(QUANTIFIED_EXPR_IN); optSpaceThen(VARNAME_THEN_OPT_TYPE_DECL); undo(); }
 }
-<_QUANT_EXPR_LIST> {
-  "," {pushState(_QUANT_EXPR_LIST); pushState(_QUANT_EXPR_IN); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return OP_COMMA; }
-  {_NS} {yypushback(1); popState(); }
+<QUANTIFIED_EXPR_REPEATER> {
+  "," {optSpaceRepeat(); pushOptSpaceThen(QUANTIFIED_EXPR_IN); optSpaceThen(VARNAME_THEN_OPT_TYPE_DECL); return OP_COMMA; }
+  {ELSE} { retry(); }
 }
-<_QUANT_EXPR_IN> {
-  "in" {pushState(_QUANT_EXPR_SATISFIES); yybegin(EXPR_SINGLE); return KW_IN;}
+<QUANTIFIED_EXPR_IN> {
+  "in" {pushState(QUANTIFIED_EXPR_SATISFIES); yybegin(EXPR_SINGLE); return KW_IN;}
+  {ELSE} { return BAD_CHARACTER; }
 }
-<_QUANT_EXPR_SATISFIES> {
+<QUANTIFIED_EXPR_SATISFIES> {
   "satisfies" {yybegin(EXPR_SINGLE); return KW_SATISFIES; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 // Typeswitch expressions
@@ -655,8 +660,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "case" {pushState(_TYPESWITCH_EXPR_CASE2); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(_TYPESWITCH_EXPR_CASE_); return KW_CASE;}
 }
 <_TYPESWITCH_EXPR_CASE_> {
-  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_CASE_AS); yybegin(VARNAME);}
-  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(ITEM_TYPE); }
+  "$" {undo(); pushState(_TYPESWITCH_EXPR_CASE_AS); yybegin(VARNAME);}
+  [^\$\x20\x09\x0D\x0A]+ {undo(); yybegin(ITEM_TYPE); }
 }
 <_TYPESWITCH_EXPR_CASE_AS> {
   "as" {yybegin(ITEM_TYPE); return KW_AS; }
@@ -665,8 +670,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "default" {yybegin(_TYPESWITCH_EXPR_DEFAULT_); return KW_DEFAULT; }
 }
 <_TYPESWITCH_EXPR_DEFAULT_> {
-  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(VARNAME); }
-  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR_RETURN); }
+  "$" {undo(); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(VARNAME); }
+  [^\$\x20\x09\x0D\x0A]+ {undo(); yybegin(_TYPESWITCH_EXPR_RETURN); }
 }
 <_TYPESWITCH_EXPR_RETURN> {
   "return" {yybegin(EXPR_SINGLE); return KW_RETURN; }
@@ -674,14 +679,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // FLWOR Expressions
 <_FLWOR_HEAD> {
-  "for" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_FOR_CLAUSE); }
-  "let" {pushState(_FLWOR_HEAD); yypushback(yylength()); yybegin(_LET_CLAUSE); }
+  "for" {pushState(_FLWOR_HEAD); undo(); yybegin(_FOR_CLAUSE); }
+  "let" {pushState(_FLWOR_HEAD); undo(); yybegin(_LET_CLAUSE); }
 }
 <_FLWOR_BODY1, _FLWOR_BODY2, _FLWOR_BODY3, _FLWOR_HEAD> {
-  "where" {pushState(_FLWOR_BODY2); yypushback(yylength()); yybegin(_WHERE_CLAUSE); }
+  "where" {pushState(_FLWOR_BODY2); undo(); yybegin(_WHERE_CLAUSE); }
 }
 <_FLWOR_BODY2, _FLWOR_BODY3, _FLWOR_HEAD> {
-  "order" {pushState(_FLWOR_BODY3); yypushback(yylength()); yybegin(_ORDER_CLAUSE); }
+  "order" {pushState(_FLWOR_BODY3); undo(); yybegin(_ORDER_CLAUSE); }
   "stable" {pushState(_FLWOR_BODY3); yybegin(_ORDER_CLAUSE); return KW_STABLE; }
 }
 <_FLWOR_BODY3, _FLWOR_HEAD> {
@@ -695,7 +700,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_FOR_CLAUSE_VAR_POS> {
   "at" { yybegin(VARNAME); return KW_AT; }
-  {NS} { yypushback(yylength()); popState(); }
+  {NS} { undo(); popState(); }
 }
 <_FOR_CLAUSE_VAR_IN> {
   "in" { yybegin(EXPR_SINGLE); return KW_IN;}
@@ -707,7 +712,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_LET_CLAUSE_> {
   "," { pushState(); pushState(_LET_CLAUSE_VAR); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return OP_COMMA;}
-  {NS} {yypushback(yylength()); popState(); }
+  {NS} {undo(); popState(); }
 }
 <_LET_CLAUSE_VAR> {
   ":=" { yybegin(EXPR_SINGLE); return OP_ASSIGN;}
@@ -730,16 +735,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_ORDER_CLAUSE_LIST> {
   "," { pushState(_ORDER_CLAUSE_LIST); pushState(_ORDER_CLAUSE_MODIFIER); yybegin(EXPR_SINGLE); return OP_COMMA; }
-  {_NS} {yypushback(1); popState(); }
+  {_NS} {undo(); popState(); }
 }
 <_ORDER_CLAUSE_MODIFIER> {
   "ascending" { return KW_ASCENDING; }
   "descending" { return KW_DESCENDING; }
-  {_NS} {yypushback(1); yybegin(_ORDER_CLAUSE_MODIFIER_EMPTY); }
+  {_NS} {undo(); yybegin(_ORDER_CLAUSE_MODIFIER_EMPTY); }
 }
 <_ORDER_CLAUSE_MODIFIER_EMPTY> {
   "empty" {yybegin(_ORDER_CLAUSE_MODIFIER_EMPTY_); return KW_EMPTY; }
-  {_NS} {yypushback(1); yybegin(_ORDER_CLAUSE_MODIFIER_COLLATION); }
+  {_NS} {undo(); yybegin(_ORDER_CLAUSE_MODIFIER_COLLATION); }
 }
 <_ORDER_CLAUSE_MODIFIER_EMPTY_> {
   "greatest" {yybegin(_ORDER_CLAUSE_MODIFIER_COLLATION); return KW_GREATEST; }
@@ -747,32 +752,32 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_ORDER_CLAUSE_MODIFIER_COLLATION> {
   "collation" {yybegin(URI_LITERAL); return KW_COLLATION; }
-  {_NS} {yypushback(1); popState(); }
+  {_NS} {undo(); popState(); }
 }
 
 // other expressions
 <_OR_EXPR> {
-  [^] {yypushback(yylength()); pushState(_OR_EXPR_); yybegin(_AND_EXPR); }
+  [^] {undo(); pushState(_OR_EXPR_); yybegin(_AND_EXPR); }
 }
 <_OR_EXPR_> {
   "or" / {WordSep} {pushState(); yybegin(_AND_EXPR); return KW_OR;}
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_AND_EXPR> {
-  [^] {yypushback(yylength()); pushState(_AND_EXPR_); yybegin(_COMPARE_EXPR); }
+  [^] {undo(); pushState(_AND_EXPR_); yybegin(_COMPARE_EXPR); }
 }
 <_AND_EXPR_> {
   "and" {pushState(); yybegin(_COMPARE_EXPR); return KW_AND;}
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_COMPARE_EXPR> {
-  [^] {yypushback(yylength()); pushState(_COMPARE_EXPR_); yybegin(_RANGE_EXPR); }
+  [^] {undo(); pushState(_COMPARE_EXPR_); yybegin(_RANGE_EXPR); }
 }
 <_COMPARE_EXPR_> {
   "=" { yybegin(_RANGE_EXPR); return OP_EQUALS; }
@@ -793,20 +798,20 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] {yypushback(yylength()); popState(); }
+  [^] {undo(); popState(); }
 }
 <_RANGE_EXPR> {
-  [^] {yypushback(yylength()); pushState(_RANGE_EXPR_); yybegin(_ADD_EXPR); }
+  [^] {undo(); pushState(_RANGE_EXPR_); yybegin(_ADD_EXPR); }
 }
 <_RANGE_EXPR_> {
   "to" { yybegin(_ADD_EXPR); return KW_TO; }
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] {yypushback(yylength()); popState(); }
+  [^] {undo(); popState(); }
 }
 <_ADD_EXPR> {
-  [^] {yypushback(yylength()); pushState(_ADD_EXPR_); yybegin(_MULT_EXPR); }
+  [^] {undo(); pushState(_ADD_EXPR_); yybegin(_MULT_EXPR); }
 }
 <_ADD_EXPR_> {
   "+" {pushState(); yybegin(_MULT_EXPR); return OP_PLUS;}
@@ -814,10 +819,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_MULT_EXPR> {
-  [^] {yypushback(yylength()); pushState(_MULT_EXPR_); yybegin(_UNION_EXPR); }
+  [^] {undo(); pushState(_MULT_EXPR_); yybegin(_UNION_EXPR); }
 }
 <_MULT_EXPR_> {
   "*" {pushState(); yybegin(_UNION_EXPR); return OP_STAR;}
@@ -827,10 +832,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_UNION_EXPR> {
-  [^] {yypushback(yylength()); pushState(_UNION_EXPR_); yybegin(_INTERSECT_EXCEPT_EXPR); }
+  [^] {undo(); pushState(_UNION_EXPR_); yybegin(_INTERSECT_EXCEPT_EXPR); }
 }
 <_UNION_EXPR_> {
   "union" {pushState(); yybegin(_INTERSECT_EXCEPT_EXPR); return KW_UNION;}
@@ -838,10 +843,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_INTERSECT_EXCEPT_EXPR> {
-  [^] {yypushback(yylength()); pushState(_INTERSECT_EXCEPT_EXPR_); yybegin(_UNARY_EXPR); }
+  [^] {undo(); pushState(_INTERSECT_EXCEPT_EXPR_); yybegin(_UNARY_EXPR); }
 }
 <_INTERSECT_EXCEPT_EXPR_> {
   "intersect" {pushState(); yybegin(_UNARY_EXPR); return KW_INTERSECT;}
@@ -849,7 +854,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_UNARY_EXPR> {
   "+" {return OP_PLUS; }
@@ -860,36 +865,36 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "(#" {pushState(_CAST_AS_EXPR); pushState(_OPT_EXPR_LIST_IN_CURLY); pushState(_PRAGMA); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] {pushState(_CAST_AS_EXPR); yypushback(yylength()); yybegin(_STEP_EXPR); }
+  [^] {pushState(_CAST_AS_EXPR); undo(); yybegin(_STEP_EXPR); }
 }
 <_CAST_AS_EXPR> {
-  "castable" {yypushback(yylength()); yybegin(_CASTABLE_AS_EXPR); }
+  "castable" {undo(); yybegin(_CASTABLE_AS_EXPR); }
   "cast" { pushState(_CASTABLE_AS_EXPR); pushState(_OPT_QUESTION); pushState(_QNAME); yybegin(_KW_AS); return KW_CAST;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
-  [:letter:]+ { yybegin(_CASTABLE_AS_EXPR); yypushback(yylength()); }
-  [^] { yybegin(_CASTABLE_AS_EXPR); yypushback(yylength()); }
+  [:letter:]+ { yybegin(_CASTABLE_AS_EXPR); undo(); }
+  [^] { yybegin(_CASTABLE_AS_EXPR); undo(); }
 }
 <_CASTABLE_AS_EXPR> {
   "castable" { pushState(_TREAT_AS_EXPR); pushState(_OPT_QUESTION); pushState(_QNAME); yybegin(_KW_AS); return KW_CASTABLE;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
-  [:letter:]+ { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
-  [^] { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
+  [:letter:]+ { yybegin(_TREAT_AS_EXPR); undo(); }
+  [^] { yybegin(_TREAT_AS_EXPR); undo(); }
 }
 <_TREAT_AS_EXPR> {
   "treat" { pushState(_INSTANCEOF_EXPR); pushState(ITEM_TYPE); yybegin(_KW_AS); return KW_CASTABLE;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
-  [:letter:]+ { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
-  [^] { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
+  [:letter:]+ { yybegin(_INSTANCEOF_EXPR); undo(); }
+  [^] { yybegin(_INSTANCEOF_EXPR); undo(); }
 }
 <_INSTANCEOF_EXPR> {
   "instance" { pushState(ITEM_TYPE); yybegin(_KW_OF); return KW_INSTANCE;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
-  [:letter:]+ {yypushback(yylength()); popState(); }
-  [^] {yypushback(yylength()); popState(); }
+  [:letter:]+ {undo(); popState(); }
+  [^] {undo(); popState(); }
 }
 
 <_VALIDATE_EXPR_X> {
@@ -905,11 +910,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_PRAGMA> {
   "(#" {pushState(); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
   {S} {return WHITE_SPACE;}
-  [^] {yypushback(yylength()); popState(); }
+  [^] {undo(); popState(); }
 }
 <_PRAGMA_> {
   {S} {return XQ_PRAGMA_CHAR; }
-  {QName} {yypushback(yylength()); pushState(_PRAGMA_CONTENT); yybegin(_QNAME); }
+  {QName} {undo(); pushState(_PRAGMA_CONTENT); yybegin(_QNAME); }
 }
 <_PRAGMA_CONTENT> {
   [^#]|("#"[^)]) {return XQ_PRAGMA_CHAR; }
@@ -917,7 +922,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 <_RELATIVE_PATH_EXPR> {
-  [^] {yypushback(yylength()); pushState(_RELATIVE_PATH_EXPR_); yybegin(_STEP_EXPR); }
+  [^] {undo(); pushState(_RELATIVE_PATH_EXPR_); yybegin(_STEP_EXPR); }
 }
 <_RELATIVE_PATH_EXPR_> {
   "/" {pushState(); yybegin(_STEP_EXPR); return OP_SLASH;}
@@ -925,17 +930,17 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_STEP_EXPR> {
   // flattened Literals
-  "\"" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(STRING_LITERAL); }
-  "'" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(STRING_LITERAL); }
+  "\"" { pushState(_PREDICATE_LIST); undo(); yybegin(STRING_LITERAL); }
+  "'" { pushState(_PREDICATE_LIST); undo(); yybegin(STRING_LITERAL); }
   {DoubleLiteral} { yybegin(_PREDICATE_LIST); return XQ_DOUBLE_LITERAL; }
   {DecimalLiteral} { yybegin(_PREDICATE_LIST); return XQ_DECIMAL_LITERAL; }
   {IntegerLiteral} { yybegin(_PREDICATE_LIST); return XQ_INTEGER_LITERAL; }
   // flattened VarRef
-  "$" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(VARNAME); }
+  "$" { pushState(_PREDICATE_LIST); undo(); yybegin(VARNAME); }
   // flattened ParenthesizedExpr
   "(" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
   ".." { yybegin(_PREDICATE_LIST); return OP_DOTDOT;}
@@ -974,23 +979,23 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
   // the @ is optional so we need to test here for the rest
   "@" { pushState(_PREDICATE_LIST); yybegin(_NODE_TEST); return OP_AT;}
-  [^] {yypushback(yylength()); pushState(_PREDICATE_LIST); yybegin(_NODE_TEST);}
+  [^] {undo(); pushState(_PREDICATE_LIST); yybegin(_NODE_TEST);}
   // flattened FunctionCall
-  {QName} { pushState(_PREDICATE_LIST);  yypushback(yylength()); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
+  {QName} { pushState(_PREDICATE_LIST);  undo(); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
 }
 <_PREDICATE_LIST> {
   "[" {pushState(_PREDICATE_LIST); pushState(_CLOSE_SQUARE); startList(EXPR_SINGLE, EXPR_REPEATER); return OP_LSQUARE; }
-  [^\[\x20\x09\x0D\x0A]+ {yypushback(yylength()); popState(); }
+  [^\[\x20\x09\x0D\x0A]+ {undo(); popState(); }
 }
 
 <_EL_IN_CURLY_OR_QNAME> {
-  "{" {yypushback(yylength()); yybegin(_EXPR_LIST_IN_CURLY); }
-  {QName} {yypushback(yylength()); yybegin(_QNAME); }
+  "{" {undo(); yybegin(_EXPR_LIST_IN_CURLY); }
+  {QName} {undo(); yybegin(_QNAME); }
 }
 
 <_EL_IN_CURLY_OR_NCNAME> {
-  "{" {yypushback(yylength()); yybegin(_EXPR_LIST_IN_CURLY); }
-  {NCName} {yypushback(yylength()); yybegin(_NCNAME); }
+  "{" {undo(); yybegin(_EXPR_LIST_IN_CURLY); }
+  {NCName} {undo(); yybegin(_NCNAME); }
 }
 
 <_NODE_TEST> {
@@ -1006,7 +1011,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "schema-attribute" {pushState(OPT_OCCURANCE_INDICATOR); pushState(_RBRACE); pushState(_QNAME); yybegin(_LBRACE);  return KW_SCHEMA_ATTRIBUTE;}
   "element" {pushState(OPT_OCCURANCE_INDICATOR); pushState(ATTRIBUTE_TEST); yybegin(_LBRACE); return KW_ELEMENT;}
   "schema-element" {pushState(OPT_OCCURANCE_INDICATOR); pushState(_RBRACE); pushState(_QNAME); yybegin(_LBRACE); return KW_SCHEMA_ELEMENT;}
-  {WildcardQName} {yypushback(yylength()); yybegin(_WILDCARD_QNAME); }
+  {WildcardQName} {undo(); yybegin(_WILDCARD_QNAME); }
 }
 
 <_XML_PI_NAME> {
@@ -1014,21 +1019,21 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {XmlName} {yybegin(_XML_PI_CONTENT); return XML_PI_NAME;}
   [^] {return BAD_CHARACTER;}
 }
-<_XML_PI_CONTENT, _XML_PI_NAME> "?>" { yypushback(yylength()); popState(); }
+<_XML_PI_CONTENT, _XML_PI_NAME> "?>" { undo(); popState(); }
 <_XML_PI_CONTENT> {
   {S} { return WHITE_SPACE; }
   [^] { return XML_PI_CHAR; }
 }
 <_XML_ATTRLIST_START> {
   {S} { pushState(_XML_ATTRLIST_START); yybegin(_XML_ATTR_NAME); return WHITE_SPACE; }
-  [^] { yypushback(yylength()); popState(); }
+  [^] { undo(); popState(); }
 }
 <_XML_ATTR_NAME> {
-  {QName} {yypushback(yylength()); pushState(_XML_ATTR_VALUE); pushState(_EQUALS); yybegin(_QNAME); }
-  [^] {yypushback(yylength()); popState(); }
+  {QName} {undo(); pushState(_XML_ATTR_VALUE); pushState(_EQUALS); yybegin(_QNAME); }
+  [^] {undo(); popState(); }
 }
 <_XML_TAG_NAME> {
-  {QName} {yypushback(yylength()); yybegin(_STRICT_QNAME); }
+  {QName} {undo(); yybegin(_STRICT_QNAME); }
   [^] {popState(); return BAD_CHARACTER; }
 }
 <_XML_END_TAG> {
@@ -1049,10 +1054,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "<?" { pushState(); pushState(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
   "<![CDATA[" { pushState(); yybegin(_XML_CDATA_CONTENT); return XML_CDATA_START; }
   // this is used to escape to the outer element
-  "</" {yypushback(yylength()); popState(); }
+  "</" {undo(); popState(); }
   "<" { pushState(); pushState(_XML_END_TAG); pushState(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
   [^\{\}\<\&]+ { return XML_ELEMENT_CHAR; }
-  [^] {yypushback(yylength()); pushState(); yybegin(_XML_STR_COMMON_CONTENT);}
+  [^] {undo(); pushState(); yybegin(_XML_STR_COMMON_CONTENT);}
 }
 <_XML_CDATA_CONTENT> {
   [^\]]|("]"[^\]])|("]]"[^\>]) {return XML_CDATA_CHAR;}
@@ -1111,7 +1116,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_EXPR_LIST_OR_RBRACE> {
   ")" {popState(); return OP_RBRACE;}
-  {ELSE} {yypushback(yylength()); pushState(_RBRACE); startList(EXPR_SINGLE, EXPR_REPEATER); }
+  {ELSE} {undo(); pushState(_RBRACE); startList(EXPR_SINGLE, EXPR_REPEATER); }
 }
 
 // curly braces {}
@@ -1133,7 +1138,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_EXPR_LIST_OR_RCURLY> {
   "}" {popState(); return OP_RCURLY; }
-  {ELSE} {yypushback(yylength()); pushState(_RCURLY); startList(EXPR_SINGLE, EXPR_REPEATER); }
+  {ELSE} {undo(); pushState(_RCURLY); startList(EXPR_SINGLE, EXPR_REPEATER); }
 }
 
 
@@ -1203,13 +1208,13 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "\"\"" { return XQ_STR_ESCAPE_QUOTE; }
   "\"" { popState(); return XQ_STR_END; }
   [^\"\&] { return XQ_STR_CHAR; }
-  [^] { yypushback(yylength()); pushState(); yybegin(_STR_COMMON_CONTENT); }
+  [^] { undo(); pushState(); yybegin(_STR_COMMON_CONTENT); }
 }
 <STR_START_APOS> {
   "''" { return XQ_STR_ESCAPE_APOS; }
   "'" { popState(); return XQ_STR_END; }
   [^\'\&] { return XQ_STR_CHAR; }
-  [^] { yypushback(yylength()); pushState(); yybegin(_STR_COMMON_CONTENT); }
+  [^] { undo(); pushState(); yybegin(_STR_COMMON_CONTENT); }
 }
 <_STR_COMMON_CONTENT> {
   {CharRef} {popState(); return XQ_STR_CHAR_REF; }
@@ -1226,20 +1231,20 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "\"\"" { return XML_STR_ESCAPE_QUOTE; }
   "\"" { popState(); return XML_STR_END; }
   [^\"\{\}\<\&] { return XML_STR_CHAR; }
-  [^] { yypushback(yylength()); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
+  [^] { undo(); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
 }
 <_XML_STR_START_APOS> {
   "''" { return XML_STR_ESCAPE_APOS; }
   "'" { popState(); return XML_STR_END; }
   [^\'\{\}\<\&] { return XML_STR_CHAR; }
-  [^] { yypushback(yylength()); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
+  [^] { undo(); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
 }
 <_XML_STR_COMMON_CONTENT> {
   {CharRef} {popState(); return XML_STR_CHAR_REF; }
   {PredefinedEntityRef} {popState(); return XML_STR_ENT_REF; }
   "{{" {popState(); return OP_LCURLYCURLY; }
   "}}" {popState(); return OP_RCURLYCURLY; }
-  "{" {yypushback(yylength()); yybegin(_EXPR_LIST_IN_CURLY); }
+  "{" {undo(); yybegin(_EXPR_LIST_IN_CURLY); }
   [^] {popState(); return BAD_CHARACTER; }
 }
 

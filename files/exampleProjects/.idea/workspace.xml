@@ -77,10 +77,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ifExpr.xqy" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Highlighting/src/ifExpr.xqy">
+      <file leaf-file-name="quantifiedExp.xqy" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Highlighting/src/quantifiedExp.xqy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="38" selection-start="214" selection-end="214" vertical-scroll-proportion="0.15718563">
+            <state line="1" column="36" selection-start="61" selection-end="61" vertical-scroll-proportion="0.02245509">
               <folding />
             </state>
           </provider>
@@ -101,6 +101,7 @@
         <option value="$PROJECT_DIR$/Highlighting/src/test.xq" />
         <option value="$PROJECT_DIR$/Highlighting/src/declareVar.xqy" />
         <option value="$PROJECT_DIR$/Highlighting/src/ifExpr.xqy" />
+        <option value="$PROJECT_DIR$/Highlighting/src/quantifiedExp.xqy" />
       </list>
     </option>
   </component>
@@ -134,8 +135,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -154,8 +153,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="exampleProjects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Highlighting" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
+      <pane id="Favorites" />
+      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -312,14 +327,19 @@
         <state line="1" column="27" selection-start="59" selection-end="59" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Highlighting/src/ifExpr.xqy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="38" selection-start="214" selection-end="214" vertical-scroll-proportion="0.15718563" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Highlighting/src/test.xqy">
       <provider selected="true" editor-type-id="text-editor">
         <state line="7" column="41" selection-start="203" selection-end="203" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Highlighting/src/ifExpr.xqy">
+    <entry file="file://$PROJECT_DIR$/Highlighting/src/quantifiedExp.xqy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="38" selection-start="214" selection-end="214" vertical-scroll-proportion="0.15718563">
+        <state line="1" column="36" selection-start="61" selection-end="61" vertical-scroll-proportion="0.02245509">
           <folding />
         </state>
       </provider>
