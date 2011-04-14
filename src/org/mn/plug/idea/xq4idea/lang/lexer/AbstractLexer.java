@@ -114,6 +114,24 @@ public abstract class AbstractLexer {
   }
 
   /**
+   * Surround the given state with before and after. Acts as though you did:
+   * <code><pre>
+   *   pushOptSpaceThen(after);
+   *   pushOptSpaceThen(state);
+   *   optSpaceThen(before);
+   * </pre></code>
+   *
+   * @param before The state before state
+   * @param state  The state in the middle
+   * @param after  The state after state
+   */
+  void surround(int before, int state, int after) {
+    pushOptSpaceThen(after);
+    pushOptSpaceThen(state);
+    optSpaceThen(before);
+  }
+
+  /**
    * Resets the scanner state and trys matching again with the given state
    *
    * @param state The state to move to after resetting the scanner

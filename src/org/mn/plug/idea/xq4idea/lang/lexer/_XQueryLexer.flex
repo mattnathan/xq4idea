@@ -44,9 +44,13 @@ import com.intellij.psi.tree.IElementType;
 %x _COMMA
 %x _SEMI
 %x _EQUALS
+%x _EMPTY_BRACES
+%x _RBRACE
 
 // literals
+%x XQ_COMMENT
 %x STRING_LITERAL
+%x VARNAME
 
 // the top level module file
 %x MODULE
@@ -90,14 +94,43 @@ import com.intellij.psi.tree.IElementType;
 %x OPT_AT_THEN_URI_LIST
 %x OPT_COMMA_THEN_URI_LIST
 
+// "$" QName TypeDeclaration?
+%x VARNAME_THEN_OPT_TYPE_DECL
+// ("as" SequenceType)?
+%x OPT_AS_THEN_SEQUENCE_TYPE
+
+// "namespace" NCName = ""
+%x NAMESPACE_THEN_NCNAME_EQUALS_URI
+// "ordered" | "unordered"
+%x ORDERED_OR_UNORDERED
+
+// ("empty-sequence" "(" ")") | (ItemType OccurrenceIndicator?)
+%x SEQUENCE_TYPE
+// 	DocumentTest | ElementTest | AttributeTest | SchemaElementTest | SchemaAttributeTest
+//  | PITest | CommentTest | TextTest | AnyKindTest
+%x KIND_TEST
+// 	KindTest | ("item" "(" ")") | AtomicType
+%x ITEM_TYPE
+// ("?" | "*" | "+")?
+%x OPT_OCCURANCE_INDICATOR
+// (NCName | StrLiteral)?
+%x OPT_STR_OR_NCNAME
+// "attribute" "(" ( (QName | "*") OPT_COMMA_THEN_QNAME )? ")"
+%x ATTRIBUTE_TEST
+// "element" "(" ( (QName | "*") OPT_COMMA_THEN_QNAME_THEN_OPT_QUESTION )? ")"
+%x ELEMENT_TEST
+// ("," TypeName )?
+%x OPT_COMMA_THEN_QNAME
+// ("," TypeName "?"? )?
+%x OPT_COMMA_THEN_QNAME_THEN_OPT_QUESTION
+%x DOCUMENT_TEST
+
 
 
 // below here we shouldn't be using anything ---------------------------------------------------------------------------
 
 // these are top level states
-%x XQ_COMMENT
 %x XML_COMMENT
-%s DECLAREORDERING
 
 // strings
 %x STR_START_QUOTE
@@ -106,26 +139,8 @@ import com.intellij.psi.tree.IElementType;
 %x _XML_STR_START_QUOTE
 %x _XML_STR_START_APOS
 
-%s NAMESPACE_THEN_NCNAME_EQUALS_URI
-
-
-
 %s _PRESERVE_OR_STRIP
 %s URI_LITERAL
-
-
-%s _PARAM
-%s _AS
-%s _ITEM_TYPE
-%x _ITEM_TYPE_OCC
-%s _ITEM_TYPE_DN
-%s _ITEM_TYPE_PI
-%s _ITEM_TYPE_ATTR
-%s _ITEM_TYPE_SATTR
-%s _ITEM_TYPE_AorE
-%s _ITEM_TYPE_AorE_
-%s _ITEM_TYPE_AorE__
-%s _ITEM_TYPE_SELEM
 
 // Expression states
 %x _EXPR_SINGLE
@@ -239,8 +254,6 @@ import com.intellij.psi.tree.IElementType;
 %x _XML_CDATA_CONTENT
 %x _XML_CDATA_END
 
-%s _EMPTY_BRACES
-%s _EMPTY_BRACES_
 %s _OPEN_BRACE
 %s _CLOSE_BRACE
 %s _OPEN_CURLY
@@ -253,7 +266,6 @@ import com.intellij.psi.tree.IElementType;
 %x _PRAGMA_CONTENT
 
 %x _OPT_QUESTION
-%s _VARNAME
 %s _STAR
 %s _COLON
 %s _COLONCOLON
@@ -394,13 +406,13 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // declare ...
 <DECLARE_X> {
   "option" { pushSpaceThen(STRING_LITERAL); spaceThen(_QNAME); return KW_OPTION;}
-  "ordering" { spaceThen(DECLAREORDERING); return KW_ORDERING; }
+  "ordering" { spaceThen(ORDERED_OR_UNORDERED); return KW_ORDERING; }
   "boundary-space" {spaceThen(_PRESERVE_OR_STRIP); return KW_BOUNDARY_SPACE; }
   "base-uri" { spaceThen(URI_LITERAL); return KW_BASE_URI; }
   "copy-namespaces" {spaceThen(DECLARE_COPYNS_PRESERVE_OR_NOT); return KW_COPY_NAMESPACES; }
   "construction" {spaceThen(_PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
   "default" {spaceThen(DECLARE_DEFAULT_X); return KW_DEFAULT; }
-  "variable" { pushSpaceThen(ASSIGN_OR_EXTERNAL); spaceThen(_PARAM); return KW_VARIABLE; }
+  "variable" { pushOptSpaceThen(ASSIGN_OR_EXTERNAL); spaceThen(VARNAME_THEN_OPT_TYPE_DECL); return KW_VARIABLE; }
 }
 
 // "namespace" NCName "=" UriLiteral
@@ -423,6 +435,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "empty" {spaceThen(GREATEST_OR_LEAST); return KW_EMPTY; }
   {ELSE} { return BAD_CHARACTER; }
 }
+// "greatest" | "least"
 <GREATEST_OR_LEAST> {
   "greatest" { popState(); return KW_GREATEST;}
   "least" { popState(); return KW_LEAST;}
@@ -436,7 +449,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // ORDERING
-<DECLAREORDERING> {
+<ORDERED_OR_UNORDERED> {
   "ordered" { popState(); return KW_ORDERED; }
   "unordered" { popState(); return KW_UNORDERED; }
   {ELSE} { return BAD_CHARACTER; }
@@ -497,58 +510,74 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // variable declaration part
 // "$" VarName TypeDeclaration?
 //
-<_PARAM> {
-  "$" {yypushback(yylength()); pushState(_AS); yybegin(_VARNAME);}
+<VARNAME_THEN_OPT_TYPE_DECL> {
+  "$" {  pushOptSpaceThen(OPT_AS_THEN_SEQUENCE_TYPE); retryAs(VARNAME); }
+  {ELSE} { return BAD_CHARACTER; }
 }
-<_AS> {
-  "as" {yybegin(_ITEM_TYPE); return KW_AS; }
-  {NS} {yypushback(yylength()); popState();}
+<OPT_AS_THEN_SEQUENCE_TYPE> {
+  "as" {spaceThen(SEQUENCE_TYPE); return KW_AS; }
+  {ELSE} { retry(); }
 }
-<_ITEM_TYPE> {
-  "void" {yybegin(_EMPTY_BRACES); return KW_VOID;}
-  "item" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_ITEM;}
-  "node" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
-  "text" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
-  "comment" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
-  "document-node" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
-  "processing-instruction" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
-  "attribute" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
-  "schema-attribute" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
-  "element" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
-  "schema-element" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
-  {QName} {yypushback(yylength()); pushState(_ITEM_TYPE_OCC); yybegin(_QNAME);}
+
+<SEQUENCE_TYPE> {
+  "empty-sequence" { optSpaceThen(_EMPTY_BRACES); return KW_EMPTY_SEQUENCE; }
+  {ELSE} { pushOptSpaceThen(OPT_OCCURANCE_INDICATOR); retryAs(ITEM_TYPE); }
 }
-<_ITEM_TYPE_OCC> {
+
+<KIND_TEST, ITEM_TYPE> {
+  "document-node" { surround(_OPEN_BRACE, DOCUMENT_TEST, _CLOSE_BRACE); return KW_DOCUMENT_NODE;}
+  "element" { surround(_OPEN_BRACE, ELEMENT_TEST, _CLOSE_BRACE); return KW_ELEMENT;}
+  "attribute" { surround(_OPEN_BRACE, ATTRIBUTE_TEST, _CLOSE_BRACE); return KW_ATTRIBUTE;}
+  "schema-element" { surround(_OPEN_BRACE, _QNAME, _CLOSE_BRACE); return KW_SCHEMA_ELEMENT;}
+  "schema-attribute" { surround(_OPEN_BRACE, _QNAME, _CLOSE_BRACE); return KW_SCHEMA_ATTRIBUTE;}
+  "processing-instruction" { surround(_OPEN_BRACE, OPT_STR_OR_NCNAME, _CLOSE_BRACE); return KW_PROCESSING_INSTRUCTION;}
+  "comment" { optSpaceThen(_EMPTY_BRACES); return KW_COMMENT;}
+  "text" { optSpaceThen(_EMPTY_BRACES); return KW_TEXT;}
+  "node" { optSpaceThen(_EMPTY_BRACES); return KW_NODE;}
+}
+<ITEM_TYPE> {
+  "item" { optSpaceThen(_EMPTY_BRACES); return KW_ITEM;}
+  {QName} { retryAs(_QNAME); }
+  {ELSE} { return BAD_CHARACTER; }
+}
+<OPT_OCCURANCE_INDICATOR> {
   "?" {popState(); return OP_QUESTION;}
   "*" {popState(); return OP_STAR;}
   "+" {popState(); return OP_PLUS;}
-  [^\?\*\+] {popState(); yypushback(1);}
+  {ELSE} {retry();}
 }
-// as processing-instruction( NCName | "")
-<_ITEM_TYPE_PI> {
-  "\""|"'" { pushState(_CLOSE_BRACE); yypushback(1); yybegin(STRING_LITERAL); }
-  {NCName} { pushState(_CLOSE_BRACE); yypushback(yylength()); yybegin(_NCNAME); }
-  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+// (NCName | "")?
+<OPT_STR_OR_NCNAME> {
+  "\""|"'" { retryAs(STRING_LITERAL); }
+  {NCName} { retryAs(_NCNAME); }
+  {ELSE} { retry(); }
 }
-// as element( (QName|* (, QName "?"? )? )? )? )
-<_ITEM_TYPE_AorE> {
-  "*" {yybegin(_ITEM_TYPE_AorE_); return OP_STAR; }
-  {QName} {yypushback(yylength()); pushState(_ITEM_TYPE_AorE_); yybegin(_QNAME); }
-  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+// (QName|* (, QName "?"? )? )? )?
+<ELEMENT_TEST> {
+  "*" {optSpaceThen(OPT_COMMA_THEN_QNAME_THEN_OPT_QUESTION); return OP_STAR; }
+  {QName} {pushOptSpaceThen(OPT_COMMA_THEN_QNAME_THEN_OPT_QUESTION); retryAs(_QNAME); }
+  {ELSE} { retry(); }
 }
-<_ITEM_TYPE_AorE_> {
-  "," {pushState(_ITEM_TYPE_AorE__); yybegin(_QNAME); return OP_COMMA;}
-  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+// (QName|* (, QName )? )? )?
+<ATTRIBUTE_TEST> {
+  "*" {optSpaceThen(OPT_COMMA_THEN_QNAME); return OP_STAR; }
+  {QName} {pushOptSpaceThen(OPT_COMMA_THEN_QNAME); retryAs(_QNAME); }
+  {ELSE} { retry(); }
 }
-<_ITEM_TYPE_AorE__> {
-  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
-  "?" {yybegin(_CLOSE_BRACE); return OP_QUESTION; }
+<OPT_COMMA_THEN_QNAME> {
+  "," {optSpaceThen(_QNAME); return OP_COMMA;}
+  {ELSE} { retry(); }
 }
+<OPT_COMMA_THEN_QNAME_THEN_OPT_QUESTION> {
+  "," {pushOptSpaceThen(_OPT_QUESTION); optSpaceThen(_QNAME); return OP_COMMA;}
+  {ELSE} { retry(); }
+}
+
 // as document-node( (ElementTest | ElementSchemaTest)? )
-<_ITEM_TYPE_DN> {
-  "element" {pushState(_CLOSE_BRACE); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
-  "schema-element" {pushState(_CLOSE_BRACE); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
-  ")" {yypushback(1); yybegin(_CLOSE_BRACE); }
+<DOCUMENT_TEST> {
+  "element" {surround(_OPEN_BRACE, ELEMENT_TEST, _CLOSE_BRACE); return KW_ELEMENT;}
+  "schema-element" {surround(_OPEN_BRACE, _QNAME, _CLOSE_BRACE); return KW_SCHEMA_ELEMENT;}
+  {ELSE} { retry(); }
 }
 
 <MAIN_MODULE> {
@@ -593,11 +622,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // QuantifiedExpr := (<"some" "$"> | <"every" "$">) VarName TypeDeclaration? "in" ExprSingle
 //                    ("," "$" VarName TypeDeclaration? "in" ExprSingle)* "satisfies" ExprSingle
 <_QUANT_EXPR> {
-  "some" {pushState(_QUANT_EXPR_IN); yybegin(_PARAM); return KW_SOME;}
-  "every" {pushState(_QUANT_EXPR_IN); yybegin(_PARAM); return KW_EVERY;}
+  "some" {pushState(_QUANT_EXPR_IN); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_SOME;}
+  "every" {pushState(_QUANT_EXPR_IN); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_EVERY;}
 }
 <_QUANT_EXPR_LIST> {
-  "," {pushState(_QUANT_EXPR_LIST); pushState(_QUANT_EXPR_IN); yybegin(_PARAM); return OP_COMMA; }
+  "," {pushState(_QUANT_EXPR_LIST); pushState(_QUANT_EXPR_IN); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return OP_COMMA; }
   {_NS} {yypushback(1); popState(); }
 }
 <_QUANT_EXPR_IN> {
@@ -621,17 +650,17 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "case" {pushState(_TYPESWITCH_EXPR_CASE2); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(_TYPESWITCH_EXPR_CASE_); return KW_CASE;}
 }
 <_TYPESWITCH_EXPR_CASE_> {
-  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_CASE_AS); yybegin(_VARNAME);}
-  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_ITEM_TYPE); }
+  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_CASE_AS); yybegin(VARNAME);}
+  [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(ITEM_TYPE); }
 }
 <_TYPESWITCH_EXPR_CASE_AS> {
-  "as" {yybegin(_ITEM_TYPE); return KW_AS; }
+  "as" {yybegin(ITEM_TYPE); return KW_AS; }
 }
 <_TYPESWITCH_EXPR_CASE2> {
   "default" {yybegin(_TYPESWITCH_EXPR_DEFAULT_); return KW_DEFAULT; }
 }
 <_TYPESWITCH_EXPR_DEFAULT_> {
-  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(_VARNAME); }
+  "$" {yypushback(1); pushState(_TYPESWITCH_EXPR_RETURN); yybegin(VARNAME); }
   [^\$\x20\x09\x0D\x0A]+ {yypushback(yylength()); yybegin(_TYPESWITCH_EXPR_RETURN); }
 }
 <_TYPESWITCH_EXPR_RETURN> {
@@ -657,10 +686,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // ForClause := <"for" "$"> VarName TypeDeclaration? PositionalVar? "in" ExprSingle
 //              ("," "$" VarName TypeDeclaration? PositionalVar? "in" ExprSingle)*
 <_FOR_CLAUSE> {
-  "for" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); yybegin(_PARAM); return KW_FOR; }
+  "for" { pushState(_FOR_CLAUSE_VAR_IN); pushState(_FOR_CLAUSE_VAR_POS); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_FOR; }
 }
 <_FOR_CLAUSE_VAR_POS> {
-  "at" { yybegin(_VARNAME); return KW_AT; }
+  "at" { yybegin(VARNAME); return KW_AT; }
   {NS} { yypushback(yylength()); popState(); }
 }
 <_FOR_CLAUSE_VAR_IN> {
@@ -669,10 +698,10 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // LetClause := <"let" "$"> VarName TypeDeclaration? ":=" ExprSingle ("," "$" VarName TypeDeclaration? ":=" ExprSingle)*
 <_LET_CLAUSE> {
-  "let" {pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return KW_LET;}
+  "let" {pushState(_LET_CLAUSE_); pushState(_LET_CLAUSE_VAR); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return KW_LET;}
 }
 <_LET_CLAUSE_> {
-  "," { pushState(); pushState(_LET_CLAUSE_VAR); yybegin(_PARAM); return OP_COMMA;}
+  "," { pushState(); pushState(_LET_CLAUSE_VAR); yybegin(VARNAME_THEN_OPT_TYPE_DECL); return OP_COMMA;}
   {NS} {yypushback(yylength()); popState(); }
 }
 <_LET_CLAUSE_VAR> {
@@ -844,14 +873,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   [^] { yybegin(_TREAT_AS_EXPR); yypushback(yylength()); }
 }
 <_TREAT_AS_EXPR> {
-  "treat" { pushState(_INSTANCEOF_EXPR); pushState(_ITEM_TYPE); yybegin(_KW_AS); return KW_CASTABLE;}
+  "treat" { pushState(_INSTANCEOF_EXPR); pushState(ITEM_TYPE); yybegin(_KW_AS); return KW_CASTABLE;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
   [^] { yybegin(_INSTANCEOF_EXPR); yypushback(yylength()); }
 }
 <_INSTANCEOF_EXPR> {
-  "instance" { pushState(_ITEM_TYPE); yybegin(_KW_OF); return KW_INSTANCE;}
+  "instance" { pushState(ITEM_TYPE); yybegin(_KW_OF); return KW_INSTANCE;}
   {S} {return WHITE_SPACE;}
   "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   [:letter:]+ {yypushback(yylength()); popState(); }
@@ -901,7 +930,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {DecimalLiteral} { yybegin(_PREDICATE_LIST); return XQ_DECIMAL_LITERAL; }
   {IntegerLiteral} { yybegin(_PREDICATE_LIST); return XQ_INTEGER_LITERAL; }
   // flattened VarRef
-  "$" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(_VARNAME); }
+  "$" { pushState(_PREDICATE_LIST); yypushback(1); yybegin(VARNAME); }
   // flattened ParenthesizedExpr
   "(" { pushState(_PREDICATE_LIST); yybegin(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
   ".." { yybegin(_PREDICATE_LIST); return OP_DOTDOT;}
@@ -962,16 +991,16 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_NODE_TEST> {
   "*" {popState(); return OP_STAR;}
   "void" {yybegin(_EMPTY_BRACES); return KW_VOID;}
-  "item" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_ITEM;}
-  "node" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_NODE;}
-  "text" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_TEXT;}
-  "comment" {pushState(_ITEM_TYPE_OCC); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
-  "document-node" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_DN); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
-  "processing-instruction" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_PI); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
-  "attribute" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
-  "schema-attribute" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
-  "element" {pushState(_ITEM_TYPE_OCC); pushState(_ITEM_TYPE_AorE); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
-  "schema-element" {pushState(_ITEM_TYPE_OCC); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
+  "item" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_ITEM;}
+  "node" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_NODE;}
+  "text" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_TEXT;}
+  "comment" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
+  "document-node" {pushState(OPT_OCCURANCE_INDICATOR); pushState(DOCUMENT_TEST); yybegin(_OPEN_BRACE); return KW_DOCUMENT_NODE;}
+  "processing-instruction" {pushState(OPT_OCCURANCE_INDICATOR); pushState(OPT_STR_OR_NCNAME); yybegin(_OPEN_BRACE); return KW_PROCESSING_INSTRUCTION;}
+  "attribute" {pushState(OPT_OCCURANCE_INDICATOR); pushState(ATTRIBUTE_TEST); yybegin(_OPEN_BRACE); return KW_ATTRIBUTE;}
+  "schema-attribute" {pushState(OPT_OCCURANCE_INDICATOR); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE);  return KW_SCHEMA_ATTRIBUTE;}
+  "element" {pushState(OPT_OCCURANCE_INDICATOR); pushState(ATTRIBUTE_TEST); yybegin(_OPEN_BRACE); return KW_ELEMENT;}
+  "schema-element" {pushState(OPT_OCCURANCE_INDICATOR); pushState(_CLOSE_BRACE); pushState(_QNAME); yybegin(_OPEN_BRACE); return KW_SCHEMA_ELEMENT;}
   {WildcardQName} {yypushback(yylength()); yybegin(_WILDCARD_QNAME); }
 }
 
@@ -1045,9 +1074,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <_OPT_QUESTION> {
   "?" { popState(); return OP_QUESTION; }
-  {S} { return WHITE_SPACE; }
-  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
-  [^] {yypushback(yylength()); popState(); }
+  {ELSE} { retry(); }
 }
 <_KW_AS> {
   "as" {popState(); return KW_AS;}
@@ -1082,10 +1109,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   [^] {return BAD_CHARACTER; }
 }
 <_EMPTY_BRACES> {
-  "(" {yybegin(_EMPTY_BRACES_); return OP_LBRACE;}
+  "(" {optSpaceThen(_RBRACE); return OP_LBRACE;}
+  {ELSE} {return BAD_CHARACTER; }
 }
-<_EMPTY_BRACES_> {
+<_RBRACE> {
   ")" {popState(); return OP_RBRACE; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_EXPR_LIST_IN_CURLY> {
   "{" {pushState(_CLOSE_CURLY); pushState(_EXPR_LIST); yybegin(_EXPR_SINGLE); return OP_LCURLY; }
@@ -1209,8 +1238,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // "$" QNAME
-<_VARNAME> {
+<VARNAME> {
   "$" {yybegin(_QNAME); return OP_VARSTART; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 <XQ_COMMENT> {

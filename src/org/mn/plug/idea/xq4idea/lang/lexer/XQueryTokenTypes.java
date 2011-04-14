@@ -194,4 +194,5 @@ public interface XQueryTokenTypes {
   IElementType KW_TO = new XQueryElementType("TO");
   IElementType KW_AND = new XQueryElementType("AND");
   IElementType KW_OR = new XQueryElementType("OR");
+  IElementType KW_EMPTY_SEQUENCE = new XQueryElementType("EMPTY_SEQUENCE");
 }
