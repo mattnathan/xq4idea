@@ -57,6 +57,9 @@ import com.intellij.psi.tree.IElementType;
 %x _OPT_EXPR_LIST_IN_CURLY
 %x _EXPR_LIST_OR_RBRACE
 %x _EXPR_LIST_OR_RCURLY
+%x _QNAME
+%x QNAME_OR_EXPR_LIST_IN_CURLY
+%x NCNAME_OR_EXPR_LIST_IN_CURLY
 
 // literals
 %x XQ_COMMENT
@@ -71,6 +74,7 @@ import com.intellij.psi.tree.IElementType;
 %x LIBRARY_OR_MAIN
 %x LIBRARY_MODULE
 %x MAIN_MODULE
+%x QUERY_BODY
 
 // VersionDecl
 %x VERSION_DECL
@@ -225,6 +229,25 @@ import com.intellij.psi.tree.IElementType;
 %x NODE_TEST
 %x OPT_PREDICATE_LIST
 
+%x PRAGMA
+%x PRAGMA_CONTENT
+
+// xml states
+%x XML_PI_NAME
+%x XML_PI_CONTENT
+%x XML_PI_END
+%x XML_ATTRIBUTE_EQUALS_VALUE
+%x XML_ATTR_VALUE
+%x XML_ELEMENT_CONTENT
+%x XML_TAG_NAME
+%x XML_END_TAG
+%x XML_START_CLOSE_TAG
+%x XML_CDATA_CONTENT
+%x _XML_CDATA_END
+%x XML_STR_COMMON_CONTENT
+%x _XML_STR_START_QUOTE
+%x _XML_STR_START_APOS
+
 
 
 // below here we shouldn't be using anything ---------------------------------------------------------------------------
@@ -236,13 +259,9 @@ import com.intellij.psi.tree.IElementType;
 %x STR_START_QUOTE
 %x STR_START_APOS
 %x _STR_COMMON_CONTENT
-%x _XML_STR_START_QUOTE
-%x _XML_STR_START_APOS
 
 
 // Expression states
-%s _EL_IN_CURLY_OR_QNAME
-%s _EL_IN_CURLY_OR_NCNAME
 
 
 
@@ -257,27 +276,10 @@ import com.intellij.psi.tree.IElementType;
 // FLWOR states
 // allows for or let repeating,
 
-// xml states
-%x _XML_PI_NAME
-%x _XML_PI_CONTENT
-%x _XML_PI_END
-%x _XML_ATTRLIST_START
-%x _XML_ATTR_NAME
-%x _XML_ATTR_VALUE
-%x _XML_STR_COMMON_CONTENT
-%x _XML_ELEMENT_CONTENT
-%x _XML_TAG_NAME
-%x _XML_END_TAG
-%x _XML_CLOSE_TAG
-%x _XML_CDATA_CONTENT
-%x _XML_CDATA_END
 
 %s _OPEN_SQUARE
 %s _CLOSE_SQUARE
 %x _CLOSE_TAG
-%s _PRAGMA
-%x _PRAGMA_
-%x _PRAGMA_CONTENT
 
 %x _OPT_QUESTION
 %s _STAR
@@ -285,7 +287,6 @@ import com.intellij.psi.tree.IElementType;
 %s _COLONCOLON
 
 %s _NCNAME
-%s _QNAME
 %x _STRICT_QNAME
 %x _QNAME_
 %x _QNAME_LOCAL
@@ -377,6 +378,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 // SchemaImport entry point
 <IMPORT_DECL, LIBRARY_MODULE, MAIN_MODULE> {
   "import" {
+    optSpaceRepeat();
     pushOptSpaceThen(_SEMI); 
     pushOptSpaceThen(OPT_AT_THEN_URI_LIST);
     spaceThen(IMPORT_SCHEMA_OR_MODULE); 
@@ -385,13 +387,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 // "declare" XXX entry point
 <DECLARE_DECL, LIBRARY_MODULE, MAIN_MODULE> {
-  "declare" { pushOptSpaceThen(_SEMI); spaceThen(DECLARE_X); return KW_DECLARE; }
+  "declare" { optSpaceRepeat(); pushOptSpaceThen(_SEMI); spaceThen(DECLARE_X); return KW_DECLARE; }
 }
-<MODULE, MAIN_MODULE, LIBRARY_MODULE> {
-  {S} { return WHITE_SPACE; }
-  "(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
-  {ELSE} { return BAD_CHARACTER; }
-}
+//<MODULE, MAIN_MODULE, LIBRARY_MODULE> {
+//  "(:" { yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
+//}
+<MAIN_MODULE> {ELSE} { /*setInitialState(QUERY_BODY);*/ undo(); startList(EXPR_SINGLE, EXPR_REPEATER); }
+<LIBRARY_MODULE> {ELSE} { return BAD_CHARACTER; }
+//<QUERY_BODY> {ELSE} { return BAD_CHARACTER; }
 
 // xquery version "" (encoding "")? ;
 <VERSION_DECL_VERSION> {
@@ -852,11 +855,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // the rules
 <OPT_OR_EXPR> {
-  "or" / {WordSep} {optSpaceRepeat(); spaceThen(_AND_EXPR); return KW_OR;}
+  "or" {optSpaceRepeat(); spaceThen(_AND_EXPR); return KW_OR;}
   {ELSE} { retry(); }
 }
 <OPT_AND_EXPR> {
-  "and" / {WordSep} {optSpaceRepeat(); spaceThen(_COMPARE_EXPR); return KW_AND;}
+  "and" {optSpaceRepeat(); spaceThen(_COMPARE_EXPR); return KW_AND;}
   {ELSE} { retry(); }
 }
 <OPT_COMPARE_EXPR> {
@@ -879,7 +882,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { retry(); }
 }
 <OPT_RANGE_EXPR> {
-  "to" / {WordSep} { optSpaceThen(_ADD_EXPR); return KW_TO; }
+  "to" { optSpaceThen(_ADD_EXPR); return KW_TO; }
   {ELSE} { retry(); }
 }
 <OPT_ADD_EXPR> {
@@ -889,9 +892,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <OPT_MULT_EXPR> {
   "*" {optSpaceRepeat(); optSpaceThen(_UNION_EXPR); return OP_STAR;}
-  "div" / {WordSep} {optSpaceRepeat(); optSpaceThen(_UNION_EXPR); return OP_DIV;}
-  "idiv" / {WordSep} {optSpaceRepeat(); optSpaceThen(_UNION_EXPR); return OP_IDIV;}
-  "mod" / {WordSep} {optSpaceRepeat(); optSpaceThen(_UNION_EXPR); return OP_MOD;}
+  "div" {optSpaceRepeat(); optSpaceThen(_UNION_EXPR); return OP_DIV;}
+  "idiv" {optSpaceRepeat(); optSpaceThen(_UNION_EXPR); return OP_IDIV;}
+  "mod" {optSpaceRepeat(); optSpaceThen(_UNION_EXPR); return OP_MOD;}
   {ELSE} { retry(); }
 }
 <OPT_UNION_EXPR> {
@@ -927,18 +930,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 <VALUE_EXPR> {
   // validate expr
-  "validate" {pushOptSpaceThen(OPT_CAST_AS_EXPR); optSpaceThen(VALIDATE_EXPR); return KW_VALIDATE; }
+  "validate" {optSpaceThen(VALIDATE_EXPR); return KW_VALIDATE; }
   // Extension expr
   "(#" {
-    pushOptSpaceThen(OPT_CAST_AS_EXPR);
     pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY);
-    pushOptSpaceThen(_PRAGMA);
-    optSpaceThen(_PRAGMA_);
-    return XQ_PRAGMA_START;
+    retryAs(PRAGMA);
   }
   // path expr
   {ELSE} { retryAs(STEP_EXPR); }
-  
 }
 
 <VALIDATE_EXPR> {
@@ -950,16 +949,12 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_FILTER_EXPR> {
   "~" {}
 }
-<_PRAGMA> {
-  "(#" {pushState(); yybegin(_PRAGMA_); return XQ_PRAGMA_START; }
-  {S} {return WHITE_SPACE;}
-  [^] {retry(); }
+<PRAGMA> {
+  "(#" { optSpaceRepeat(); pushState(PRAGMA_CONTENT); optSpaceThen(_QNAME); return XQ_PRAGMA_START; }
+  {ELSE} { retry(); }
 }
-<_PRAGMA_> {
-  {S} {return XQ_PRAGMA_CHAR; }
-  {QName} {undo(); pushState(_PRAGMA_CONTENT); yybegin(_QNAME); }
-}
-<_PRAGMA_CONTENT> {
+<PRAGMA_CONTENT> {
+  {S} { return WHITE_SPACE; }
   [^#]|("#"[^)]) {return XQ_PRAGMA_CHAR; }
   "#)" {popState(); return XQ_PRAGMA_END; }
 }
@@ -992,17 +987,17 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "unordered" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
 
   // flattened DirectConstructor
-  "<!--" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(XML_COMMENT); return XML_COMMENT_START; }
-  "<?" { pushOptSpaceThen(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
-  "<" { pushOptSpaceThen(_XML_END_TAG); pushOptSpaceThen(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
+  "<!--" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(XML_COMMENT); return TT_XML_COMMENT_START; }
+  "<?" { pushOptSpaceThen(XML_PI_END); yybegin(XML_PI_NAME); return TT_XML_PI_START; }
+  "<" { pushOptSpaceThen(XML_END_TAG); pushOptSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); yybegin(XML_TAG_NAME); return TT_XML_TAG_START; }
 
   // flattened ComputedConstructor
   "document" {pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_DOCUMENT;}
-  "element" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_QNAME); return KW_ELEMENT;}
-  "attribute" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_QNAME); return KW_ATTRIBUTE;}
+  "element" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(QNAME_OR_EXPR_LIST_IN_CURLY); return KW_ELEMENT;}
+  "attribute" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(QNAME_OR_EXPR_LIST_IN_CURLY); return KW_ATTRIBUTE;}
   "text" {pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_TEXT;}
   "comment" {pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_COMMENT;}
-  "processing-instruction" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_NCNAME); return KW_PROCESSING_INSTRUCTION;}
+  "processing-instruction" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(NCNAME_OR_EXPR_LIST_IN_CURLY); return KW_PROCESSING_INSTRUCTION;}
 
   // flattened AxisStep
   "child" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_CHILD;}
@@ -1028,16 +1023,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { retry(); }
 }
 
-<_EL_IN_CURLY_OR_QNAME> {
-  "{" {retryAs(_EXPR_LIST_IN_CURLY); }
-  {QName} {retryAs(_QNAME); }
-}
-
-<_EL_IN_CURLY_OR_NCNAME> {
-  "{" {retryAs(_EXPR_LIST_IN_CURLY); }
-  {NCName} {retryAs(_NCNAME); }
-}
-
 <NODE_TEST, STEP_EXPR> {
   "*" {pushOptSpaceThen(OPT_PREDICATE_LIST); popState(); return OP_STAR;}
 //  "void" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EMPTY_BRACES); return KW_VOID;}
@@ -1057,54 +1042,57 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <NODE_TEST> {ELSE} { return BAD_CHARACTER; }
 <STEP_EXPR> {ELSE} { retry(); }
 
-<_XML_PI_NAME> {
-  "xml" {optSpaceThen(_XML_ATTRLIST_START); return XML_PI_NAME;}
-  {XmlName} {optSpaceThen(_XML_PI_CONTENT); return XML_PI_NAME;}
-  [^] {return BAD_CHARACTER;}
+
+// xml processing instructions: <?name hjhdgdhjd ?>
+<XML_PI_NAME> {
+  "xml" {spaceThen(XML_ATTRIBUTE_EQUALS_VALUE); return TT_XML_PI_NAME;}
+  {XmlName} {optSpaceThen(XML_PI_CONTENT); return TT_XML_PI_NAME;}
 }
-<_XML_PI_CONTENT, _XML_PI_NAME> "?>" { retry(); }
-<_XML_PI_CONTENT> {
+<XML_PI_CONTENT, XML_PI_NAME> "?>" { retry(); }
+<XML_PI_NAME> {ELSE} {return BAD_CHARACTER;}
+<XML_PI_CONTENT> {
   {S} { return WHITE_SPACE; }
-  [^] { return XML_PI_CHAR; }
+  {ELSE} { return TT_XML_PI_CHAR; }
 }
-<_XML_ATTRLIST_START> {
-  {S} { pushState(_XML_ATTRLIST_START); yybegin(_XML_ATTR_NAME); return WHITE_SPACE; }
-  [^] { retry(); }
+
+// xml attribute list
+<XML_ATTRIBUTE_EQUALS_VALUE> {
+  {QName} {optSpaceRepeat(); pushOptSpaceThen(XML_ATTR_VALUE); pushOptSpaceThen(_EQUALS); retryAs(_QNAME); }
+  {ELSE} { retry(); }
 }
-<_XML_ATTR_NAME> {
-  {QName} {undo(); pushState(_XML_ATTR_VALUE); pushState(_EQUALS); yybegin(_QNAME); }
-  [^] {retry(); }
+<XML_TAG_NAME> {
+  {QName} { retryAs(_QNAME); }
+  {ELSE} { return BAD_CHARACTER; }
 }
-<_XML_TAG_NAME> {
-  {QName} {retryAs(_STRICT_QNAME); }
-  [^] {popState(); return BAD_CHARACTER; }
+<XML_END_TAG> {
+  "/>" {popState(); return TT_XML_EMPTYTAG_END; }
+  ">" {pushOptSpaceThen(XML_START_CLOSE_TAG); optSpaceThen(XML_ELEMENT_CONTENT); return TT_XML_TAG_END; }
+  {ELSE} {return BAD_CHARACTER;}
 }
-<_XML_END_TAG> {
-  {S} {return WHITE_SPACE;}
-  "/>" {popState(); return XML_EMPTYTAG_END; }
-  ">" {pushState(_XML_CLOSE_TAG); yybegin(_XML_ELEMENT_CONTENT); return XML_TAG_END; }
-  [^] {popState(); return BAD_CHARACTER;}
+<XML_START_CLOSE_TAG> {
+  "</" { pushOptSpaceThen(_CLOSE_TAG); yybegin(_QNAME); return TT_XML_CLOSETAG_START; }
+  {ELSE} {return BAD_CHARACTER;}
 }
-<_XML_CLOSE_TAG> {
-  "</" / {QName} { pushState(_CLOSE_TAG); yybegin(_STRICT_QNAME); return XML_CLOSETAG_START; }
-  {S} {return WHITE_SPACE;}
-  [^] {popState(); return BAD_CHARACTER;}
-}
-<_XML_ELEMENT_CONTENT> {
+<XML_ELEMENT_CONTENT> {
   // note, wherever this is used it always repeats
   // flattened DirElemConstructor
-  "<!--" { pushState(); yybegin(XML_COMMENT); return XML_COMMENT_START; }
-  "<?" { pushState(); pushState(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
-  "<![CDATA[" { pushState(); yybegin(_XML_CDATA_CONTENT); return XML_CDATA_START; }
+  "<!--" { optSpaceRepeat(); yybegin(XML_COMMENT); return TT_XML_COMMENT_START; }
+  "<?" { optSpaceRepeat(); pushState(XML_PI_END); yybegin(XML_PI_NAME); return TT_XML_PI_START; }
+  "<![CDATA[" { optSpaceRepeat(); yybegin(XML_CDATA_CONTENT); return TT_XML_CDATA_START; }
   // this is used to escape to the outer element
-  "</" {retry(); }
-  "<" { pushState(); pushState(_XML_END_TAG); pushState(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
-  [^\{\}\<\&]+ { return XML_ELEMENT_CHAR; }
-  [^] {undo(); pushState(); yybegin(_XML_STR_COMMON_CONTENT);}
+  "</" { retry(); }
+  "<" { optSpaceRepeat(); pushOptSpaceThen(XML_END_TAG); pushOptSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); yybegin(XML_TAG_NAME); return TT_XML_TAG_START; }
+  [^\{\}\<\&]+ { return TT_XML_ELEMENT_CHAR; }
+  {ELSE} {optSpaceRepeat(); retryAs(XML_STR_COMMON_CONTENT);}
 }
-<_XML_CDATA_CONTENT> {
-  [^\]]|("]"[^\]])|("]]"[^\>]) {return XML_CDATA_CHAR;}
-  "]]>" {popState(); return XML_CDATA_END; }
+<XML_CDATA_CONTENT> {
+  [^\]]|("]"[^\]])|("]]"[^\>]) {return TT_XML_CDATA_CHAR;}
+  "]]>" {popState(); return TT_XML_CDATA_END; }
+}
+<XML_ATTR_VALUE> {
+  "\"" { yybegin(_XML_STR_START_QUOTE); return TT_XML_STR_START; }
+  "'" {yybegin(_XML_STR_START_APOS); return TT_XML_STR_START; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 
 // common formats
@@ -1189,16 +1177,15 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 <_CLOSE_SQUARE> {
   "]" {popState(); return OP_RSQUARE; }
+  {ELSE} { return BAD_CHARACTER; }
 }
-<_XML_PI_END> {
-  "?>" {popState(); return XML_PI_END; }
-  {S} {return WHITE_SPACE;}
-  [^] {popState(); return BAD_CHARACTER;}
+<XML_PI_END> {
+  "?>" {popState(); return TT_XML_PI_END; }
+  {ELSE} {return BAD_CHARACTER;}
 }
 <_CLOSE_TAG> {
-  ">" {popState(); return XML_TAG_END; }
-  {S} {return WHITE_SPACE;}
-  [^] {return BAD_CHARACTER; }
+  ">" {popState(); return TT_XML_TAG_END; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 
 // ("preserve" | "strip") ";"
@@ -1208,39 +1195,55 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { return BAD_CHARACTER; }
 }
 
+<QNAME_OR_EXPR_LIST_IN_CURLY> {
+  "{" {retryAs(_EXPR_LIST_IN_CURLY); }
+  {QName} {retryAs(_QNAME); }
+  {ELSE} {return BAD_CHARACTER; }
+}
+
+<NCNAME_OR_EXPR_LIST_IN_CURLY> {
+  "{" {retryAs(_EXPR_LIST_IN_CURLY); }
+  {NCName} {retryAs(_NCNAME); }
+  {ELSE} {return BAD_CHARACTER; }
+}
+
 <_QNAME> {
   {Prefix} / ":" { yybegin(_QNAME_); return XQ_PREFIX_NAME; }
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 <_STRICT_QNAME> {
   {Prefix} / ":" { yybegin(_QNAME_); return XQ_PREFIX_NAME; }
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 <_QNAME_> {
   ":" {yybegin(_QNAME_LOCAL); return OP_COLON; }
-  [^] { popState(); return BAD_CHARACTER; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_QNAME_LOCAL> {
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
-  [^] { popState(); return BAD_CHARACTER; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 <_WILDCARD_QNAME> {
   "*" / ":" {yybegin(_QNAME_); return OP_STAR; }
   {Prefix} / ":" { yybegin(_WILDCARD_QNAME_); return XQ_PREFIX_NAME; }
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 <_WILDCARD_QNAME_> {
   ":" {yybegin(_WILDCARD_QNAME_LOCAL); return OP_COLON; }
-  [^] { popState(); return BAD_CHARACTER; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 <_WILDCARD_QNAME_LOCAL> {
   "*" {popState(); return OP_STAR; }
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
-  [^] { popState(); return BAD_CHARACTER; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 
 <_NCNAME> {
   {NCName} {popState(); return XQ_NCNAME; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 
 
@@ -1253,45 +1256,39 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <STR_START_QUOTE> {
   "\"\"" { return XQ_STR_ESCAPE_QUOTE; }
   "\"" { popState(); return XQ_STR_END; }
-  [^\"\&] { return XQ_STR_CHAR; }
-  [^] { undo(); pushState(); yybegin(_STR_COMMON_CONTENT); }
+  [^\"\&]+ { return XQ_STR_CHAR; }
+  {ELSE} { pushState(); retryAs(_STR_COMMON_CONTENT); }
 }
 <STR_START_APOS> {
   "''" { return XQ_STR_ESCAPE_APOS; }
   "'" { popState(); return XQ_STR_END; }
-  [^\'\&] { return XQ_STR_CHAR; }
-  [^] { undo(); pushState(); yybegin(_STR_COMMON_CONTENT); }
+  [^\'\&]+ { return XQ_STR_CHAR; }
+  {ELSE} { pushState(); retryAs(_STR_COMMON_CONTENT); }
 }
 <_STR_COMMON_CONTENT> {
   {CharRef} {popState(); return XQ_STR_CHAR_REF; }
   {PredefinedEntityRef} {popState(); return XQ_STR_ENT_REF;}
-  [^] {popState(); return BAD_CHARACTER; }
-}
-<_XML_ATTR_VALUE> {
-  {S} {return WHITE_SPACE; }
-  "\"" { yybegin(_XML_STR_START_QUOTE); return XML_STR_START; }
-  "'" {yybegin(_XML_STR_START_APOS); return XML_STR_START; }
-  [^] {popState(); return BAD_CHARACTER;}
+  {ELSE} {return BAD_CHARACTER; }
 }
 <_XML_STR_START_QUOTE> {
-  "\"\"" { return XML_STR_ESCAPE_QUOTE; }
-  "\"" { popState(); return XML_STR_END; }
-  [^\"\{\}\<\&] { return XML_STR_CHAR; }
-  [^] { undo(); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
+  "\"\"" { return TT_XML_STR_ESCAPE_QUOTE; }
+  "\"" { popState(); return TT_XML_STR_END; }
+  [^\"\{\}\<\&]+ { return TT_XML_STR_CHAR; }
+  {ELSE} { pushState(); retryAs(XML_STR_COMMON_CONTENT); }
 }
 <_XML_STR_START_APOS> {
-  "''" { return XML_STR_ESCAPE_APOS; }
-  "'" { popState(); return XML_STR_END; }
-  [^\'\{\}\<\&] { return XML_STR_CHAR; }
-  [^] { undo(); pushState(); yybegin(_XML_STR_COMMON_CONTENT); }
+  "''" { return TT_XML_STR_ESCAPE_APOS; }
+  "'" { popState(); return TT_XML_STR_END; }
+  [^\'\{\}\<\&]+ { return TT_XML_STR_CHAR; }
+  {ELSE} {  pushState(); retryAs(XML_STR_COMMON_CONTENT); }
 }
-<_XML_STR_COMMON_CONTENT> {
-  {CharRef} {popState(); return XML_STR_CHAR_REF; }
-  {PredefinedEntityRef} {popState(); return XML_STR_ENT_REF; }
+<XML_STR_COMMON_CONTENT> {
+  {CharRef} {popState(); return TT_XML_STR_CHAR_REF; }
+  {PredefinedEntityRef} {popState(); return TT_XML_STR_ENT_REF; }
   "{{" {popState(); return OP_LCURLYCURLY; }
   "}}" {popState(); return OP_RCURLYCURLY; }
   "{" {retryAs(_EXPR_LIST_IN_CURLY); }
-  [^] {popState(); return BAD_CHARACTER; }
+  {ELSE} {return BAD_CHARACTER; }
 }
 
 // ("at" URILiteral ("," URILiteral)*)?
@@ -1317,16 +1314,17 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <XQ_COMMENT> {
   ":)" { popState(); return XQ_COMMENT_END; }
   "(:" { pushState(); return XQ_COMMENT_START; }
-  [^] { return XQ_COMMENT_CHAR; }
+  {ELSE} { return XQ_COMMENT_CHAR; }
 }
 <XML_COMMENT> {
-  "-->" {popState(); return XML_COMMENT_END;}
-  [^\-]|(-[^\-]) {return XML_COMMENT_CHAR; }
-  [^] { return BAD_CHARACTER; }
+  "-->" {popState(); return TT_XML_COMMENT_END;}
+  ([^\-]|(-[^\-]))+ {return TT_XML_COMMENT_CHAR; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 
 <_COMMA> {
   "," {popState(); return OP_COMMA;}
+  {ELSE} {return BAD_CHARACTER; }
 }
 
 <_OPT_WORD_SEP> {

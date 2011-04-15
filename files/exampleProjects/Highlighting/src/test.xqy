@@ -148,6 +148,7 @@ declare variable $var := self::comment()[0];
 
 
 declare variable $xmlComment := <!-- my xml comment-d -->;
+declare variable $xmlComment := <a><![CDATA[ my xml comment-d ]]></a>;
 declare variable $xmlProcessingInstruction := <?name this shows no processing is done here (::) for{2} ?>;
 declare variable $xmlProcessingInstruction :=
     <?xml version="my&#333;hello &#x12abDE; &lt;" encoding="UTF-{
@@ -175,8 +176,9 @@ declare variable $comment := comment{"hello comment"};
 declare variable $pi := processing-instruction hello{"hello comment"};
 declare variable $pi := processing-instruction {"hello"} {"hello comment"};
 
-declare variable $pragma := (#some pragma content #) {};declare variable $pragma := (#some pragma content #) {};
-declare variable $pragma := (#q:name pragma content #)(# more pragma #) {};
+declare variable $pragma := (#some pragma content #) {};
+declare variable $pragma := (#some pragma content #) {};
+declare variable $pragma := (#q:name pragma content #) (# more pragma #) {};
 
 declare variable $expr := "hello" cast as my:type;
 declare variable $expr := "hello" cast as my:type?;

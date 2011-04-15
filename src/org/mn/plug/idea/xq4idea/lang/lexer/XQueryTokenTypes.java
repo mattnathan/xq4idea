@@ -66,30 +66,30 @@ public interface XQueryTokenTypes {
   IElementType XQ_COMMENT_START = new XQueryElementType("(:");
   IElementType XQ_COMMENT_CHAR = new XQueryElementType("XQ_COMMENT_CHAR");
   IElementType XQ_COMMENT_END = new XQueryElementType(":)");
-  IElementType XML_COMMENT_START = new XQueryElementType("<!--");
-  IElementType XML_COMMENT_CHAR = new XQueryElementType("XML_COMMENT_CHAR");
-  IElementType XML_COMMENT_END = new XQueryElementType("-->");
+  IElementType TT_XML_COMMENT_START = new XQueryElementType("<!--");
+  IElementType TT_XML_COMMENT_CHAR = new XQueryElementType("XML_COMMENT_CHAR");
+  IElementType TT_XML_COMMENT_END = new XQueryElementType("-->");
 
   // xml stuff
-  IElementType XML_TAG_START = new XQueryElementType("XML_TAG_START <");
-  IElementType XML_EMPTYTAG_END = new XQueryElementType("XML_EMPTYTAG_END />");
-  IElementType XML_TAG_END = new XQueryElementType("XML_TAG_END >");
-  IElementType XML_CLOSETAG_START = new XQueryElementType("XML_CLOSETAG_START </");
-  IElementType XML_PI_START = new XQueryElementType("<?");
-  IElementType XML_PI_END = new XQueryElementType("?>");
-  IElementType XML_PI_NAME = new XQueryElementType("XML_PI_NAME");
-  IElementType XML_PI_CHAR = new XQueryElementType("XML_PI_CHAR");
-  IElementType XML_STR_START = new XQueryElementType("XML_STR_START");
-  IElementType XML_STR_CHAR = new XQueryElementType("XML_STR_CHAR");
-  IElementType XML_STR_END = new XQueryElementType("XML_STR_END");
-  IElementType XML_STR_ESCAPE_QUOTE = new XQueryElementType("\"\"");
-  IElementType XML_STR_ESCAPE_APOS = new XQueryElementType("''");
-  IElementType XML_STR_CHAR_REF = new XQueryElementType("XML_STR_CHAR_REF");
-  IElementType XML_STR_ENT_REF = new XQueryElementType("XML_STR_ENT_REF");
-  IElementType XML_CDATA_START = new XQueryElementType("<![CDATA[");
-  IElementType XML_CDATA_CHAR = new XQueryElementType("XML_CDATA_CHAR");
-  IElementType XML_CDATA_END = new XQueryElementType("]]>");
-  IElementType XML_ELEMENT_CHAR = new XQueryElementType("XML_ELEMENT_CHAR");
+  IElementType TT_XML_TAG_START = new XQueryElementType("XML_TAG_START <");
+  IElementType TT_XML_EMPTYTAG_END = new XQueryElementType("XML_EMPTYTAG_END />");
+  IElementType TT_XML_TAG_END = new XQueryElementType("XML_TAG_END >");
+  IElementType TT_XML_CLOSETAG_START = new XQueryElementType("XML_CLOSETAG_START </");
+  IElementType TT_XML_PI_START = new XQueryElementType("<?");
+  IElementType TT_XML_PI_END = new XQueryElementType("?>");
+  IElementType TT_XML_PI_NAME = new XQueryElementType("XML_PI_NAME");
+  IElementType TT_XML_PI_CHAR = new XQueryElementType("XML_PI_CHAR");
+  IElementType TT_XML_STR_START = new XQueryElementType("XML_STR_START");
+  IElementType TT_XML_STR_CHAR = new XQueryElementType("XML_STR_CHAR");
+  IElementType TT_XML_STR_END = new XQueryElementType("XML_STR_END");
+  IElementType TT_XML_STR_ESCAPE_QUOTE = new XQueryElementType("\"\"");
+  IElementType TT_XML_STR_ESCAPE_APOS = new XQueryElementType("''");
+  IElementType TT_XML_STR_CHAR_REF = new XQueryElementType("XML_STR_CHAR_REF");
+  IElementType TT_XML_STR_ENT_REF = new XQueryElementType("XML_STR_ENT_REF");
+  IElementType TT_XML_CDATA_START = new XQueryElementType("<![CDATA[");
+  IElementType TT_XML_CDATA_CHAR = new XQueryElementType("XML_CDATA_CHAR");
+  IElementType TT_XML_CDATA_END = new XQueryElementType("]]>");
+  IElementType TT_XML_ELEMENT_CHAR = new XQueryElementType("XML_ELEMENT_CHAR");
 
   // XQuery literals
   IElementType XQ_STR = new XQueryElementType("XQ_STR");
