@@ -3,7 +3,7 @@
 
 xquery version "1.0-ml" encoding "UTF-8";
 
-module namespace lib = "my.module";
+(:module namespace lib = "my.module";:)
 
 import schema namespace lib = "my.module";
 import schema namespace lib = "my.module"
@@ -157,6 +157,7 @@ declare variable $xmlProcessingInstruction :=
 declare variable $xml := <node> </node>;
 declare variable $xml :=
     <my:node attr = "value" code = "{$var}">
+        (: plain text :)
         <node my="{self::text()}">text</node>
         Hello, World
         {"embedded expression"}
@@ -226,6 +227,6 @@ declare variable $xpath := <node/>//me:elem/@attr;
 
 12.2e2234,
 "hello",
-<html>(::)</html>
+<html>(: text :)<!-- comment --></html>
 (: comment :),
 $helloWorld

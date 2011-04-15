@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
  * @author Matt Nathan
  */
 public abstract class AbstractLexer {
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private int initialState = -1;
 
   final IntStack stack = new IntStack();
@@ -26,6 +26,10 @@ public abstract class AbstractLexer {
   abstract int wordSep();
 
   abstract int optWordSep();
+
+  abstract int xmlWordSep();
+
+  abstract int optXmlWordSep();
 
   private int initialStateImpl() {
     return this.initialState == -1 ? initialState() : initialState;
@@ -92,6 +96,80 @@ public abstract class AbstractLexer {
   }
 
   /**
+   * Push a state onto the stack making sure space will appear before it
+   *
+   * @param state The state to end up in
+   */
+  void pushSpaceThen(int state) {
+    pushState(state);
+    pushState(wordSep());
+  }
+
+  /**
+   * Push a state onto the stack that can appear with optional space will before it
+   *
+   * @param state The state to end up in
+   */
+  void pushOptSpaceThen(int state) {
+    pushState(state);
+    pushState(optWordSep());
+  }
+
+  /**
+   * Call this method to setup state ready to accept a non-optional space or comment.
+   *
+   * @param state The state to go to after finding characters that aren't space or comment
+   */
+  void xmlSpaceThen(int state) {
+    pushState(state);
+    yybegin(xmlWordSep());
+  }
+
+  /**
+   * Call this method to setup state ready to accept an optional space or comment.
+   *
+   * @param state The state to go to after finding characters that aren't space or comment
+   */
+  void optXmlSpaceThen(int state) {
+    pushState(state);
+    yybegin(optXmlWordSep());
+  }
+
+  /**
+   * Call this method to setup a repeating loop with possible space between each iteration.
+   */
+  void optXmlSpaceRepeat() {
+    pushOptXmlSpaceThen(yystate());
+  }
+
+  /**
+   * Call this method to setup a repeating loop with guarenteed space between each iteration.
+   */
+  void xmlSpaceRepeat() {
+    pushXmlSpaceThen(yystate());
+  }
+
+  /**
+   * Push a state onto the stack making sure space will appear before it
+   *
+   * @param state The state to end up in
+   */
+  void pushXmlSpaceThen(int state) {
+    pushState(state);
+    pushState(xmlWordSep());
+  }
+
+  /**
+   * Push a state onto the stack that can appear with optional space will before it
+   *
+   * @param state The state to end up in
+   */
+  void pushOptXmlSpaceThen(int state) {
+    pushState(state);
+    pushState(optXmlWordSep());
+  }
+
+  /**
    * Start a list. This is in the form (initialState (repeaterState)*)
    *
    * @param initialState  The initial state
@@ -111,26 +189,6 @@ public abstract class AbstractLexer {
   void pushList(int initialState, int repeaterState) {
     pushOptSpaceThen(repeaterState);
     pushOptSpaceThen(initialState);
-  }
-
-  /**
-   * Push a state onto the stack making sure space will appear before it
-   *
-   * @param state The state to end up in
-   */
-  void pushSpaceThen(int state) {
-    pushState(state);
-    pushState(wordSep());
-  }
-
-  /**
-   * Push a state onto the stack that can appear with optional space will before it
-   *
-   * @param state The state to end up in
-   */
-  void pushOptSpaceThen(int state) {
-    pushState(state);
-    pushState(optWordSep());
   }
 
   /**

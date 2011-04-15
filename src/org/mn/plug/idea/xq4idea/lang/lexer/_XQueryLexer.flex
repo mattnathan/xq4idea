@@ -35,12 +35,20 @@ import com.intellij.psi.tree.IElementType;
   int optWordSep() {
     return _OPT_WORD_SEP;
   }
+  int xmlWordSep() {
+    return _XML_WORD_SEP;
+  }
+  int optXmlWordSep() {
+    return _XML_OPT_WORD_SEP;
+  }
 %}
 
 // utility matchers, generally one word/letter matching
 // comment or space
 %x _WORD_SEP
 %x _OPT_WORD_SEP
+%x _XML_WORD_SEP
+%x _XML_OPT_WORD_SEP
 %x _COMMA
 %x _SEMI
 %x _KW_AS
@@ -60,9 +68,16 @@ import com.intellij.psi.tree.IElementType;
 %x _QNAME
 %x QNAME_OR_EXPR_LIST_IN_CURLY
 %x NCNAME_OR_EXPR_LIST_IN_CURLY
+%x _NCNAME
+%x _QNAME_
+%x _QNAME_LOCAL
+%x _WILDCARD_QNAME
+%x _WILDCARD_QNAME_
+%x _WILDCARD_QNAME_LOCAL
 
 // literals
 %x XQ_COMMENT
+%x XML_COMMENT
 %x STRING_LITERAL
 %x URI_LITERAL
 %x VARNAME
@@ -253,7 +268,6 @@ import com.intellij.psi.tree.IElementType;
 // below here we shouldn't be using anything ---------------------------------------------------------------------------
 
 // these are top level states
-%x XML_COMMENT
 
 // strings
 %x STR_START_QUOTE
@@ -286,13 +300,6 @@ import com.intellij.psi.tree.IElementType;
 %s _COLON
 %s _COLONCOLON
 
-%s _NCNAME
-%x _STRICT_QNAME
-%x _QNAME_
-%x _QNAME_LOCAL
-%s _WILDCARD_QNAME
-%x _WILDCARD_QNAME_
-%x _WILDCARD_QNAME_LOCAL
 
 // whitespace
 S = [\x20\x09\x0D\x0A]+
@@ -987,9 +994,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "unordered" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
 
   // flattened DirectConstructor
-  "<!--" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(XML_COMMENT); return TT_XML_COMMENT_START; }
-  "<?" { pushOptSpaceThen(XML_PI_END); yybegin(XML_PI_NAME); return TT_XML_PI_START; }
-  "<" { pushOptSpaceThen(XML_END_TAG); pushOptSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); yybegin(XML_TAG_NAME); return TT_XML_TAG_START; }
+  "<!--" { pushOptSpaceThen(OPT_PREDICATE_LIST); optXmlSpaceThen(XML_COMMENT); return TT_XML_COMMENT_START; }
+  "<?" { pushOptXmlSpaceThen(XML_PI_END); yybegin(XML_PI_NAME); return TT_XML_PI_START; }
+  "<" { pushOptXmlSpaceThen(XML_END_TAG); pushOptXmlSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); yybegin(XML_TAG_NAME); return TT_XML_TAG_START; }
 
   // flattened ComputedConstructor
   "document" {pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_DOCUMENT;}
@@ -1045,8 +1052,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // xml processing instructions: <?name hjhdgdhjd ?>
 <XML_PI_NAME> {
-  "xml" {spaceThen(XML_ATTRIBUTE_EQUALS_VALUE); return TT_XML_PI_NAME;}
-  {XmlName} {optSpaceThen(XML_PI_CONTENT); return TT_XML_PI_NAME;}
+  "xml" {xmlSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); return TT_XML_PI_NAME;}
+  {XmlName} {optXmlSpaceThen(XML_PI_CONTENT); return TT_XML_PI_NAME;}
 }
 <XML_PI_CONTENT, XML_PI_NAME> "?>" { retry(); }
 <XML_PI_NAME> {ELSE} {return BAD_CHARACTER;}
@@ -1057,7 +1064,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 
 // xml attribute list
 <XML_ATTRIBUTE_EQUALS_VALUE> {
-  {QName} {optSpaceRepeat(); pushOptSpaceThen(XML_ATTR_VALUE); pushOptSpaceThen(_EQUALS); retryAs(_QNAME); }
+  {QName} { optXmlSpaceRepeat(); pushOptXmlSpaceThen(XML_ATTR_VALUE); pushOptXmlSpaceThen(_EQUALS); retryAs(_QNAME); }
   {ELSE} { retry(); }
 }
 <XML_TAG_NAME> {
@@ -1065,25 +1072,25 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { return BAD_CHARACTER; }
 }
 <XML_END_TAG> {
-  "/>" {popState(); return TT_XML_EMPTYTAG_END; }
-  ">" {pushOptSpaceThen(XML_START_CLOSE_TAG); optSpaceThen(XML_ELEMENT_CONTENT); return TT_XML_TAG_END; }
+  "/>" { popState(); return TT_XML_EMPTYTAG_END; }
+  ">" {pushOptXmlSpaceThen(XML_START_CLOSE_TAG); optXmlSpaceThen(XML_ELEMENT_CONTENT); return TT_XML_TAG_END; }
   {ELSE} {return BAD_CHARACTER;}
 }
 <XML_START_CLOSE_TAG> {
-  "</" { pushOptSpaceThen(_CLOSE_TAG); yybegin(_QNAME); return TT_XML_CLOSETAG_START; }
+  "</" { pushOptXmlSpaceThen(_CLOSE_TAG); yybegin(_QNAME); return TT_XML_CLOSETAG_START; }
   {ELSE} {return BAD_CHARACTER;}
 }
 <XML_ELEMENT_CONTENT> {
   // note, wherever this is used it always repeats
   // flattened DirElemConstructor
-  "<!--" { optSpaceRepeat(); yybegin(XML_COMMENT); return TT_XML_COMMENT_START; }
-  "<?" { optSpaceRepeat(); pushState(XML_PI_END); yybegin(XML_PI_NAME); return TT_XML_PI_START; }
-  "<![CDATA[" { optSpaceRepeat(); yybegin(XML_CDATA_CONTENT); return TT_XML_CDATA_START; }
+  "<!--" { optXmlSpaceRepeat(); yybegin(XML_COMMENT); return TT_XML_COMMENT_START; }
+  "<?" { optXmlSpaceRepeat(); pushState(XML_PI_END); yybegin(XML_PI_NAME); return TT_XML_PI_START; }
+  "<![CDATA[" { optXmlSpaceRepeat(); yybegin(XML_CDATA_CONTENT); return TT_XML_CDATA_START; }
   // this is used to escape to the outer element
   "</" { retry(); }
-  "<" { optSpaceRepeat(); pushOptSpaceThen(XML_END_TAG); pushOptSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); yybegin(XML_TAG_NAME); return TT_XML_TAG_START; }
+  "<" { optXmlSpaceRepeat(); pushOptXmlSpaceThen(XML_END_TAG); pushOptXmlSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); yybegin(XML_TAG_NAME); return TT_XML_TAG_START; }
   [^\{\}\<\&]+ { return TT_XML_ELEMENT_CHAR; }
-  {ELSE} {optSpaceRepeat(); retryAs(XML_STR_COMMON_CONTENT);}
+  {ELSE} {optXmlSpaceRepeat(); retryAs(XML_STR_COMMON_CONTENT);}
 }
 <XML_CDATA_CONTENT> {
   [^\]]|("]"[^\]])|("]]"[^\>]) {return TT_XML_CDATA_CHAR;}
@@ -1212,11 +1219,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {LocalPart} {popState(); return XQ_LOCAL_NAME; }
   {ELSE} {return BAD_CHARACTER; }
 }
-<_STRICT_QNAME> {
-  {Prefix} / ":" { yybegin(_QNAME_); return XQ_PREFIX_NAME; }
-  {LocalPart} {popState(); return XQ_LOCAL_NAME; }
-  {ELSE} {return BAD_CHARACTER; }
-}
 <_QNAME_> {
   ":" {yybegin(_QNAME_LOCAL); return OP_COLON; }
   {ELSE} { return BAD_CHARACTER; }
@@ -1335,6 +1337,15 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <_WORD_SEP> {
   "(:" { pushState(_OPT_WORD_SEP); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
   {S} { yybegin(_OPT_WORD_SEP); return WHITE_SPACE; }
+  {ELSE} { popState(); return BAD_CHARACTER; }
+}
+
+<_XML_OPT_WORD_SEP> {
+  {S} { return WHITE_SPACE; }
+  {ELSE} { retry(); }
+}
+<_XML_WORD_SEP> {
+  {S} { yybegin(_XML_OPT_WORD_SEP); return WHITE_SPACE; }
   {ELSE} { popState(); return BAD_CHARACTER; }
 }
 
