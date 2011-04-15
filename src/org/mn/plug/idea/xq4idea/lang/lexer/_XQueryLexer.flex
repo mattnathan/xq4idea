@@ -281,8 +281,6 @@ import com.intellij.psi.tree.IElementType;
 
 // other expressions
 %s _FILTER_EXPR
-%x _RELATIVE_PATH_EXPR
-%x _RELATIVE_PATH_EXPR_
 
 
 
@@ -944,6 +942,8 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
     retryAs(PRAGMA);
   }
   // path expr
+  "/" {optSpaceThen(STEP_EXPR); return OP_SLASH;}
+  "//" {optSpaceThen(STEP_EXPR); return OP_SLASHSLASH;}
   {ELSE} { retryAs(STEP_EXPR); }
 }
 
@@ -964,16 +964,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {S} { return WHITE_SPACE; }
   [^#]|("#"[^)]) {return XQ_PRAGMA_CHAR; }
   "#)" {popState(); return XQ_PRAGMA_END; }
-}
-
-<_RELATIVE_PATH_EXPR> {
-  [^] {undo(); pushState(_RELATIVE_PATH_EXPR_); yybegin(STEP_EXPR); }
-}
-<_RELATIVE_PATH_EXPR_> {
-  "/" {pushState(); yybegin(STEP_EXPR); return OP_SLASH;}
-  "//" {pushState(); yybegin(STEP_EXPR); return OP_SLASHSLASH;}
-
-  {ELSE} { retry(); }
 }
 <STEP_EXPR> {
   // flattened Literals
@@ -1050,7 +1040,15 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <STEP_EXPR> {ELSE} { retry(); }
 
 
-// xml processing instructions: <?name hjhdgdhjd ?>
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+// Expressions
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+// xml processing instructions: <?name some text ?>
 <XML_PI_NAME> {
   "xml" {xmlSpaceThen(XML_ATTRIBUTE_EQUALS_VALUE); return TT_XML_PI_NAME;}
   {XmlName} {optXmlSpaceThen(XML_PI_CONTENT); return TT_XML_PI_NAME;}

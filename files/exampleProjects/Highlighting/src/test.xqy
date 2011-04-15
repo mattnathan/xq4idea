@@ -223,6 +223,7 @@ declare variable $expr := "hello" or "him";
 declare variable $expr := "hello" or "him" and "me" eq 3 to 8 + 7 - 1 * 2 union "hello" except "" cast as type;
 
 declare variable $attr := @myAttr;
+declare variable $attr := //@myAttr;
 declare variable $xpath := <node/>//me:elem/@attr;
 
 12.2e2234,
