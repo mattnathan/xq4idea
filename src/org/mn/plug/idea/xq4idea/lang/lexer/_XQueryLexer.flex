@@ -392,9 +392,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 //<MODULE, MAIN_MODULE, LIBRARY_MODULE> {
 //  "(:" { yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
 //}
-<MAIN_MODULE> {ELSE} { /*setInitialState(QUERY_BODY);*/ undo(); startList(EXPR_SINGLE, EXPR_REPEATER); }
+<MAIN_MODULE> {ELSE} { setInitialState(QUERY_BODY); undo(); startList(EXPR_SINGLE, EXPR_REPEATER); }
 <LIBRARY_MODULE> {ELSE} { return BAD_CHARACTER; }
-//<QUERY_BODY> {ELSE} { return BAD_CHARACTER; }
+<QUERY_BODY> {ELSE} { return BAD_CHARACTER; }
 
 // xquery version "" (encoding "")? ;
 <VERSION_DECL_VERSION> {
