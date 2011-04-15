@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
  * @author Matt Nathan
  */
 public abstract class AbstractLexer {
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private int initialState = -1;
 
   final IntStack stack = new IntStack();

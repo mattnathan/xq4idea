@@ -4,7 +4,7 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
 // this lexer follows the principles set out in http://www.w3.org/TR/xquery-xpath-parsing/
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "FieldCanBeLocal", "AccessStaticViaInstance", "JavaDoc", "ConstantConditions"})
+@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "FieldCanBeLocal", "AccessStaticViaInstance", "JavaDoc", "ConstantConditions","UnnecessarySemicolon"})
 /**
  * Generated lexer
  */
@@ -240,6 +240,7 @@ import com.intellij.psi.tree.IElementType;
 %x VALUE_EXPR
 %x VALIDATE_EXPR
 
+%x RELATIVE_PATH_EXPR
 %x STEP_EXPR
 %x NODE_TEST
 %x OPT_PREDICATE_LIST
@@ -942,9 +943,14 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
     retryAs(PRAGMA);
   }
   // path expr
-  "/" {optSpaceThen(STEP_EXPR); return OP_SLASH;}
-  "//" {optSpaceThen(STEP_EXPR); return OP_SLASHSLASH;}
-  {ELSE} { retryAs(STEP_EXPR); }
+  "/" {startList(STEP_EXPR, RELATIVE_PATH_EXPR); return OP_SLASH;}
+  "//" {startList(STEP_EXPR, RELATIVE_PATH_EXPR); return OP_SLASHSLASH;}
+  {ELSE} { undo(); startList(STEP_EXPR, RELATIVE_PATH_EXPR); }
+}
+<RELATIVE_PATH_EXPR> {
+  "/" {optSpaceRepeat(); optSpaceThen(STEP_EXPR); return OP_SLASH;}
+  "//" {optSpaceRepeat(); optSpaceThen(STEP_EXPR); return OP_SLASHSLASH;}
+  {ELSE} { retry(); }
 }
 
 <VALIDATE_EXPR> {
@@ -1011,7 +1017,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "ancestor-or-self" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT_OR_SELF;}
 
   // flattened FunctionCall
-  {QName} { pushOptSpaceThen(OPT_PREDICATE_LIST);  pushOptSpaceThen(_OPT_EXPR_LIST_IN_BRACE); retryAs(_QNAME); }
+  {QName}/({S})?"(" { pushOptSpaceThen(OPT_PREDICATE_LIST);  pushOptSpaceThen(_OPT_EXPR_LIST_IN_BRACE); retryAs(_QNAME); }
   // the @ is optional so we need to test here for the rest
   "@" { pushOptSpaceThen(OPT_PREDICATE_LIST); yybegin(NODE_TEST); return OP_AT;}
 }

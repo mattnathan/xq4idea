@@ -1,10 +1,1 @@
-<node>
-    {
-        let $var := ""
-        return $var
-    }
-</node>
-
-
-
-
+<node attr="val"/>/./@attr
