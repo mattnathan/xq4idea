@@ -221,9 +221,8 @@ import com.intellij.psi.tree.IElementType;
 %x VALUE_EXPR
 %x VALIDATE_EXPR
 
-%x _STEP_EXPR
+%x STEP_EXPR
 %x NODE_TEST
-%x OPT_NODE_TEST
 %x OPT_PREDICATE_LIST
 
 
@@ -654,11 +653,11 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { retry(); }
 }
 <QUANTIFIED_EXPR_IN> {
-  "in" {pushState(QUANTIFIED_EXPR_SATISFIES); yybegin(EXPR_SINGLE); return KW_IN;}
+  "in" {pushState(QUANTIFIED_EXPR_SATISFIES); optSpaceThen(EXPR_SINGLE); return KW_IN;}
   {ELSE} { return BAD_CHARACTER; }
 }
 <QUANTIFIED_EXPR_SATISFIES> {
-  "satisfies" {yybegin(EXPR_SINGLE); return KW_SATISFIES; }
+  "satisfies" {optSpaceThen(EXPR_SINGLE); return KW_SATISFIES; }
   {ELSE} { return BAD_CHARACTER; }
 }
 
@@ -703,7 +702,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { retryAs(FLWOR_EXPR_RETURN); }
 }
 <FLWOR_EXPR_RETURN> {
-  "return" {yybegin(EXPR_SINGLE); return KW_RETURN;}
+  "return" {optSpaceThen(EXPR_SINGLE); return KW_RETURN;}
   {ELSE} { return BAD_CHARACTER; }
 }
 
@@ -799,7 +798,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { retry(); }
 }
 <OPT_EMPTY_THEN_GREATEST_OR_LEAST> {
-  "empty" { yybegin(GREATEST_OR_LEAST); return KW_EMPTY; }
+  "empty" { optSpaceThen(GREATEST_OR_LEAST); return KW_EMPTY; }
   {ELSE} { retry(); }
 }
 <GREATEST_OR_LEAST> {
@@ -867,13 +866,13 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "<=" { optSpaceThen(_RANGE_EXPR); return OP_LE; }
   ">" { optSpaceThen(_RANGE_EXPR); return OP_GT; }
   ">=" { optSpaceThen(_RANGE_EXPR); return OP_GE; }
-  "eq" / {WordSep} { optSpaceThen(_RANGE_EXPR); return OP_KW_EQ; }
-  "ne" / {WordSep} { optSpaceThen(_RANGE_EXPR); return OP_KW_NE; }
-  "lt" / {WordSep} { optSpaceThen(_RANGE_EXPR); return OP_KW_LT; }
-  "le" / {WordSep} { optSpaceThen(_RANGE_EXPR); return OP_KW_LE; }
-  "gt" / {WordSep} { optSpaceThen(_RANGE_EXPR); return OP_KW_GT; }
-  "ge" / {WordSep} { optSpaceThen(_RANGE_EXPR); return OP_KW_GE; }
-  "is" / {WordSep} { optSpaceThen(_RANGE_EXPR); return OP_KW_IS; }
+  "eq" { optSpaceThen(_RANGE_EXPR); return OP_KW_EQ; }
+  "ne" { optSpaceThen(_RANGE_EXPR); return OP_KW_NE; }
+  "lt" { optSpaceThen(_RANGE_EXPR); return OP_KW_LT; }
+  "le" { optSpaceThen(_RANGE_EXPR); return OP_KW_LE; }
+  "gt" { optSpaceThen(_RANGE_EXPR); return OP_KW_GT; }
+  "ge" { optSpaceThen(_RANGE_EXPR); return OP_KW_GE; }
+  "is" { optSpaceThen(_RANGE_EXPR); return OP_KW_IS; }
   "<<" { optSpaceThen(_RANGE_EXPR); return OP_LTLT; }
   ">>" { optSpaceThen(_RANGE_EXPR); return OP_GTGT; }
 
@@ -938,7 +937,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
     return XQ_PRAGMA_START;
   }
   // path expr
-  {ELSE} { retryAs(_STEP_EXPR); }
+  {ELSE} { retryAs(STEP_EXPR); }
   
 }
 
@@ -966,67 +965,66 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 <_RELATIVE_PATH_EXPR> {
-  [^] {undo(); pushState(_RELATIVE_PATH_EXPR_); yybegin(_STEP_EXPR); }
+  [^] {undo(); pushState(_RELATIVE_PATH_EXPR_); yybegin(STEP_EXPR); }
 }
 <_RELATIVE_PATH_EXPR_> {
-  "/" {pushState(); yybegin(_STEP_EXPR); return OP_SLASH;}
-  "//" {pushState(); yybegin(_STEP_EXPR); return OP_SLASHSLASH;}
+  "/" {pushState(); yybegin(STEP_EXPR); return OP_SLASH;}
+  "//" {pushState(); yybegin(STEP_EXPR); return OP_SLASHSLASH;}
 
   {ELSE} { retry(); }
 }
-<_STEP_EXPR> {
+<STEP_EXPR> {
   // flattened Literals
-  "\"" { pushState(OPT_PREDICATE_LIST); retryAs(STRING_LITERAL); }
-  "'" { pushState(OPT_PREDICATE_LIST); retryAs(STRING_LITERAL); }
+  "\"" { pushOptSpaceThen(OPT_PREDICATE_LIST); retryAs(STRING_LITERAL); }
+  "'" { pushOptSpaceThen(OPT_PREDICATE_LIST); retryAs(STRING_LITERAL); }
   {DoubleLiteral} { optSpaceThen(OPT_PREDICATE_LIST); return XQ_DOUBLE_LITERAL; }
   {DecimalLiteral} { optSpaceThen(OPT_PREDICATE_LIST); return XQ_DECIMAL_LITERAL; }
   {IntegerLiteral} { optSpaceThen(OPT_PREDICATE_LIST); return XQ_INTEGER_LITERAL; }
   // flattened VarRef
-  "$" { pushState(OPT_PREDICATE_LIST); retryAs(VARNAME); }
+  "$" { pushOptSpaceThen(OPT_PREDICATE_LIST); retryAs(VARNAME); }
   // flattened ParenthesizedExpr
-  "(" { pushState(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
+  "(" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_OR_RBRACE); return OP_LBRACE;}
   ".." { optSpaceThen(OPT_PREDICATE_LIST); return OP_DOTDOT;}
   // flattened ContextItemExpr
   "." { optSpaceThen(OPT_PREDICATE_LIST);  return OP_DOT; }
   // flattened Ordered and Unordered Expressions
-  "ordered" { pushState(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
-  "unordered" { pushState(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
+  "ordered" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_ORDERED; }
+  "unordered" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_UNORDERED; }
 
   // flattened DirectConstructor
-  "<!--" { pushState(OPT_PREDICATE_LIST); optSpaceThen(XML_COMMENT); return XML_COMMENT_START; }
-  "<?" { pushState(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
-  "<" { pushState(_XML_END_TAG); pushState(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
+  "<!--" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(XML_COMMENT); return XML_COMMENT_START; }
+  "<?" { pushOptSpaceThen(_XML_PI_END); yybegin(_XML_PI_NAME); return XML_PI_START; }
+  "<" { pushOptSpaceThen(_XML_END_TAG); pushOptSpaceThen(_XML_ATTRLIST_START); yybegin(_XML_TAG_NAME); return XML_TAG_START; }
 
   // flattened ComputedConstructor
-  "document" {pushState(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_DOCUMENT;}
-  "element" {pushState(OPT_PREDICATE_LIST); pushState(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_QNAME); return KW_ELEMENT;}
-  "attribute" {pushState(OPT_PREDICATE_LIST); pushState(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_QNAME); return KW_ATTRIBUTE;}
-  "text" {pushState(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_TEXT;}
-  "comment" {pushState(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_COMMENT;}
-  "processing-instruction" {pushState(OPT_PREDICATE_LIST); pushState(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_NCNAME); return KW_PROCESSING_INSTRUCTION;}
+  "document" {pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_DOCUMENT;}
+  "element" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_QNAME); return KW_ELEMENT;}
+  "attribute" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_QNAME); return KW_ATTRIBUTE;}
+  "text" {pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_TEXT;}
+  "comment" {pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EXPR_LIST_IN_CURLY); return KW_COMMENT;}
+  "processing-instruction" {pushOptSpaceThen(OPT_PREDICATE_LIST); pushOptSpaceThen(_OPT_EXPR_LIST_IN_CURLY); optSpaceThen(_EL_IN_CURLY_OR_NCNAME); return KW_PROCESSING_INSTRUCTION;}
 
   // flattened AxisStep
-  "child" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_CHILD;}
-  "descendant" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT;}
-  "attribute" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_ATTRIBUTE;}
-  "self" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_SELF;}
-  "descendant-or-self" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT_OR_SELF;}
-  "following-sibling" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_FOLLOWING_SIBLING;}
-  "following" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_FOLLOWING;}
-  "parent" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_CHILD;}
-  "ancestor" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT;}
-  "preceeding-sibling" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_ATTRIBUTE;}
-  "preceeding" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_SELF;}
-  "ancestor-or-self" { pushState(OPT_PREDICATE_LIST); pushState(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT_OR_SELF;}
+  "child" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_CHILD;}
+  "descendant" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT;}
+  "attribute" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_ATTRIBUTE;}
+  "self" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_SELF;}
+  "descendant-or-self" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT_OR_SELF;}
+  "following-sibling" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_FOLLOWING_SIBLING;}
+  "following" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_FOLLOWING;}
+  "parent" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_CHILD;}
+  "ancestor" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT;}
+  "preceeding-sibling" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_ATTRIBUTE;}
+  "preceeding" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_SELF;}
+  "ancestor-or-self" { pushOptSpaceThen(NODE_TEST); optSpaceThen(_COLONCOLON); return KW_DESCENDANT_OR_SELF;}
 
   // flattened FunctionCall
-  {QName} { pushState(OPT_PREDICATE_LIST);  undo(); pushState(_OPT_EXPR_LIST_IN_BRACE); yybegin(_QNAME); }
+  {QName} { pushOptSpaceThen(OPT_PREDICATE_LIST);  pushOptSpaceThen(_OPT_EXPR_LIST_IN_BRACE); retryAs(_QNAME); }
   // the @ is optional so we need to test here for the rest
-  "@" { pushState(OPT_PREDICATE_LIST); yybegin(NODE_TEST); return OP_AT;}
-  {ELSE} {pushState(OPT_PREDICATE_LIST); retryAs(OPT_NODE_TEST);}
+  "@" { pushOptSpaceThen(OPT_PREDICATE_LIST); yybegin(NODE_TEST); return OP_AT;}
 }
 <OPT_PREDICATE_LIST> {
-  "[" {pushState(OPT_PREDICATE_LIST); pushState(_CLOSE_SQUARE); startList(EXPR_SINGLE, EXPR_REPEATER); return OP_LSQUARE; }
+  "[" {optSpaceRepeat(); pushOptSpaceThen(_CLOSE_SQUARE); startList(EXPR_SINGLE, EXPR_REPEATER); return OP_LSQUARE; }
   {ELSE} { retry(); }
 }
 
@@ -1040,27 +1038,28 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {NCName} {retryAs(_NCNAME); }
 }
 
-<NODE_TEST, OPT_NODE_TEST> {
-  "*" {popState(); return OP_STAR;}
-  "void" {yybegin(_EMPTY_BRACES); return KW_VOID;}
-  "item" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_ITEM;}
-  "node" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_NODE;}
-  "text" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_TEXT;}
-  "comment" {pushState(OPT_OCCURANCE_INDICATOR); yybegin(_EMPTY_BRACES); return KW_COMMENT;}
-  "document-node" {pushState(OPT_OCCURANCE_INDICATOR); pushState(DOCUMENT_TEST); yybegin(_LBRACE); return KW_DOCUMENT_NODE;}
-  "processing-instruction" {pushState(OPT_OCCURANCE_INDICATOR); pushState(OPT_STR_OR_NCNAME); yybegin(_LBRACE); return KW_PROCESSING_INSTRUCTION;}
-  "attribute" {pushState(OPT_OCCURANCE_INDICATOR); pushState(ATTRIBUTE_TEST); yybegin(_LBRACE); return KW_ATTRIBUTE;}
-  "schema-attribute" {pushState(OPT_OCCURANCE_INDICATOR); pushState(_RBRACE); pushState(_QNAME); yybegin(_LBRACE);  return KW_SCHEMA_ATTRIBUTE;}
-  "element" {pushState(OPT_OCCURANCE_INDICATOR); pushState(ATTRIBUTE_TEST); yybegin(_LBRACE); return KW_ELEMENT;}
-  "schema-element" {pushState(OPT_OCCURANCE_INDICATOR); pushState(_RBRACE); pushState(_QNAME); yybegin(_LBRACE); return KW_SCHEMA_ELEMENT;}
-  {WildcardQName} {retryAs(_WILDCARD_QNAME); }
+<NODE_TEST, STEP_EXPR> {
+  "*" {pushOptSpaceThen(OPT_PREDICATE_LIST); popState(); return OP_STAR;}
+//  "void" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EMPTY_BRACES); return KW_VOID;}
+
+  "document-node" { pushOptSpaceThen(OPT_PREDICATE_LIST); surround(_LBRACE, DOCUMENT_TEST, _RBRACE); return KW_DOCUMENT_NODE;}
+  "element" { pushOptSpaceThen(OPT_PREDICATE_LIST); surround(_LBRACE, ELEMENT_TEST, _RBRACE); return KW_ELEMENT;}
+  "attribute" { pushOptSpaceThen(OPT_PREDICATE_LIST); surround(_LBRACE, ATTRIBUTE_TEST, _RBRACE); return KW_ATTRIBUTE;}
+  "schema-element" { pushOptSpaceThen(OPT_PREDICATE_LIST); surround(_LBRACE, _QNAME, _RBRACE); return KW_SCHEMA_ELEMENT;}
+  "schema-attribute" { pushOptSpaceThen(OPT_PREDICATE_LIST); surround(_LBRACE, _QNAME, _RBRACE); return KW_SCHEMA_ATTRIBUTE;}
+  "processing-instruction" { pushOptSpaceThen(OPT_PREDICATE_LIST); surround(_LBRACE, OPT_STR_OR_NCNAME, _RBRACE); return KW_PROCESSING_INSTRUCTION;}
+  "comment" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EMPTY_BRACES); return KW_COMMENT;}
+  "text" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EMPTY_BRACES); return KW_TEXT;}
+  "node" { pushOptSpaceThen(OPT_PREDICATE_LIST); optSpaceThen(_EMPTY_BRACES); return KW_NODE;}
+
+  {WildcardQName} { pushOptSpaceThen(OPT_PREDICATE_LIST); retryAs(_WILDCARD_QNAME); }
 }
 <NODE_TEST> {ELSE} { return BAD_CHARACTER; }
-<OPT_NODE_TEST> {ELSE} { retry(); }
+<STEP_EXPR> {ELSE} { retry(); }
 
 <_XML_PI_NAME> {
-  "xml" {yybegin(_XML_ATTRLIST_START); return XML_PI_NAME;}
-  {XmlName} {yybegin(_XML_PI_CONTENT); return XML_PI_NAME;}
+  "xml" {optSpaceThen(_XML_ATTRLIST_START); return XML_PI_NAME;}
+  {XmlName} {optSpaceThen(_XML_PI_CONTENT); return XML_PI_NAME;}
   [^] {return BAD_CHARACTER;}
 }
 <_XML_PI_CONTENT, _XML_PI_NAME> "?>" { retry(); }

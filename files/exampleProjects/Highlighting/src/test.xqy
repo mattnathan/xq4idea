@@ -95,7 +95,7 @@ declare variable $var as attribute(hello) external ;
 declare variable $var as attribute(hello:local) external ;
 declare variable $var as attribute(*) external ;
 declare variable $var as attribute(hello, prefix) external ;
-declare variable $var as attribute(hello, prefix:local?) external ;
+declare variable $var as attribute(hello, prefix:local) external ;
 
 declare variable $var as schema-attribute(hello) external ;
 declare variable $var as schema-attribute(hello:local) external ;
@@ -143,7 +143,7 @@ declare variable $var := ..;
 declare variable $var := ("hello");
 
 declare variable $var := $local:dun;
-declare variable $var := child::void();
+declare variable $var := child::node();
 declare variable $var := self::comment()[0];
 
 

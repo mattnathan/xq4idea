@@ -9,7 +9,7 @@ declare variable $var :=
 ;
 declare variable $var :=
     let $var as empty-sequence() := ""
-    let $var at $var := ""
+    let $var as var := ""
     let $var := "", $var2 := ""
     return ""
 ;
