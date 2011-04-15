@@ -157,6 +157,9 @@ import com.intellij.psi.tree.IElementType;
 // ("," TypeName "?"? )?
 %x OPT_COMMA_THEN_QNAME_THEN_OPT_QUESTION
 %x DOCUMENT_TEST
+%x PARAM_LIST_OR_RBRACE
+%x PARAM_LIST_REPEATER
+%x EXPR_LIST_OR_EXTERNAL
 
 
 // Expression states
@@ -433,6 +436,13 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "construction" {spaceThen(PRESERVE_OR_STRIP); return KW_CONSTRUCTION; }
   "default" {spaceThen(DECLARE_DEFAULT_X); return KW_DEFAULT; }
   "variable" { pushOptSpaceThen(ASSIGN_OR_EXTERNAL); spaceThen(VARNAME_THEN_OPT_TYPE_DECL); return KW_VARIABLE; }
+  "function" {
+    pushOptSpaceThen(EXPR_LIST_OR_EXTERNAL);
+    pushOptSpaceThen(OPT_AS_THEN_SEQUENCE_TYPE);
+    pushOptSpaceThen(PARAM_LIST_OR_RBRACE);
+    pushOptSpaceThen(_LBRACE);
+    spaceThen(_QNAME);
+    return KW_VARIABLE; }
 }
 
 // "namespace" NCName "=" UriLiteral
@@ -498,6 +508,22 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 <ASSIGN_OR_EXTERNAL> {
   ":=" { optSpaceThen(EXPR_SINGLE); return OP_ASSIGN;}
   "external" {popState(); return KW_EXTERNAL;}
+  {ELSE} { return BAD_CHARACTER; }
+}
+
+<PARAM_LIST_OR_RBRACE> {
+  ")" { popState(); return OP_RBRACE; }
+  {ELSE} { pushOptSpaceThen(PARAM_LIST_REPEATER); retryAs(VARNAME_THEN_OPT_TYPE_DECL); }
+}
+<PARAM_LIST_REPEATER> {
+  "," { optSpaceRepeat(); optSpaceThen(VARNAME_THEN_OPT_TYPE_DECL); }
+  ")" { popState(); return OP_RBRACE; }
+  {ELSE} { retry(); }
+}
+// ("external" | "{" Expr "}")
+<EXPR_LIST_OR_EXTERNAL> {
+  "external" { popState(); return KW_EXTERNAL; }
+  "{" { retryAs(_EXPR_LIST_IN_CURLY); }
   {ELSE} { return BAD_CHARACTER; }
 }
 

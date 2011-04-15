@@ -226,6 +226,11 @@ declare variable $attr := @myAttr;
 declare variable $attr := //@myAttr;
 declare variable $xpath := <node/>//me:elem/@attr;
 
+declare function local:func() {
+    let $var := ""
+    return $var
+};
+
 12.2e2234,
 "hello",
 <html>(: text :)<!-- comment --></html>
