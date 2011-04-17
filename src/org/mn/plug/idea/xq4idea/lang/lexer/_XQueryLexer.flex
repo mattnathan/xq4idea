@@ -59,6 +59,8 @@ import com.intellij.psi.tree.IElementType;
 %x _LBRACE
 %x _LCURLY
 %x _RCURLY
+%x _RSQUARE
+%x _CLOSE_TAG
 %x _EXPR_LIST_IN_CURLY
 %x _EXPR_LIST_IN_BRACE
 %x _OPT_EXPR_LIST_IN_BRACE
@@ -74,11 +76,16 @@ import com.intellij.psi.tree.IElementType;
 %x _WILDCARD_QNAME
 %x _WILDCARD_QNAME_
 %x _WILDCARD_QNAME_LOCAL
+%x _OPT_QUESTION
+%x _COLONCOLON
 
 // literals
 %x XQ_COMMENT
 %x XML_COMMENT
 %x STRING_LITERAL
+%x STR_START_QUOTE
+%x STR_START_APOS
+%x _STR_COMMON_CONTENT
 %x URI_LITERAL
 %x VARNAME
 %x OPT_VARNAME
@@ -266,41 +273,6 @@ import com.intellij.psi.tree.IElementType;
 %x XML_STR_COMMON_CONTENT
 %x _XML_STR_START_QUOTE
 %x _XML_STR_START_APOS
-
-
-
-// below here we shouldn't be using anything ---------------------------------------------------------------------------
-
-// these are top level states
-
-// strings
-%x STR_START_QUOTE
-%x STR_START_APOS
-%x _STR_COMMON_CONTENT
-
-
-// Expression states
-
-
-
-// other expressions
-%s _FILTER_EXPR
-
-
-
-
-// FLWOR states
-// allows for or let repeating,
-
-
-%s _OPEN_SQUARE
-%s _CLOSE_SQUARE
-%x _CLOSE_TAG
-
-%x _OPT_QUESTION
-%s _STAR
-%s _COLON
-%s _COLONCOLON
 
 
 // whitespace
@@ -985,9 +957,6 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "{" { retryAs(_EXPR_LIST_IN_CURLY); }
   {ELSE} { return BAD_CHARACTER; }
 }
-<_FILTER_EXPR> {
-  "~" {}
-}
 <PRAGMA> {
   "(#" { optSpaceRepeat(); pushState(PRAGMA_CONTENT); optSpaceThen(_QNAME); return XQ_PRAGMA_START; }
   {ELSE} { retry(); }
@@ -1048,7 +1017,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   "@" { pushOptSpaceThen(OPT_PREDICATE_LIST); yybegin(NODE_TEST); return OP_AT;}
 }
 <OPT_PREDICATE_LIST> {
-  "[" {optSpaceRepeat(); pushOptSpaceThen(_CLOSE_SQUARE); startList(EXPR_SINGLE, EXPR_REPEATER); return OP_LSQUARE; }
+  "[" {optSpaceRepeat(); pushOptSpaceThen(_RSQUARE); startList(EXPR_SINGLE, EXPR_REPEATER); return OP_LSQUARE; }
   {ELSE} { retry(); }
 }
 
@@ -1133,14 +1102,9 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 // common formats
-<_STAR> {
-  "*" {popState(); return OP_STAR; }
-}
-<_COLON> {
-  ":" {popState(); return OP_COLON; }
-}
 <_COLONCOLON> {
   "::" {popState(); return OP_COLONCOLON; }
+  {ELSE} { return BAD_CHARACTER; }
 }
 <_EQUALS> {
   "=" {popState(); return OP_EQUALS; }
@@ -1212,7 +1176,7 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
 }
 
 
-<_CLOSE_SQUARE> {
+<_RSQUARE> {
   "]" {popState(); return OP_RSQUARE; }
   {ELSE} { return BAD_CHARACTER; }
 }
@@ -1379,8 +1343,5 @@ SimpleName = ({Letter} | "_" ) ({SimpleNameChar})*
   {ELSE} { popState(); return BAD_CHARACTER; }
 }
 
-// todo: get rid of these after migrating all states to be explicit
-"(:" { pushState(); yybegin(XQ_COMMENT); return XQ_COMMENT_START; }
-{S} { return WHITE_SPACE; }
-[:letter:]+ { return BAD_WORD; }
-{ELSE} { return BAD_CHARACTER2; }
+// This should never be picked up but we leave it here just in case
+[^] { return BAD_CHARACTER2; }
