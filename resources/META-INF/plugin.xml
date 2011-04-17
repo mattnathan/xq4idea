@@ -25,5 +25,7 @@
 
     <lang.parserDefinition language="XQuery"
                            implementationClass="org.mn.plug.idea.xq4idea.lang.parser.XQueryParserDefinition"/>
+    <lang.commenter language="XQuery"
+                    implementationClass="org.mn.plug.idea.xq4idea.highlight.XQueryCommenter"/>
   </extensions>
 </idea-plugin>
