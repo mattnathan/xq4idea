@@ -1,29 +1,29 @@
 <idea-plugin version="2">
-    <name>xq4idea</name>
-    <description>XQuery plugin for IDEA</description>
-    <version>1.0</version>
-    <vendor>Matt Nathan</vendor>
-    <idea-version since-build="8000"/>
+  <name>xq4idea</name>
+  <description>XQuery plugin for IDEA</description>
+  <version>1.0</version>
+  <vendor>Matt Nathan</vendor>
+  <idea-version since-build="8000"/>
 
-    <application-components>
-        <!-- Add your application components here -->
-    </application-components>
+  <application-components>
+    <!-- Add your application components here -->
+  </application-components>
 
-    <project-components>
-        <!-- Add your project components here -->
-    </project-components>
+  <project-components>
+    <!-- Add your project components here -->
+  </project-components>
 
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
+  <actions>
+    <!-- Add your actions here -->
+  </actions>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <fileTypeFactory implementation="org.mn.plug.idea.xq4idea.XQueryFileTypeFactory"/>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileTypeFactory implementation="org.mn.plug.idea.xq4idea.XQueryFileTypeFactory"/>
 
-        <syntaxHighlighter key="XQuery"
-                           implementationClass="org.mn.plug.idea.xq4idea.highlight.XQuerySyntaxHighlighter"/>
-        
-        <lang.parserDefinition language="XQuery"
-                               implementationClass="org.mn.plug.idea.xq4idea.lang.parser.XQueryParserDefinition"/>
-    </extensions>
+    <syntaxHighlighter key="XQuery"
+                       implementationClass="org.mn.plug.idea.xq4idea.highlight.XQuerySyntaxHighlighter"/>
+
+    <lang.parserDefinition language="XQuery"
+                           implementationClass="org.mn.plug.idea.xq4idea.lang.parser.XQueryParserDefinition"/>
+  </extensions>
 </idea-plugin>
