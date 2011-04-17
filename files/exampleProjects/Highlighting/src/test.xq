@@ -1,1 +1,2 @@
-<node attr="val"/>/./@attr
+(: :)
+xquery version "";

@@ -1,9 +1,10 @@
 <idea-plugin version="2">
   <name>xq4idea</name>
   <description>XQuery plugin for IDEA</description>
-  <version>1.0</version>
+  <version>0.1</version>
   <vendor>Matt Nathan</vendor>
   <idea-version since-build="8000"/>
+  <category>Cutom Languages</category>
 
   <application-components>
     <!-- Add your application components here -->
